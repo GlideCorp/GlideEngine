@@ -49,6 +49,8 @@ namespace Engine
 
             //TODO: Rimuove una volta implementato sistema di logs
             Console.WriteLine($"{Gl?.GetStringS(GLEnum.Vendor)}\n{Gl?.GetStringS(GLEnum.Version)}\n");
+
+            Shader sTest = new Shader(ShaderDefaults.Default);
         }
 
         private static void OnUpdate(double deltaTime) { }
