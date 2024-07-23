@@ -1,17 +1,7 @@
-﻿
-using Core.Logs;
+using Engine;
 
-public class Program
-{
-    public static void Main(string[] args)
-    {
-        Task.Delay(2000).Wait();
-        Logger.Info("Ciaoo");
+App.Initialize();
 
-        Task.Delay(2000).Wait();
-        Logger.Warning("Ciaoo");
+App.Run();
 
-        Task.Delay(2000).Wait();
-        Logger.Error("Ciaoo");
-    }
-}
+App.End();
