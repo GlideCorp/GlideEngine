@@ -1,14 +1,13 @@
-﻿using Silk.NET.OpenGL;
-using Silk.NET.Windowing;
+﻿using Core.Logs;
 using Silk.NET.Maths;
-
+using Silk.NET.OpenGL;
+using Silk.NET.Windowing;
 using SilkWindow = Silk.NET.Windowing.Window;
 
 namespace Engine
 {
     public static class App
     {
-
         public static GL Gl { get; private set; }
 
         public static IWindow Window { get; private set; }
@@ -16,6 +15,8 @@ namespace Engine
         
         public static void Initialize()
         {
+            Logger.Startup();
+
             WindowOptions options = WindowOptions.Default with
             {
                 Size = new Vector2D<int>(800, 600),
@@ -38,6 +39,7 @@ namespace Engine
         public static void End()
         {
             Window.Dispose();
+            Logger.Shutdown();
         }
 
         private static void OnLoad()
