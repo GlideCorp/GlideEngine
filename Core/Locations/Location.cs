@@ -1,5 +1,6 @@
 ﻿
 using Core.Logs;
+using System.ComponentModel;
 using System.Text;
 
 namespace Core.Locations
@@ -13,10 +14,11 @@ namespace Core.Locations
             ReadOnlySpan<string> pathSpan = path;
             for (int i = 0; i < pathSpan.Length; i++)
             {
-                if (pathSpan[i].Length > 0 && !IsValid(pathSpan[i]))
+                if (pathSpan[i].Length == 0 || !IsValid(pathSpan[i]))
                 {
-                    string errorMessage = $"Invalid location subpath '{pathSpan[i]}'.";
-                    Logger.Error(errorMessage);
+                    string message = $"Invalid location SubPath '{pathSpan[i]}'";
+                    Logger.Error(message);
+                    throw new InvalidEnumArgumentException(message);
                 }
             }
 

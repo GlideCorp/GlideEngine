@@ -1,9 +1,14 @@
 ﻿
+using Core.Logs;
+
 namespace Core.Locations
 {
-    public class Tree()
+    public class Tree(Location filter)
     {
         private Node Root { get; init; } = new();
+        public Location Filter { get; init; } = filter;
+
+        public bool CanInsert(ITrackable trackable) { return trackable.Location.Match(Filter); }
 
         private Node Explore(Location location)
         {
@@ -16,22 +21,26 @@ namespace Core.Locations
             return current;
         }
 
-        public void Insert(ITrackable trackable)
+        public bool Insert(ITrackable trackable)
         {
+            if (!CanInsert(trackable)) { return false; }
+
             Node current = Explore(trackable.Location);
             current.Insert(trackable);
+            return true;
         }
 
-        public void Remove(ITrackable trackable)
+        public bool Remove(ITrackable trackable)
         {
+            if (!CanInsert(trackable)) { return false; }
+
             Node current = Explore(trackable.Location);
-            current.Remove(trackable);
+            return current.Remove(trackable);
         }
 
         public IEnumerable<ITrackable> RetriveValues(Location location)
         {
             Node current = Explore(location);
-
             return current.RetriveValues();
         }
     }

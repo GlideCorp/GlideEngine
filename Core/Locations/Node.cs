@@ -1,8 +1,6 @@
 ﻿
 using Core.Logs;
-using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.Xml.Linq;
 
 namespace Core.Locations
 {
@@ -44,7 +42,6 @@ namespace Core.Locations
             if (index >= 0)
             {
                 child = Children[index];
-                Logger.Info($"Entry collison in children for '{subPath}'");
                 return false;
             }
             else
@@ -79,21 +76,13 @@ namespace Core.Locations
 
                 return true;
             }
-            else
-            {
-                Logger.Info($"No entry found in children for '{subPath}'");
-                return false;
-            }
+            else { return false; }
         }
 
         public bool Insert(ITrackable trackable)
         {
             int index = Values.BinarySearch(trackable);
-            if (index >= 0)
-            {
-                Logger.Info($"Entry collison in values for '{trackable}'");
-                return false;
-            }
+            if (index >= 0) { return false; }
             else
             {
                 Values.Insert(~index, trackable);
@@ -111,11 +100,7 @@ namespace Core.Locations
 
                 return true;
             }
-            else
-            {
-                Logger.Info($"No entry found in values for '{trackable}'");
-                return false;
-            }
+            else { return false; }
         }
 
         public bool Find(string subPath, [NotNullWhen(true)] out Node? child)
