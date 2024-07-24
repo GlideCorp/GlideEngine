@@ -28,7 +28,6 @@ namespace Engine
             Window.Load += OnLoad;
             Window.Update += OnUpdate;
             Window.Render += OnRender;
-            Window.Run();
         }
 
         public static void Run()

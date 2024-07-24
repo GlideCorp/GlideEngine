@@ -13,13 +13,13 @@ namespace Engine
 
     public class Shader
     {
-        private uint ProgramID {  get; set; }
+        private uint ProgramID { get; set; }
 
-        private FileInfo VertexFile {  get; init; }
+        private FileInfo VertexFile { get; init; }
         private FileInfo FragmentFile { get; init; }
 
-        private Dictionary<string, int> UniformLocationCache {  get; set; }
- 
+        private Dictionary<string, int> UniformLocationCache { get; set; }
+
         public Shader(string vertexShaderPath, string fragmentShaderPath)
         {
             ProgramID = 0;
@@ -51,7 +51,7 @@ namespace Engine
 
         ~Shader()
         {
-            if(ProgramID != 0)
+            if (ProgramID != 0)
             {
                 GL Gl = App.Gl;
                 Gl.DeleteProgram(ProgramID);
@@ -63,6 +63,7 @@ namespace Engine
             ShaderSource source = new();
             StringBuilder builder = new();
 
+            // FEATURE: shader preprocessing
             using (StreamReader stream = VertexFile.OpenText())
             {
                 string s = "";
@@ -96,7 +97,7 @@ namespace Engine
             ProgramID = Gl.CreateProgram();
             uint vs = CompileShader(GLEnum.VertexShader, shaderSource.VertexSource);
             uint fs = CompileShader(GLEnum.FragmentShader, shaderSource.FragmentSource);
-        
+
             Gl.AttachShader(ProgramID, vs);
             Gl.AttachShader(ProgramID, fs);
 
@@ -146,7 +147,7 @@ namespace Engine
             GL Gl = App.Gl;
             location = Gl.GetUniformLocation(ProgramID, uniformName);
 
-            if(location == -1)
+            if (location == -1)
             {
                 Logger.Warning($"Cannot find {uniformName} in ShaderProgram #{ProgramID}");
             }
@@ -182,7 +183,7 @@ namespace Engine
         public unsafe void SetMatrix4(string uniformName, Matrix4x4 matrix)
         {
             GL Gl = App.Gl;
-            Gl.UniformMatrix4(GetLocation(uniformName), 1, false, (float*) &matrix);
+            Gl.UniformMatrix4(GetLocation(uniformName), 1, false, (float*)&matrix);
         }
 
         #endregion
