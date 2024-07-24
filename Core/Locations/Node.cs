@@ -1,6 +1,8 @@
 ﻿
 using Core.Logs;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Xml.Linq;
 
 namespace Core.Locations
 {
@@ -141,10 +143,7 @@ namespace Core.Locations
         {
             if (recursive)
             {
-                for (int i = 0; i < Children.Count; i++)
-                {
-                    yield return Children[i];
-                }
+                for (int i = 0; i < Children.Count; i++) { yield return Children[i]; }
             }
             else
             {
@@ -164,6 +163,29 @@ namespace Core.Locations
                         yield return node.Children[i];
                         queue.Enqueue(node.Children[i]);
                     }
+                }
+            }
+        }
+
+        public IEnumerable<ITrackable> RetriveValues(bool recursive = false)
+        {
+            if (recursive)
+            {
+                for (int i = 0; i < Values.Count; i++) { yield return Values[i]; }
+            }
+            else
+            {
+                Queue<Node> queue = new();
+
+                for (int i = 0; i < Values.Count; i++) { yield return Values[i]; }
+                for (int i = 0; i < Children.Count; i++) { queue.Enqueue(Children[i]); }
+
+                while (queue.Count > 0)
+                {
+                    Node node = queue.Dequeue();
+
+                    for (int i = 0; i < node.Values.Count; i++) { yield return node.Values[i]; }
+                    for (int i = 0; i < node.Children.Count; i++) { queue.Enqueue(node.Children[i]); }
                 }
             }
         }

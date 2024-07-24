@@ -27,5 +27,12 @@ namespace Core.Locations
             Node current = Explore(trackable.Location);
             current.Remove(trackable);
         }
+
+        public IEnumerable<ITrackable> RetriveValues(Location location)
+        {
+            Node current = Explore(location);
+
+            return current.RetriveValues();
+        }
     }
 }
