@@ -1,12 +1,13 @@
 using Core.Locations;
 using Core.Logs;
 using Engine;
+using System.Numerics;
 
 App.Initialize();
 
 Location location = new("test", "qualcosa:qualcos'altro");
-
-Logger.Info(location.ToString());
+Vector3 vector = Vector3.One;
+Logger.Info(vector);
 
 App.Run();
 

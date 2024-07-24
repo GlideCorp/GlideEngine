@@ -85,12 +85,22 @@ namespace Core.Logs
             Instance.Log_Internal(message, Level.Info);
 #endif
         }
+
+        public static void Info(object obj)
+        {
+#if DEBUG
+            string? message = obj.ToString();
+            if (message is not null) { Instance.Log_Internal(message, Level.Info); }
+#endif
+        }
+
         public static void Warning(string message)
         {
 #if DEBUG || RELEASE
             Instance.Log_Internal(message, Level.Warning);
 #endif
         }
+
         public static void Error(string message)
         {
 #if DEBUG || RELEASE || DISTRO
