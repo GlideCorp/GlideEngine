@@ -1,5 +1,5 @@
-﻿using Silk.NET.OpenGL;
-using System.Diagnostics;
+﻿using Core.Logs;
+using Silk.NET.OpenGL;
 using System.Numerics;
 using System.Text;
 
@@ -31,36 +31,22 @@ namespace Engine
             //TODO: TODO
             if (!VertexFile.Exists)
             {
-                Console.WriteLine(Path.GetFullPath(vertexShaderPath));
+                Logger.Error($"ShaderFile {VertexFile.Name} does not exist!");
                 return;
             }
 
             if (!FragmentFile.Exists)
             {
-                Console.WriteLine(Path.GetFullPath(fragmentShaderPath));
+                Logger.Error($"ShaderFile {VertexFile.Name} does not exist!");
                 return;
             }
 
+            Logger.Info($"Creating ShaderProgram [vs: {VertexFile.Name}, fg: {FragmentFile.Name}]...");
             ShaderSource shaderSource = Parse();
             CreateProgram(shaderSource);
 
-            //TODO: TODO
-            Console.Write(shaderSource.VertexSource);
-            Console.Write("\n\n\n\n\n\n");
-            Console.Write(shaderSource.FragmentSource);
-        }
-
-        public Shader (ShaderSource shaderSource)
-        {
-            ProgramID = 0;
-            UniformLocationCache = new();
-
-            CreateProgram(shaderSource);
-
-            //TODO: TODO
-            Console.Write(shaderSource.VertexSource);
-            Console.Write("\n\n\n\n\n\n");
-            Console.Write(shaderSource.FragmentSource);
+            if (ProgramID != 0)
+                Logger.Info($"Successfuly created ShaderProgram #{ProgramID}");
         }
 
         ~Shader()
@@ -134,14 +120,14 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(result))
             {
-                //Log Error
+                Logger.Error($"{((shaderType == GLEnum.VertexShader) ? VertexFile.Name : FragmentFile.Name)}\n{result}");
 
                 Gl.DeleteShader(id);
                 return 0;
             }
             else
             {
-                //Log Info -> "Compiled successfully vertexShderFileName ecc...
+                Logger.Info($"{((shaderType == GLEnum.VertexShader) ? VertexFile.Name : FragmentFile.Name)} compiled succesfully!");
             }
 
             return id;
@@ -162,7 +148,7 @@ namespace Engine
 
             if(location == -1)
             {
-                //LogWarning -> Uniform blahblah in shaders pincoPallo.vs e pincoPallo.fg dosent exist!
+                Logger.Warning($"Cannot find {uniformName} in ShaderProgram #{ProgramID}");
             }
 
             UniformLocationCache[uniformName] = location;
@@ -209,22 +195,18 @@ namespace Engine
 
         public void Reload()
         {
-            if(VertexFile == null || FragmentFile == null)
-            {
-                //LogWarning -> Reloads are not possible for static Shaders
-                return;
-            }
-
             GL Gl = App.Gl;
 
-            //LogInfo -> Reloading Shader ...
+            Logger.Info($"Reloading ShaderProgram #{ProgramID}");
 
+            uint oldId = ProgramID;
             Gl.DeleteProgram(ProgramID);
 
             ShaderSource shaderSource = Parse();
             CreateProgram(shaderSource);
 
             UniformLocationCache.Clear();
+            Logger.Info($"Successfuly reloaded ShaderProgram #{oldId} -> #{ProgramID}");
         }
     }
 }

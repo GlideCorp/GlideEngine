@@ -45,11 +45,9 @@ namespace Engine
         private static void OnLoad()
         {
             Gl = Window.CreateOpenGL();
-
-            //TODO: Rimuove una volta implementato sistema di logs
             Console.WriteLine($"{Gl?.GetStringS(GLEnum.Vendor)}\n{Gl?.GetStringS(GLEnum.Version)}\n");
 
-            Shader sTest = new Shader(ShaderDefaults.Default);
+            Shader sTest = new Shader("shaders/basic.vs", "shaders/basic.fg");
         }
 
         private static void OnUpdate(double deltaTime) { }
