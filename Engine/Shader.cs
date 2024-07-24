@@ -41,7 +41,7 @@ namespace Engine
                 return;
             }
 
-            Logger.Info($"Creating ShaderProgram [vs: {VertexFile.Name}, fg: {FragmentFile.Name}]");
+            Logger.Info($"Creating ShaderProgram [vs: {VertexFile.Name}, fg: {FragmentFile.Name}]...");
             ShaderSource shaderSource = Parse();
             CreateProgram(shaderSource);
 
