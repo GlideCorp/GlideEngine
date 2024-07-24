@@ -1,11 +1,12 @@
-﻿using System;
-using Silk.NET.OpenGL;
+﻿using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
-using Silk.NET.Input;
 using Silk.NET.Maths;
-using Silk.NET.SDL;
-using Silk.NET.Windowing.Glfw;
+using Engine.Rendering;
+using System.Numerics;
+using Shader = Engine.Rendering.Shader;
+using System.Drawing;
 using Core.Logs;
+using System.Reflection;
 
 namespace Engine
 {
@@ -15,8 +16,18 @@ namespace Engine
         public static GL Gl { get; private set; }
 
         public static IWindow Window { get; private set; }
-
         
+        //TODO: Eventualmente spostare sta roba ------------------------------------------
+        private static Shader sTest;
+        private static Mesh mTest;
+
+        private static Vector3 CameraPosition = new Vector3(2.0f, 2.0f, 3.0f);
+        private static Vector3 CameraTarget = Vector3.Zero;
+        private static Vector3 CameraDirection = Vector3.Normalize(CameraPosition - CameraTarget);
+        private static Vector3 CameraRight = Vector3.Normalize(Vector3.Cross(Vector3.UnitY, CameraDirection));
+        private static Vector3 CameraUp = Vector3.Cross(CameraDirection, CameraRight);
+        //---------------------------------------------------------------------------------
+
         public static void Initialize()
         {
             WindowOptions options = WindowOptions.Default with
@@ -31,7 +42,6 @@ namespace Engine
             Window.Load += OnLoad;
             Window.Update += OnUpdate;
             Window.Render += OnRender;
-            Window.Run();
         }
 
         public static void Run()
@@ -49,11 +59,45 @@ namespace Engine
             Gl = Window.CreateOpenGL();
             Console.WriteLine($"{Gl?.GetStringS(GLEnum.Vendor)}\n{Gl?.GetStringS(GLEnum.Version)}\n");
 
-            Shader sTest = new Shader("shaders/basic.vs", "shaders/basic.fg");
+            //Da mettere in Sandbox per Testing
+            sTest = new Shader("shaders/basic.vs", "shaders/basic.fg");
+
+            List<Vertex> vertices = new List<Vertex>
+            {
+                new(){ Position = new(0.5f, 0.5f, 0.0f)},
+                new(){ Position = new (0.5f, -0.5f, 0.0f)},
+                new(){ Position = new (-0.5f, -0.5f, 0.0f)},
+                new(){ Position =  new(-0.5f, 0.5f, 0.0f)}
+            };
+
+            List<uint> indices = new List<uint>
+            {
+                0, 1, 3,  // first Triangle
+                1, 2, 3   // second Triangle
+            };
+
+            mTest = new Mesh(vertices, indices);
+            sTest.Use();
+
+            var size = Window.FramebufferSize;
+            Matrix4x4 view = Matrix4x4.CreateLookAt(CameraPosition, CameraTarget, CameraUp);
+            Matrix4x4 proj = Matrix4x4.CreatePerspectiveFieldOfView(MathF.PI / 180f * 60.0f, (float)size.X / size.Y, 0.1f, 100.0f); //TODO: Create MathHelper con Deg2Rad(float deg)->float rads
+
+            sTest.SetMatrix4("uModel", Matrix4x4.Identity);
+            sTest.SetMatrix4("uView", view);
+            sTest.SetMatrix4("uProjection", proj);
         }
 
-        private static void OnUpdate(double deltaTime) { }
+        private static void OnUpdate(double deltaTime) 
+        { 
+        
+        }
 
-        private static void OnRender(double deltaTime) { }
+        private static void OnRender(double deltaTime)
+        {
+            Graphics.Clear();
+
+            Graphics.Draw(mTest);
+        }
     }
 }
