@@ -2,17 +2,30 @@
 
 namespace Core.Logs
 {
-    // TODO: add static method to start and stop the logger
     public class Logger
     {
         private static Logger? _instance = null;
-        public static Logger Instance
+        private static Logger Instance
         {
             get
             {
-                _instance ??= new();
+                if (_instance is null) { throw new ArgumentNullException(); }
                 return _instance;
             }
+        }
+
+        public static void Startup()
+        {
+            _instance = new();
+        }
+
+        public static void Shutdown()
+        {
+            Instance.Messages.CompleteAdding();
+            Instance.BackgroundWorker.Wait();
+            Instance.Messages.Dispose();
+
+            _instance = null;
         }
 
         public const string LatestPath = "Logs/Latest.log";
@@ -30,7 +43,7 @@ namespace Core.Logs
             Messages = new(new ConcurrentQueue<Message>(), MaxQueueLength);
 
             if (!LatestInfo.Directory!.Exists) { LatestInfo.Directory!.Create(); }
-            else if (LatestInfo.Exists)// reset log file
+            else if (LatestInfo.Exists) // reset log file
             {
                 using Stream stream = LatestInfo.OpenWrite();
                 stream.SetLength(0);
@@ -38,13 +51,6 @@ namespace Core.Logs
 
             BackgroundWorker = new(() => BackgroundWorkerBody(Messages));
             BackgroundWorker.Start();
-        }
-
-        ~Logger()
-        {
-            Messages.CompleteAdding();
-            BackgroundWorker.Wait();
-            Messages.Dispose();
         }
 
         private static void BackgroundWorkerBody(BlockingCollection<Message> messages)
@@ -73,13 +79,9 @@ namespace Core.Logs
             Messages.Add(message);
         }
 
-        private void Info_Internal(string text) { Log_Internal(text, Level.Info); }
-        private void Warning_Internal(string text) { Log_Internal(text, Level.Warning); }
-        private void Error_Internal(string text) { Log_Internal(text, Level.Error); }
-
-        private static void Log(string message, Level level) { Instance.Log_Internal(message, level); }
-        public static void Info(string message) { Instance.Info_Internal(message); }
-        public static void Warning(string message) { Instance.Warning_Internal(message); }
-        public static void Error(string message) { Instance.Error_Internal(message); }
+        public static void Log(string message, Level level) { Instance.Log_Internal(message, level); }
+        public static void Info(string message) { Instance.Log_Internal(message, Level.Info); }
+        public static void Warning(string message) { Instance.Log_Internal(message, Level.Warning); }
+        public static void Error(string message) { Instance.Log_Internal(message, Level.Error); }
     }
 }
