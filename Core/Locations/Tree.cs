@@ -23,7 +23,7 @@ namespace Core.Locations
             Filter = filter;
         }
 
-        public bool CanInsert(ITrackable trackable) { return trackable.Location.Match(Filter); }
+        public bool CanInsert(Trackable trackable) { return trackable.Location.Match(Filter); }
 
         private Node Explore(Location location)
         {
@@ -36,7 +36,7 @@ namespace Core.Locations
             return current;
         }
 
-        public bool Insert(ITrackable trackable)
+        public bool Insert(Trackable trackable)
         {
             if (!CanInsert(trackable)) { return false; }
 
@@ -45,7 +45,7 @@ namespace Core.Locations
             return true;
         }
 
-        public bool Remove(ITrackable trackable)
+        public bool Remove(Trackable trackable)
         {
             if (!CanInsert(trackable)) { return false; }
 
@@ -53,10 +53,15 @@ namespace Core.Locations
             return current.Remove(trackable);
         }
 
-        public IEnumerable<ITrackable> RetriveValues(Location location)
+        public IEnumerable<Trackable> RetriveValues()
+        {
+            return Root.RetriveValues(recursive: true);
+        }
+
+        public IEnumerable<Trackable> RetriveValues(Location location)
         {
             Node current = Explore(location);
-            return current.RetriveValues();
+            return current.RetriveValues(recursive: true);
         }
     }
 }

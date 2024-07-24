@@ -86,11 +86,11 @@ namespace Core.Logs
 #endif
         }
 
-        public static void Info(object obj)
+        public static void Dump(object obj)
         {
 #if DEBUG
             string? message = obj.ToString();
-            if (message is not null) { Instance.Log_Internal(message, Level.Info); }
+            if (message is not null) { Instance.Log_Internal($"\n{message}", Level.Info); }
 #endif
         }
 

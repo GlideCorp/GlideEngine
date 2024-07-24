@@ -9,7 +9,7 @@ namespace Core.Locations
         public string SubPath { get; init; }
 
         private Node? Parent { get; init; }
-        private List<ITrackable> Values { get; init; }
+        private List<Trackable> Values { get; init; }
         private List<Node> Children { get; init; }
 
         public Node()
@@ -79,7 +79,7 @@ namespace Core.Locations
             else { return false; }
         }
 
-        public bool Insert(ITrackable trackable)
+        public bool Insert(Trackable trackable)
         {
             int index = Values.BinarySearch(trackable);
             if (index >= 0) { return false; }
@@ -90,7 +90,7 @@ namespace Core.Locations
             }
         }
 
-        public bool Remove(ITrackable trackable)
+        public bool Remove(Trackable trackable)
         {
             int index = Values.BinarySearch(trackable);
             if (index >= 0)
@@ -128,10 +128,6 @@ namespace Core.Locations
         {
             if (recursive)
             {
-                for (int i = 0; i < Children.Count; i++) { yield return Children[i]; }
-            }
-            else
-            {
                 Queue<Node> queue = new();
 
                 for (int i = 0; i < Children.Count; i++)
@@ -150,15 +146,15 @@ namespace Core.Locations
                     }
                 }
             }
+            else
+            {
+                for (int i = 0; i < Children.Count; i++) { yield return Children[i]; }
+            }
         }
 
-        public IEnumerable<ITrackable> RetriveValues(bool recursive = false)
+        public IEnumerable<Trackable> RetriveValues(bool recursive = false)
         {
             if (recursive)
-            {
-                for (int i = 0; i < Values.Count; i++) { yield return Values[i]; }
-            }
-            else
             {
                 Queue<Node> queue = new();
 
@@ -173,11 +169,22 @@ namespace Core.Locations
                     for (int i = 0; i < node.Children.Count; i++) { queue.Enqueue(node.Children[i]); }
                 }
             }
+            else
+            {
+                for (int i = 0; i < Values.Count; i++) { yield return Values[i]; }
+            }
         }
 
         public override string ToString()
         {
-            return $"<{SubPath}, {Children.Count} children, {Values.Count} values>";
+            return $$"""
+                {{nameof(Node)}}
+                {
+                    {{nameof(SubPath)}}: "{{SubPath}}",
+                    {{nameof(Children)}}: <{{nameof(List<Node>)}}, Count: {{Children.Count}}>,
+                    {{nameof(Values)}}: <{{nameof(List<Trackable>)}}, Count: {{Values.Count}}>
+                }
+                """;
         }
     }
 }

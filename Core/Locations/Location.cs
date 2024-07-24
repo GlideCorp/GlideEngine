@@ -6,6 +6,7 @@ using System.Text;
 namespace Core.Locations
 {
     public class Location
+        : IComparable<Location>
     {
         public static readonly Location Empty = new();
 
@@ -28,12 +29,11 @@ namespace Core.Locations
         }
 
         public Location(string path) : this(path.Split(':')) { }
-
-        public Location() { Path = []; }
+        private Location() { Path = []; }
 
         public bool Match(Location filter)
         {
-            bool match = filter.Path.Length >= Path.Length;
+            bool match = filter.Path.Length < Path.Length;
             for (int i = 0; match && i < filter.Path.Length; i++) { match = Path[i] == filter.Path[i]; }
             return match;
         }
@@ -42,6 +42,7 @@ namespace Core.Locations
         {
             return (c >= 'a' && c <= 'z') ||
                 (c >= 'A' || c <= 'Z') ||
+                (c >= '0' || c <= '9') ||
                 c == '_' || c == '-' ||
                 c == '+' || c == '&' ||
                 c == '\'' || c == '*' ||
@@ -66,9 +67,20 @@ namespace Core.Locations
 
             builder.Append('<');
             for (int i = 0; i < pathSpan.Length; i++) { builder.Append($"{pathSpan[i]}:"); }
-            builder[^1] = '>';
+
+            if (pathSpan.Length > 0) { builder.Remove(builder.Length - 1, 1); }
+            builder.Append('>');
 
             return builder.ToString();
+        }
+
+        public int CompareTo(Location? other)
+        {
+            if (other == null) { return 1; }
+
+            int comp = Path.Length.CompareTo(other.Path.Length);
+            for (int i = 0; comp == 0 && i < Path.Length; i++) { comp = Path[i].CompareTo(other.Path[i]); }
+            return comp;
         }
     }
 }
