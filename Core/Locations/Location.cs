@@ -4,12 +4,11 @@ using System.Text;
 
 namespace Core.Locations
 {
-    public class Location : ITrackable
+    public class Location
     {
-        public string Name { get; init; }
         public string[] Path { get; init; }
 
-        public Location(string name, string[] path)
+        public Location(string[] path)
         {
             ReadOnlySpan<string> pathSpan = path;
             for (int i = 0; i < pathSpan.Length; i++)
@@ -21,11 +20,17 @@ namespace Core.Locations
                 }
             }
 
-            Name = name;
             Path = path;
         }
 
-        public Location(string name, string path) : this(name, path.Split(':')) { }
+        public Location(string path) : this(path.Split(':')) { }
+
+        public bool Match(Location filter)
+        {
+            bool match = Path.Length == filter.Path.Length;
+            for (int i = 0; match && i < Path.Length; i++) { match = Path[i] == filter.Path[i]; }
+            return match;
+        }
 
         public static bool IsValid(char c)
         {
@@ -41,10 +46,10 @@ namespace Core.Locations
                 c == '<' || c == '>';
         }
 
-        public static bool IsValid(ReadOnlySpan<char> subpath)
+        public static bool IsValid(ReadOnlySpan<char> subPath)
         {
             bool isValid = true;
-            for (int i = 0; isValid && i < subpath.Length; i++) { isValid = IsValid(subpath[i]); }
+            for (int i = 0; isValid && i < subPath.Length; i++) { isValid = IsValid(subPath[i]); }
             return isValid;
         }
 
@@ -53,7 +58,7 @@ namespace Core.Locations
             StringBuilder builder = new();
             ReadOnlySpan<string> pathSpan = Path;
 
-            builder.Append($"{Name} <");
+            builder.Append('<');
             for (int i = 0; i < pathSpan.Length; i++) { builder.Append($"{pathSpan[i]}:"); }
             builder[^1] = '>';
 

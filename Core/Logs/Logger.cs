@@ -68,7 +68,7 @@ namespace Core.Logs
                     using StreamWriter writer = new(LatestInfo.FullName, true);
                     writer.WriteLine(colorlessFormat);
                 }
-                catch (Exception) { }
+                catch (Exception e) { Console.Write(e.Message); }
             }
         }
 

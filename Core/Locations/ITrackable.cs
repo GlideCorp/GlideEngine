@@ -1,10 +1,9 @@
 ﻿
 namespace Core.Locations
 {
-    public interface ITrackable
+    public interface ITrackable : IComparer<ITrackable>
     {
         public string Name { get; }
-        public string[] Path { get; }
-
+        public Location Location { get; }
     }
 }
