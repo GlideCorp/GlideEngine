@@ -33,8 +33,8 @@ namespace Core.Locations
 
         public bool Match(Location filter)
         {
-            bool match = Path.Length == filter.Path.Length;
-            for (int i = 0; match && i < Path.Length; i++) { match = Path[i] == filter.Path[i]; }
+            bool match = filter.Path.Length >= Path.Length;
+            for (int i = 0; match && i < filter.Path.Length; i++) { match = Path[i] == filter.Path[i]; }
             return match;
         }
 
