@@ -79,9 +79,23 @@ namespace Core.Logs
             Messages.Add(message);
         }
 
-        public static void Log(string message, Level level) { Instance.Log_Internal(message, level); }
-        public static void Info(string message) { Instance.Log_Internal(message, Level.Info); }
-        public static void Warning(string message) { Instance.Log_Internal(message, Level.Warning); }
-        public static void Error(string message) { Instance.Log_Internal(message, Level.Error); }
+        public static void Info(string message)
+        {
+#if DEBUG
+            Instance.Log_Internal(message, Level.Info);
+#endif
+        }
+        public static void Warning(string message)
+        {
+#if DEBUG || RELEASE
+            Instance.Log_Internal(message, Level.Warning);
+#endif
+        }
+        public static void Error(string message)
+        {
+#if DEBUG || RELEASE || DISTRO
+            Instance.Log_Internal(message, Level.Error);
+#endif
+        }
     }
 }
