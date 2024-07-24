@@ -7,6 +7,8 @@ namespace Core.Locations
 {
     public class Location
     {
+        public static readonly Location Empty = new();
+
         public string[] Path { get; init; }
 
         public Location(string[] path)
@@ -26,6 +28,8 @@ namespace Core.Locations
         }
 
         public Location(string path) : this(path.Split(':')) { }
+
+        public Location() { Path = []; }
 
         public bool Match(Location filter)
         {

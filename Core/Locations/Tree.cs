@@ -3,10 +3,27 @@ using Core.Logs;
 
 namespace Core.Locations
 {
-    public class Tree(Location filter)
+    public class Tree
     {
-        private Node Root { get; init; } = new();
-        public Location Filter { get; init; } = filter;
+        private Node Root { get; init; }
+        public Location Filter { get; init; }
+
+        public Tree()
+        {
+            Root = new();
+            Filter = Location.Empty;
+        }
+        public Tree(string path)
+        {
+            Root = new();
+            Filter = new(path);
+        }
+
+        public Tree(Location filter)
+        {
+            Root = new();
+            Filter = filter;
+        }
 
         public bool CanInsert(ITrackable trackable) { return trackable.Location.Match(Filter); }
 
