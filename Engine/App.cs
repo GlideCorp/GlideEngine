@@ -2,6 +2,8 @@
 using Silk.NET.Windowing;
 using Silk.NET.Maths;
 
+using SilkWindow = Silk.NET.Windowing.Window;
+
 namespace Engine
 {
     public static class App
@@ -21,8 +23,7 @@ namespace Engine
                 API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6))
             };
 
-            //TODO: Rivedere nomeclatura per le proprietà
-            Window = Silk.NET.Windowing.Window.Create(options);
+            Window = SilkWindow.Create(options);
             Window.Load += OnLoad;
             Window.Update += OnUpdate;
             Window.Render += OnRender;
