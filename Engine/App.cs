@@ -1,18 +1,11 @@
 ﻿using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
-using Silk.NET.Maths;
-using Engine.Rendering;
-using System.Numerics;
-using Shader = Engine.Rendering.Shader;
-using System.Drawing;
-using Core.Logs;
-using System.Reflection;
+using SilkWindow = Silk.NET.Windowing.Window;
 
 namespace Engine
 {
     public static class App
     {
-
         public static GL Gl { get; private set; }
 
         public static IWindow Window { get; private set; }
@@ -30,6 +23,8 @@ namespace Engine
 
         public static void Initialize()
         {
+            Logger.Startup();
+
             WindowOptions options = WindowOptions.Default with
             {
                 Size = new Vector2D<int>(800, 600),
@@ -37,8 +32,7 @@ namespace Engine
                 API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6))
             };
 
-            //TODO: Rivedere nomeclatura per le proprietà
-            Window = Silk.NET.Windowing.Window.Create(options);
+            Window = SilkWindow.Create(options);
             Window.Load += OnLoad;
             Window.Update += OnUpdate;
             Window.Render += OnRender;
@@ -52,6 +46,7 @@ namespace Engine
         public static void End()
         {
             Window.Dispose();
+            Logger.Shutdown();
         }
 
         private static void OnLoad()

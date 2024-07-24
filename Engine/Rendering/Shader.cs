@@ -62,6 +62,7 @@ namespace Engine.Rendering
             ShaderSource source = new();
             StringBuilder builder = new();
 
+            // FEATURE: shader preprocessing
             using (StreamReader stream = VertexFile.OpenText())
             {
                 string s = "";
