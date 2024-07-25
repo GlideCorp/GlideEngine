@@ -3,6 +3,7 @@ using Engine.Rendering;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+
 using Shader = Engine.Rendering.Shader;
 using SilkWindow = Silk.NET.Windowing.Window;
 
