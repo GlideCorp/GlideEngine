@@ -9,7 +9,7 @@ namespace Core.Logs
         {
             get
             {
-                if (_instance is null) { throw new ArgumentNullException(); }
+                if (_instance is null) { throw new NullReferenceException(); }
                 return _instance;
             }
         }
