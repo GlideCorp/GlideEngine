@@ -5,7 +5,7 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.SDL;
 using Silk.NET.Windowing;
-
+using StbImageSharp;
 using SilkWindow = Silk.NET.Windowing.Window;
 
 namespace Engine
@@ -99,7 +99,6 @@ namespace Engine
 
         public virtual void Startup()
         {
-            
         }
 
         public virtual void Run()

@@ -5,11 +5,8 @@ using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Editor
 {
@@ -18,9 +15,12 @@ namespace Editor
         private ImGuiController? ImGuiController { get; set; }
         private IInputContext? InputContext { get; set; }
 
+        Texture2D? testTexture;
+
         public override void Startup()
         {
             base.Startup();
+
         }
 
         protected override void OnLoad()
@@ -29,6 +29,13 @@ namespace Editor
 
             InputContext = Window.CreateInput();
             ImGuiController = new ImGuiController(Context, Window, InputContext);
+
+            var io = ImGui.GetIO();
+            io.BackendFlags = ImGuiBackendFlags.None;
+            io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+
+            FileStream stream = File.OpenRead("resources\\test.png");
+            testTexture = Texture2D.FromStream(stream);
 
             Logger.Info($"{Context.GetStringS(GLEnum.Vendor)}\n{Context.GetStringS(GLEnum.Version)}\n");
         }
@@ -45,9 +52,23 @@ namespace Editor
             //Editor Render Loop
             ImGuiController?.Update((float)deltaTime);
 
+            ImGui.BeginMainMenuBar();
+            ImGui.Text("Glide Engine");
+            ImGui.EndMainMenuBar();
+
             ImGui.ShowDemoWindow();
+
+            ImGui.Begin("TextureTest");
+            if(testTexture != null)
+            {
+                ImGui.Text($"Texture ID: {testTexture.TextureID}");
+                //ImGui.SliderInt("TextureID", ref id, 1, 10);
+                ImGui.Image((nint)testTexture.TextureID, new Vector2(256, 256));
+            }
+            ImGui.End();
 
             ImGuiController?.Render();
         }
+
     }
 }
