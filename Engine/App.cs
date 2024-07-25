@@ -11,7 +11,6 @@ namespace Engine
     public static class App
     {
         public static GL Gl { get; private set; }
-
         public static IWindow Window { get; private set; }
         
         //TODO: Eventualmente spostare sta roba -------------------------------------------
@@ -35,6 +34,8 @@ namespace Engine
                 Title = "GlideEngine",
                 API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6))
             };
+
+            
 
             Window = SilkWindow.Create(options);
             Window.Load += OnLoad;
