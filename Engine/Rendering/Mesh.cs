@@ -24,19 +24,17 @@ namespace Engine.Rendering
 
         public Mesh(List<Vertex> vertices, List<uint> indices)
         {
-            GL Gl = App.Gl;
-
             unsafe
             {
-                VAO = Gl.GenVertexArray();
-                Gl.BindVertexArray(VAO);
+                VAO = Application.Context.GenVertexArray();
+                Application.Context.BindVertexArray(VAO);
 
-                uint VBO = Gl.GenBuffer();
-                Gl.BindBuffer(BufferTargetARB.ArrayBuffer, VBO);
+                uint VBO = Application.Context.GenBuffer();
+                Application.Context.BindBuffer(BufferTargetARB.ArrayBuffer, VBO);
 
                 fixed (Vertex* data = vertices.ToArray())
                 {
-                    Gl.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(vertices.Count * VertexLayout.Stride), data, BufferUsageARB.StaticDraw);
+                    Application.Context.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(vertices.Count * VertexLayout.Stride), data, BufferUsageARB.StaticDraw);
                 }
 
                 /*			         Element 1						  Element 2					 */
@@ -47,23 +45,23 @@ namespace Engine.Rendering
                 uint offset = 0;
                 foreach (VertexElement element in VertexLayout.Elements)
                 {
-                    Gl.VertexAttribPointer(element.Index, (int)element.Count, element.Type, false, VertexLayout.Stride, (void*)offset);
-                    Gl.EnableVertexAttribArray(element.Index);
+                    Application.Context.VertexAttribPointer(element.Index, (int)element.Count, element.Type, false, VertexLayout.Stride, (void*)offset);
+                    Application.Context.EnableVertexAttribArray(element.Index);
 
                     offset += element.Count * VertexElement.GetSizeOf(element.Type);
                 }
 
-                uint IBO = Gl.GenBuffer();
-                Gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, IBO);
+                uint IBO = Application.Context.GenBuffer();
+                Application.Context.BindBuffer(BufferTargetARB.ElementArrayBuffer, IBO);
 
                 fixed (uint* buf = indices.ToArray())
                 {
-                    Gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)indices.Count * sizeof(int), buf, BufferUsageARB.StaticDraw);
+                    Application.Context.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)indices.Count * sizeof(int), buf, BufferUsageARB.StaticDraw);
                 }
 
-                Gl.BindVertexArray(0);
-                Gl.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
-                Gl.BindBuffer(BufferTargetARB.ElementArrayBuffer, 0);
+                Application.Context.BindVertexArray(0);
+                Application.Context.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
+                Application.Context.BindBuffer(BufferTargetARB.ElementArrayBuffer, 0);
             }
 
             IndicesCount = (uint)indices.Count;

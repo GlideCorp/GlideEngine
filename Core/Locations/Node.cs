@@ -1,6 +1,4 @@
-﻿
-using Core.Logs;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Locations
 {
