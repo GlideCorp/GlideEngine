@@ -29,12 +29,17 @@ namespace Editor
 
             InputContext = Window.CreateInput();
 
-            ImGuiFontConfig fontConfig = new("resources\\fonts\\Arvo-Regular.ttf", 15);
+            ImGuiFontConfig fontConfig = new("resources\\fonts\\SplineSansMono-Medium.ttf", 16);
             ImGuiController = new ImGuiController(Context,Window, InputContext, fontConfig);
 
             var io = ImGui.GetIO();
             io.BackendFlags = ImGuiBackendFlags.None;
             io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+
+            ImGuiStylePtr imguiStyle = ImGui.GetStyle();
+            imguiStyle.WindowRounding = 5;
+            imguiStyle.FrameRounding = 2;
+            imguiStyle.GrabRounding = 2;
 
             //io.Fonts.AddFontFromFileTTF("resources\\fonts\\Arvo-Regular.ttf", 15.0f, null, io.Fonts.GetGlyphRangesDefault());
             //RebuildFontAtlas();
