@@ -1,7 +1,4 @@
-﻿
-using System.Reflection.Metadata.Ecma335;
-
-namespace Core.Locations
+﻿namespace Core.Locations
 {
     public abstract class Trackable
         : IComparable<Trackable>

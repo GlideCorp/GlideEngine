@@ -1,9 +1,12 @@
+using Sandbox;
 
-using Engine;
+MyApplication app = new();
+app.Startup();
+app.Run();
+app.Shutdown();
 
 
-App.Initialize();
 
-App.Run();
 
-App.End();
+
+

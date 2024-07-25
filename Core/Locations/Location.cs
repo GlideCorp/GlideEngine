@@ -19,9 +19,7 @@ namespace Core.Locations
             {
                 if (pathSpan[i].Length == 0 || !IsValid(pathSpan[i]))
                 {
-                    string message = $"Invalid location SubPath '{pathSpan[i]}'";
-                    Logger.Error(message);
-                    throw new InvalidEnumArgumentException(message);
+                    Logger.Error($"Invalid location SubPath '{pathSpan[i]}'");
                 }
             }
 

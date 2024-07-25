@@ -52,8 +52,7 @@ namespace Engine.Rendering
         {
             if (ProgramID != 0)
             {
-                GL Gl = App.Gl;
-                Gl.DeleteProgram(ProgramID);
+                Application.Context.DeleteProgram(ProgramID);
             }
         }
 
@@ -91,38 +90,34 @@ namespace Engine.Rendering
 
         private void CreateProgram(ShaderSource shaderSource)
         {
-            GL Gl = App.Gl;
-
-            ProgramID = Gl.CreateProgram();
+            ProgramID = Application.Context.CreateProgram();
             uint vs = CompileShader(GLEnum.VertexShader, shaderSource.VertexSource);
             uint fs = CompileShader(GLEnum.FragmentShader, shaderSource.FragmentSource);
 
-            Gl.AttachShader(ProgramID, vs);
-            Gl.AttachShader(ProgramID, fs);
+            Application.Context.AttachShader(ProgramID, vs);
+            Application.Context.AttachShader(ProgramID, fs);
 
-            Gl.LinkProgram(ProgramID);
-            Gl.ValidateProgram(ProgramID);
+            Application.Context.LinkProgram(ProgramID);
+            Application.Context.ValidateProgram(ProgramID);
 
-            Gl.DeleteShader(vs);
-            Gl.DeleteShader(fs);
+            Application.Context.DeleteShader(vs);
+            Application.Context.DeleteShader(fs);
         }
 
         private uint CompileShader(GLEnum shaderType, string shaderSource)
         {
-            GL Gl = App.Gl;
-
-            uint id = Gl.CreateShader(shaderType);
-            Gl.ShaderSource(id, shaderSource);
-            Gl.CompileShader(id);
+            uint id = Application.Context.CreateShader(shaderType);
+            Application.Context.ShaderSource(id, shaderSource);
+            Application.Context.CompileShader(id);
 
             //Check for errors
-            string result = Gl.GetShaderInfoLog(id);
+            string result = Application.Context.GetShaderInfoLog(id);
 
             if (!string.IsNullOrEmpty(result))
             {
                 Logger.Error($"{(shaderType == GLEnum.VertexShader ? VertexFile.Name : FragmentFile.Name)}\n{result}");
 
-                Gl.DeleteShader(id);
+                Application.Context.DeleteShader(id);
                 return 0;
             }
             else
@@ -143,8 +138,7 @@ namespace Engine.Rendering
                 return location;
             }
 
-            GL Gl = App.Gl;
-            location = Gl.GetUniformLocation(ProgramID, uniformName);
+            location = Application.Context.GetUniformLocation(ProgramID, uniformName);
 
             if (location == -1)
             {
@@ -157,50 +151,42 @@ namespace Engine.Rendering
 
         public void SetInt(string uniformName, int value)
         {
-            GL Gl = App.Gl;
-            Gl.Uniform1(GetLocation(uniformName), value);
+            Application.Context.Uniform1(GetLocation(uniformName), value);
         }
 
         public void SetFloat(string uniformName, float value)
         {
-            GL Gl = App.Gl;
-            Gl.Uniform1(GetLocation(uniformName), value);
+            Application.Context.Uniform1(GetLocation(uniformName), value);
         }
 
         public void SetVector2(string uniformName, Vector2D<float> vector)
         {
-            GL Gl = App.Gl;
-            Gl.Uniform2(GetLocation(uniformName), vector.ToSystem());
+            Application.Context.Uniform2(GetLocation(uniformName), vector.ToSystem());
         }
 
         public void SetVector3(string uniformName, Vector3D<float> vector)
         {
-            GL Gl = App.Gl;
-            Gl.Uniform3(GetLocation(uniformName), vector.ToSystem());
+            Application.Context.Uniform3(GetLocation(uniformName), vector.ToSystem());
         }
 
         public unsafe void SetMatrix4(string uniformName, Matrix4X4<float> matrix)
         {
-            GL Gl = App.Gl;
-            Gl.UniformMatrix4(GetLocation(uniformName), 1, false, (float*)&matrix);
+            Application.Context.UniformMatrix4(GetLocation(uniformName), 1, false, (float*)&matrix);
         }
 
         #endregion
 
         public void Use()
         {
-            GL Gl = App.Gl;
-            Gl.UseProgram(ProgramID);
+            Application.Context.UseProgram(ProgramID);
         }
 
         public void Reload()
         {
-            GL Gl = App.Gl;
-
             Logger.Info($"Reloading ShaderProgram #{ProgramID}");
 
             uint oldId = ProgramID;
-            Gl.DeleteProgram(ProgramID);
+            Application.Context.DeleteProgram(ProgramID);
 
             ShaderSource shaderSource = Parse();
             CreateProgram(shaderSource);

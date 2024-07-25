@@ -7,9 +7,7 @@ namespace Engine.Rendering
     {
         public static void Clear()
         {
-            GL Gl = App.Gl;
-
-            Gl.Clear(ClearBufferMask.ColorBufferBit);
+            Application.Context.Clear(ClearBufferMask.ColorBufferBit);
         }
 
         /*Da usare soltanto quando vogliamo forzare il rendering di una mesh con una shader particolare
@@ -22,10 +20,8 @@ namespace Engine.Rendering
 
         public static unsafe void Draw(Mesh mesh)
         {
-            GL Gl = App.Gl;
-
-            Gl.BindVertexArray(mesh.VAO);
-            Gl.DrawElements(PrimitiveType.Triangles, mesh.IndicesCount, DrawElementsType.UnsignedInt, (void*)0);
+            Application.Context.BindVertexArray(mesh.VAO);
+            Application.Context.DrawElements(PrimitiveType.Triangles, mesh.IndicesCount, DrawElementsType.UnsignedInt, (void*)0);
         }
     }
 }
