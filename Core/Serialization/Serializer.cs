@@ -1,6 +1,5 @@
 ﻿using Core.Logs;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Core.Serialization
 {
@@ -36,16 +35,27 @@ namespace Core.Serialization
             return JsonSerializer.Deserialize<T>(text, Instance.SerializationOptions);
         }
 
-        public static T? Deserialize<T>(FileInfo file)
+        public static bool Deserialize<T>(FileInfo file, out T? @object)
         {
             if (!file.Exists)
             {
                 Logger.Error("File not found");
-                return default;
+                @object = default;
+                return false;
             }
 
             string jsonString = File.ReadAllText(file.FullName);
-            return Deserialize<T>(jsonString);
+            try
+            {
+                @object = Deserialize<T>(jsonString); 
+                return true;
+            }
+            catch (Exception)
+            {
+                Logger.Error($"Deserialize error for type '{typeof(T)}'");
+                @object = default;
+                return false;
+            }
         }
     }
 }
