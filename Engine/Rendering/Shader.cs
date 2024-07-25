@@ -1,6 +1,6 @@
 ﻿using Core.Logs;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using System.Numerics;
 using System.Text;
 
 namespace Engine.Rendering
@@ -167,19 +167,19 @@ namespace Engine.Rendering
             Gl.Uniform1(GetLocation(uniformName), value);
         }
 
-        public void SetVector2(string uniformName, Vector2 vector)
+        public void SetVector2(string uniformName, Vector2D<float> vector)
         {
             GL Gl = App.Gl;
-            Gl.Uniform2(GetLocation(uniformName), vector);
+            Gl.Uniform2(GetLocation(uniformName), vector.ToSystem());
         }
 
-        public void SetVector3(string uniformName, Vector3 vector)
+        public void SetVector3(string uniformName, Vector3D<float> vector)
         {
             GL Gl = App.Gl;
-            Gl.Uniform3(GetLocation(uniformName), vector);
+            Gl.Uniform3(GetLocation(uniformName), vector.ToSystem());
         }
 
-        public unsafe void SetMatrix4(string uniformName, Matrix4x4 matrix)
+        public unsafe void SetMatrix4(string uniformName, Matrix4X4<float> matrix)
         {
             GL Gl = App.Gl;
             Gl.UniformMatrix4(GetLocation(uniformName), 1, false, (float*)&matrix);

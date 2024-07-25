@@ -1,5 +1,4 @@
 ﻿using Silk.NET.OpenGL;
-using System.Drawing;
 
 namespace Engine.Rendering
 {

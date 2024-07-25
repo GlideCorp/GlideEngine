@@ -1,11 +1,6 @@
-﻿using Silk.NET.OpenGL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
+﻿using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine.Rendering
 {
@@ -13,8 +8,8 @@ namespace Engine.Rendering
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Vertex()
     {
-        public Vector3 Position { get; set; }
-        public Vector3 Normal { get; set; }
+        public Vector3D<float> Position { get; set; }
+        public Vector3D<float> Normal { get; set; }
     }
 
     public class Mesh

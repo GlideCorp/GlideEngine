@@ -3,6 +3,7 @@ namespace Core.Locations
 {
     public class Tree
     {
+        // FEATURE: remove filter part when appending new items
         private Node Root { get; init; }
         public Location Filter { get; init; }
 
