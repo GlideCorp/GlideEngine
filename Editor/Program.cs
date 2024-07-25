@@ -1,2 +1,6 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using Editor;
+
+EditorApp app = new();
+app.Startup();
+app.Run();
+app.Shutdown();

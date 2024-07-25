@@ -3,7 +3,10 @@ using Core.Logs;
 using Core.Serialization;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
+using Silk.NET.SDL;
 using Silk.NET.Windowing;
+
+using SilkWindow = Silk.NET.Windowing.Window;
 
 namespace Engine
 {
@@ -34,6 +37,20 @@ namespace Engine
                 return Instance.ContextInternal;
             }
         }
+        protected static IWindow Window
+        {
+            get
+            {
+                if (Instance.WindowInternal is null)
+                {
+                    Logger.Error("Null context");
+                    throw new NullReferenceException();
+                }
+
+                return Instance.WindowInternal;
+            }
+        }
+
         public static Vector2D<int> FramebufferSize { get { return Instance.WindowInternal.FramebufferSize; } }
 
         private IWindow WindowInternal { get; init; }
@@ -45,10 +62,11 @@ namespace Engine
 
             WindowOptions options = LoadWindowOptions();
 
-            WindowInternal = Window.Create(options);
+            WindowInternal = SilkWindow.Create(options);
             WindowInternal.Load += OnLoad;
             WindowInternal.Update += OnUpdate;
             WindowInternal.Render += OnRender;
+            WindowInternal.FramebufferResize += OnFramebufferResize;
 
             ContextInternal = null;
 
@@ -110,6 +128,11 @@ namespace Engine
         protected virtual void OnRender(double deltaTime)
         {
 
+        }
+
+        private static void OnFramebufferResize(Vector2D<int> newSize)
+        {
+            Context.Viewport(newSize);
         }
     }
 }
