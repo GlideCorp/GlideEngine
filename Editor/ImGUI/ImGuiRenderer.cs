@@ -19,9 +19,23 @@ namespace Editor.ImGUI
 
         private ImFontPtr defaultFontPtr;
 
+        private Texture2D FontAtlas;
+
         public ImGuiRenderer(GL gl, IView view, IInputContext input)
         {
             ImGuiController = new ImGuiController(gl, view, input);
+            unsafe
+            {
+                var io = ImGui.GetIO();
+                io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out var width, out var height, out var bytesPerPixel);
+
+                var pixels = new byte[width * height * bytesPerPixel];
+                Marshal.Copy(new IntPtr(pixelData), pixels, 0, pixels.Length);
+
+                // Create and register the texture
+                FontAtlas = new(width, height);
+                FontAtlas.SetData(pixels, TextureFormat.RGBA);
+            }
         }
 
         public void BeginLayout(double deltaTime)
@@ -64,11 +78,13 @@ namespace Editor.ImGUI
             Marshal.Copy(new IntPtr(pixelData), pixels, 0, pixels.Length);
 
             // Create and register the texture
-            Texture2D texture = new(width, height);
-            texture.SetData(pixels, TextureFormat.RGBA);
+            FontAtlas.Dispose();
+
+            FontAtlas = new(width, height);
+            FontAtlas.SetData(pixels, TextureFormat.RGBA);
 
             // Let ImGui know where to find the texture
-            io.Fonts.SetTexID((nint)texture.TextureID);
+            io.Fonts.SetTexID((nint)FontAtlas.TextureID);
             io.Fonts.ClearTexData(); // Clears CPU side texture data
         }
     }

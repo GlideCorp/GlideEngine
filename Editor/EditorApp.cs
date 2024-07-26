@@ -16,12 +16,14 @@ namespace Editor
         private ImGuiRenderer? ImGuiRenderer { get; set; }
         private IInputContext? InputContext { get; set; }
 
+        List<EditorWindow> EditorWindows{ get; set; }
+
         Texture2D? testTexture;
 
         public override void Startup()
         {
             base.Startup();
-
+            EditorWindows = new();
         }
 
         protected override void OnLoad()
@@ -45,6 +47,8 @@ namespace Editor
             FileStream stream = File.OpenRead("resources\\test.png");
             testTexture = Texture2D.FromStream(stream, TextureParameters.Default with { Filters = TextureFilter.Nearest });
 
+            EditorWindows.Add(new TestWindow());
+
             Logger.Info($"{Context.GetStringS(GLEnum.Vendor)}\n{Context.GetStringS(GLEnum.Version)}\n");
         }
 
@@ -62,9 +66,25 @@ namespace Editor
 
             ImGui.BeginMainMenuBar();
             ImGui.Text("Glide Engine");
-            ImGui.EndMainMenuBar();
 
-            ImGui.ShowDemoWindow();
+            if (ImGui.BeginMenu("Tools"))
+            {
+                foreach (var window in EditorWindows)
+                {
+                    if (ImGui.MenuItem(window.Name))
+                    {
+                        window.Open = true;
+                    }
+                }
+                ImGui.EndMenu();
+            }
+            ImGui.EndMainMenuBar();
+            ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
+
+            foreach (var window in EditorWindows)
+            {
+                window.DrawGui();
+            }
 
             ImGui.Begin("TextureTest");
             if(testTexture != null)
