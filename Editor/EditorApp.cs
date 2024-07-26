@@ -16,7 +16,7 @@ namespace Editor
         private ImGuiRenderer? ImGuiRenderer { get; set; }
         private IInputContext? InputContext { get; set; }
 
-        List<EditorWindow> EditorWindows{ get; set; }
+        List<EditorWindow> EditorWindows { get; set; }
 
         Texture2D? testTexture;
 
@@ -32,7 +32,7 @@ namespace Editor
 
             InputContext = Window.CreateInput();
 
-            ImGuiRenderer = new ImGuiRenderer(Context,Window, InputContext);
+            ImGuiRenderer = new ImGuiRenderer(Context, Window, InputContext);
             ImGuiRenderer.SetDefaultFont("resources\\fonts\\SplineSansMono-Medium.ttf", 16);
 
             var io = ImGui.GetIO();
@@ -87,7 +87,7 @@ namespace Editor
             }
 
             ImGui.Begin("TextureTest");
-            if(testTexture != null)
+            if (testTexture != null)
             {
                 ImGui.Text($"Texture ID: {testTexture.TextureID}");
                 //ImGui.SliderInt("TextureID", ref id, 1, 10);

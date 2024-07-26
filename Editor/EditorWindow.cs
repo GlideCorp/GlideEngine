@@ -12,7 +12,7 @@ namespace Editor
         public string Name { get; private set; }
 
         bool windowOpen;
-        public bool Open { get=>windowOpen; set=>windowOpen = value; }
+        public bool Open { get => windowOpen; set => windowOpen = value; }
 
         public EditorWindow(string windowName)
         {
