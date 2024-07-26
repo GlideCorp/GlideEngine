@@ -15,9 +15,14 @@ namespace Engine.Rendering
         public TextureFilter Minification { get; set; }
         public TextureFilter Magnification { get; set; }
 
+        public TextureFilter Filters 
+        { 
+            set => Minification = Magnification = value;
+        }
+
         public bool Mipmaps { get; set; }
 
-        public TextureParameters(TextureWrap verticalWrap, TextureWrap horizontalWrap,  TextureFilter minification, TextureFilter magification, bool mipmaps)
+        public TextureParameters(TextureWrap verticalWrap, TextureWrap horizontalWrap, TextureFilter minification, TextureFilter magification, bool mipmaps)
         {
             VerticalWrap = verticalWrap;
             VerticalWrap = horizontalWrap;

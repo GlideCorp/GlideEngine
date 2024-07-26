@@ -109,10 +109,20 @@ namespace Engine.Rendering
 
         public static Texture2D FromStream(Stream stream)
         {
+            return FromStream(stream, TextureParameters.Default);
+        }
+        public static Texture2D FromStream(Stream stream, TextureFormat format)
+        {
+            return FromStream(stream, TextureParameters.Default, format);
+        }
+
+        public static Texture2D FromStream(Stream stream, TextureParameters textureParameters, TextureFormat format = TextureFormat.RGB)
+        {
             ImageResult imageData = ImageResult.FromStream(stream);
 
-            Texture2D texture = new Texture2D(imageData.Width, imageData.Height);
-            texture.SetData(imageData.Data);
+
+            Texture2D texture = new Texture2D(imageData.Width, imageData.Height, textureParameters);
+            texture.SetData(imageData.Data, format);
 
             return texture;
         }
