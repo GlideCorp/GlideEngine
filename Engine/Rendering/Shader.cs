@@ -21,10 +21,15 @@ namespace Engine.Rendering
         private Dictionary<string, int> UniformLocationCache { get; set; }
 
         public Shader(string vertexShaderPath, string fragmentShaderPath)
+            :this(new FileInfo(vertexShaderPath), new FileInfo(fragmentShaderPath))
+        {
+        }
+
+        public Shader(FileInfo vertexShaderFile, FileInfo fragmentShaderFile)
         {
             ProgramID = 0;
-            VertexFile = new(vertexShaderPath);
-            FragmentFile = new(fragmentShaderPath);
+            VertexFile = vertexShaderFile;
+            FragmentFile = fragmentShaderFile;
 
             UniformLocationCache = new();
 
@@ -44,9 +49,12 @@ namespace Engine.Rendering
             ShaderSource shaderSource = Parse();
             CreateProgram(shaderSource);
 
+
+
             if (ProgramID != 0)
                 Logger.Info($"Successfuly created ShaderProgram #{ProgramID}");
         }
+
 
         ~Shader()
         {
