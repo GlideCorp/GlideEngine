@@ -1,35 +1,19 @@
+using Core.Locations;
 using Core.Logs;
-using Engine.Entities;
-using Sandbox;
+using Silk.NET.OpenGL;
 
-MyApplication app = new();
-app.Startup(); 
+Logger.Startup();
 
-MyEntity pipo = new();
-pipo.Add(new MyBehaviour());
-pipo.Add(new MyComp());
+Location location = new("primo_livello:secondo_livello");
 
-Component[] components = pipo.GetAllComponents();
-Behaviour[] behaviours = pipo.GetAllBehaviours();
 
-string debugInfo = "\ncomponents:\n";
-foreach (Component component in components)
+Print(location);
+Print("test:sperochefunzioni");
+
+
+Logger.Shutdown();
+
+void Print(Location location)
 {
-    debugInfo += $"\t{component}\n";
+    Logger.Dump(location);
 }
-
-debugInfo += "\nbehaviours:\n";
-foreach (Behaviour behaviour in behaviours)
-{
-    debugInfo += $"\t{behaviour}\n";
-}
-Logger.Info(debugInfo);
-
-app.Run();
-app.Shutdown();
-
-
-
-
-
-
