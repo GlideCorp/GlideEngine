@@ -1,14 +1,16 @@
 using Core.Locations;
 using Core.Logs;
-using Silk.NET.OpenGL;
 
 Logger.Startup();
 
-Location location = new("primo_livello:secondo_livello");
+string path = "primo_livello:secondo_livello:primo_livello:secondo_livello";
+Location location = new(path);
 
+
+ReadOnlyMemory<char> memory = path.AsMemory();
 
 Print(location);
-Print("test:sperochefunzioni");
+Print(path);
 
 
 Logger.Shutdown();

@@ -9,7 +9,7 @@ namespace Engine.Entities
 {
     public abstract class Behaviour : Trackable
     {
-        protected Behaviour(string name, string path, params Component[] components) : base(name, $"behaviour:{path}")
+        protected Behaviour(string name, params Component[] components) : base($"behaviour:{name}")
         {
         }
 

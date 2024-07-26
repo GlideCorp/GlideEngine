@@ -12,6 +12,13 @@ namespace Core.Locations
         public static readonly Location Empty = new();
 
         private string[] PathPrivate { get; init; }
+        internal ReadOnlyMemory<char> this[int index]
+        {
+            get
+            {
+                return PathPrivate[index].AsMemory();
+            }
+        }
 
         public ReadOnlySpan<string> Path { get { return PathPrivate; } }
         public int Depth { get { return PathPrivate.Length; } }
@@ -26,12 +33,12 @@ namespace Core.Locations
             else { PathPrivate = subpath; }
         }
 
-        private Location() { PathPrivate = []; }
+        public Location() { PathPrivate = []; }
 
         public bool Match(Location filter)
         {
-            bool match = filter.Path.Length < Path.Length;
-            for (int i = 0; match && i < filter.Path.Length; i++) { match = Path[i] == filter.Path[i]; }
+            bool match = filter.Depth < Depth;
+            for (int i = 0; match && i < filter.Depth; i++) { match = Path[i] == filter.Path[i]; }
             return match;
         }
 
