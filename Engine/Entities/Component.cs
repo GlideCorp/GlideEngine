@@ -10,7 +10,7 @@ namespace Engine.Entities
 {
     public abstract class Component : Trackable
     {
-        protected Component(string name, string path) : base(name, $"component:{path}")
+        protected Component(string name) : base($"component:{name}")
         {
         }
 

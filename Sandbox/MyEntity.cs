@@ -14,7 +14,7 @@ namespace Sandbox
     public class MyComp : Component
     {
         public int Val;
-        public MyComp() : base("test", "test")
+        public MyComp() : base("test")
         {
             Val = Random.Shared.Next(0, 100);
         }
@@ -27,7 +27,7 @@ namespace Sandbox
 
     public class MyBehaviour : Behaviour
     {
-        public MyBehaviour() : base("test", "test", [])
+        public MyBehaviour() : base("test", [])
         {
         }
     }

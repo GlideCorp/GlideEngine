@@ -2,7 +2,7 @@
 
 namespace Sandbox
 {
-    public class MyTrackable(int value) : Trackable(name: "Test", path: "a:b:c:d")
+    public class MyTrackable(int value) : Trackable("a:b:c:d:MyTrackable")
     {
         public int Value { get; set; } = value;
     }

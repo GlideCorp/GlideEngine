@@ -4,39 +4,80 @@ namespace Core.Locations
 {
     internal class Node
     {
-        public string SubPath { get; init; }
+        public ReadOnlyMemory<char> SubPath { get; init; }
 
         private Node? Parent { get; init; }
-        private List<Trackable> Values { get; init; }
         private List<Node> Children { get; init; }
+        public Trackable? Value { get; set; }
 
         public Node()
         {
-            SubPath = "/";
+            SubPath = "/".AsMemory();
 
             Parent = null;
-            Values = [];
             Children = [];
+            Value = null;
         }
 
-        public Node(string subPath, Node parent)
+        public Node(ReadOnlyMemory<char> subPath, Node parent)
         {
             SubPath = subPath;
 
             Parent = parent;
-            Values = [];
             Children = [];
+            Value = null;
         }
 
-        public bool Append(string subPath, out Node child)
+        public Node(ReadOnlyMemory<char> subPath, Node parent, Trackable value)
+        {
+            SubPath = subPath;
+
+            Parent = parent;
+            Children = [];
+            Value = value;
+        }
+
+        private int Search(ReadOnlyMemory<char> subPath)
         {
             // TODO: make singletone comparer class
             Comparer<Node> comparer = Comparer<Node>.Create((x, _) =>
             {
-                return x.SubPath.CompareTo(subPath);
+                return x.SubPath.Span.CompareTo(subPath.Span, StringComparison.OrdinalIgnoreCase);
             });
-            int index = Children.BinarySearch(null!, comparer);
 
+            if (Children.Count > 32) { return Children.BinarySearch(null!, comparer); }
+            else
+            {
+                for (int i = 0; i < Children.Count; i++)
+                {
+                    int comp = comparer.Compare(Children[i], null!);
+                    if (comp > 0) { return ~i; }
+                    else if (comp == 0) { return i; }
+                }
+
+                return ~Children.Count;
+            }
+        }
+
+        public bool Append(ReadOnlyMemory<char> subPath, out Node child)
+        {
+            int index = Search(subPath);
+
+            if (index >= 0)
+            {
+                child = Children[index];
+                return false;
+            }
+            else
+            {
+                child = new(subPath, this);
+                Children.Insert(~index, child);
+                return true;
+            }
+        }
+
+        public bool Append(ReadOnlyMemory<char> subPath, int index, out Node child)
+        {
             if (index >= 0)
             {
                 child = Children[index];
@@ -52,63 +93,44 @@ namespace Core.Locations
 
         private void DetatchIfEmpty()
         {
-            if (Children.Count == 0 && Values.Count == 0 && Parent is not null)
+            if (Children.Count == 0 && Parent is not null)
             {
                 Parent.Detatch(SubPath);
             }
         }
 
-        public bool Detatch(string subPath)
+        public bool Detatch(ReadOnlyMemory<char> subPath)
         {
-            // TODO: make singletone comparer class
-            Comparer<Node> comparer = Comparer<Node>.Create((x, _) =>
-            {
-                return x.SubPath.CompareTo(subPath);
-            });
-            int index = Children.BinarySearch(null!, comparer);
+            int index = Search(subPath);
 
             if (index >= 0)
             {
                 Children.RemoveAt(index);
                 DetatchIfEmpty();
-
                 return true;
             }
             else { return false; }
         }
 
-        public bool Insert(Trackable trackable)
+        public bool Find(ReadOnlyMemory<char> subPath, [NotNullWhen(true)] out Node? child)
         {
-            int index = Values.BinarySearch(trackable);
-            if (index >= 0) { return false; }
-            else
-            {
-                Values.Insert(~index, trackable);
-                return true;
-            }
-        }
+            int index = Search(subPath);
 
-        public bool Remove(Trackable trackable)
-        {
-            int index = Values.BinarySearch(trackable);
             if (index >= 0)
             {
-                Values.RemoveAt(index);
-                DetatchIfEmpty();
-
+                child = Children[index];
                 return true;
             }
-            else { return false; }
+            else
+            {
+                child = null;
+                return false;
+            }
         }
 
-        public bool Find(string subPath, [NotNullWhen(true)] out Node? child)
+        public bool Find(ReadOnlyMemory<char> subPath, out int index, [NotNullWhen(true)] out Node? child)
         {
-            // TODO: make singletone comparer class
-            Comparer<Node> comparer = Comparer<Node>.Create((x, _) =>
-            {
-                return x.SubPath.CompareTo(subPath);
-            });
-            int index = Children.BinarySearch(null!, comparer);
+            index = Search(subPath);
 
             if (index >= 0)
             {
@@ -150,26 +172,13 @@ namespace Core.Locations
             }
         }
 
-        public IEnumerable<Trackable> RetriveValues(bool recursive = false)
+        public IEnumerable<Trackable> RetriveValues()
         {
-            if (recursive)
+            if (Value is not null) { yield return Value; }
+
+            foreach (Node node in RetriveChildern(recursive: true))
             {
-                Queue<Node> queue = new();
-
-                for (int i = 0; i < Values.Count; i++) { yield return Values[i]; }
-                for (int i = 0; i < Children.Count; i++) { queue.Enqueue(Children[i]); }
-
-                while (queue.Count > 0)
-                {
-                    Node node = queue.Dequeue();
-
-                    for (int i = 0; i < node.Values.Count; i++) { yield return node.Values[i]; }
-                    for (int i = 0; i < node.Children.Count; i++) { queue.Enqueue(node.Children[i]); }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < Values.Count; i++) { yield return Values[i]; }
+                if (node.Value is not null) { yield return node.Value; }
             }
         }
 
@@ -180,7 +189,7 @@ namespace Core.Locations
                 {
                     {{nameof(SubPath)}}: "{{SubPath}}",
                     {{nameof(Children)}}: <{{nameof(List<Node>)}}, Count: {{Children.Count}}>,
-                    {{nameof(Values)}}: <{{nameof(List<Trackable>)}}, Count: {{Values.Count}}>
+                    {{nameof(Value)}}: {{Value}}
                 }
                 """;
         }
