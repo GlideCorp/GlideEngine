@@ -6,16 +6,29 @@ using System.Runtime.InteropServices;
 
 namespace Engine.Rendering
 {
+    public enum TextureFormat
+    {
+        R = GLEnum.R8,
+        RG = GLEnum.RG,
+        RGB = GLEnum.Rgb,
+        RGBA = GLEnum.Rgba,
+        DEPTH = GLEnum.Depth,
+        DEPTH_STENCIL = GLEnum.DepthStencil
+    }
+
     //https://stackoverflow.com/questions/538060/proper-use-of-the-idisposable-interface dicono di usarlo
     public class Texture2D : IResource
     {
+
         public int Width { get; private set; }
         public int Height { get; private set; }
 
         public uint TextureID { get; private set; }
 
+        public TextureParameters Params { get; private set; }
+
         //TODO: Add Format
-        public Texture2D(int width, int heigth)
+        public Texture2D(int width, int heigth, TextureParameters textureParameters)
         {
             if(width <= 0 || heigth <= 0)
             {
@@ -25,25 +38,24 @@ namespace Engine.Rendering
 
             Width = width;
             Height = heigth;
+            Params = textureParameters;
 
             GL Gl = Application.Context;
 
             TextureID = Gl.GenTexture();
             Bind();
-
-            //TODO: Generalizzare sta cosa
-            Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)GLEnum.ClampToEdge);
-            Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)GLEnum.ClampToEdge);
-            Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)GLEnum.Nearest);
-            Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)GLEnum.Nearest);
+            
+            Params.Apply(TextureID);
         }
+
+        public Texture2D(int width, int heigth) : this(width, heigth, TextureParameters.Default) { }
 
         ~Texture2D()
         {
             Dispose(false);
         }
 
-        public unsafe void SetData(Span<byte> data)
+        public unsafe void SetData(Span<byte> data, TextureFormat format = TextureFormat.RGB)
         {
             Bind();
 
@@ -52,13 +64,18 @@ namespace Engine.Rendering
             {
                 Application.Context.TexImage2D(GLEnum.Texture2D,
                                                0,
-                                               InternalFormat.Rgba,
+                                               (int)format,
                                                (uint)Width,
                                                (uint)Height,
                                                0,
-                                               PixelFormat.Rgba,
+                                               (GLEnum)PixelFormat.Rgba,
                                                GLEnum.UnsignedByte,
                                                (void*)ptr);
+            }
+
+            if(Params.Mipmaps)
+            {
+                Application.Context.GenerateMipmap(TextureTarget.Texture2D);
             }
         }
 
@@ -82,15 +99,30 @@ namespace Engine.Rendering
 
         private void Dispose(bool dispose)
         {
-
+            if(TextureID != 0)
+            {
+                Application.Context.DeleteTexture(TextureID);
+                Logger.Info($"Deleted Texture #{TextureID}");
+                TextureID = 0;
+            }
         }
 
         public static Texture2D FromStream(Stream stream)
         {
-            ImageResult imageData = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
+            return FromStream(stream, TextureParameters.Default);
+        }
+        public static Texture2D FromStream(Stream stream, TextureFormat format)
+        {
+            return FromStream(stream, TextureParameters.Default, format);
+        }
 
-            Texture2D texture = new Texture2D(imageData.Width, imageData.Height);
-            texture.SetData(imageData.Data);
+        public static Texture2D FromStream(Stream stream, TextureParameters textureParameters, TextureFormat format = TextureFormat.RGB)
+        {
+            ImageResult imageData = ImageResult.FromStream(stream);
+
+
+            Texture2D texture = new Texture2D(imageData.Width, imageData.Height, textureParameters);
+            texture.SetData(imageData.Data, format);
 
             return texture;
         }

@@ -25,9 +25,6 @@ namespace Peek
         private Mesh quadMesh;
         private Shader mainShader;
 
-        private FileInfo vertexShader;
-        private FileInfo fragmentShader;
-
         private Vector3D<float> CameraPosition;
         private Vector3D<float> CameraTarget;
         private Vector3D<float> CameraDirection;
@@ -84,16 +81,7 @@ namespace Peek
 
             quadMesh = new Mesh(vertices, indices);
 
-            //Shader stuff
-            vertexShader = new FileInfo("shaders\\main.vs");
-            fragmentShader = new FileInfo("shaders\\main.fg");
-
-            using (var stream = fragmentShader.OpenText())
-            {
-                fragmentSource = stream.ReadToEnd();
-            }
-
-            mainShader = new Shader(vertexShader, fragmentShader);
+            mainShader = new Shader("shaders\\main.vs", "shaders\\main.fg");
             mainShader.Use();
 
         }
@@ -123,25 +111,18 @@ namespace Peek
 
             if(ImGui.Button("Reload Shader"))
             {
-                using (var stream = fragmentShader.OpenWrite())
-                {
-                    var data = new UTF8Encoding(false).GetBytes(fragmentSource);
-                    stream.Write(data, 0, data.Length);
-                }
-
-                mainShader.Reload();
             }
             ImGui.EndMainMenuBar();
 
             ImGui.Begin("Shader Source");
 
-            ImGui.InputTextMultiline("#source", ref fragmentSource, (uint)1024, ImGui.GetWindowSize(), ImGuiInputTextFlags.AllowTabInput);
+            bool changed = ImGui.InputTextMultiline("#source", ref fragmentSource, (uint)1024, ImGui.GetWindowSize(), ImGuiInputTextFlags.AllowTabInput);
 
-            ImGui.ShowDemoWindow();
             ImGui.End();
 
 
             ImGuiController?.Render();
         }
+
     }
 }

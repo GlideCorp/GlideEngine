@@ -1,4 +1,5 @@
 ﻿using Core.Logs;
+using Editor.ImGUI;
 using Engine;
 using Engine.Rendering;
 using ImGuiNET;
@@ -12,7 +13,7 @@ namespace Editor
 {
     public class EditorApp : Application
     {
-        private ImGuiController? ImGuiController { get; set; }
+        private ImGuiRenderer? ImGuiRenderer { get; set; }
         private IInputContext? InputContext { get; set; }
 
         Texture2D? testTexture;
@@ -29,8 +30,8 @@ namespace Editor
 
             InputContext = Window.CreateInput();
 
-            ImGuiFontConfig fontConfig = new("resources\\fonts\\SplineSansMono-Medium.ttf", 16);
-            ImGuiController = new ImGuiController(Context,Window, InputContext, fontConfig);
+            ImGuiRenderer = new ImGuiRenderer(Context,Window, InputContext);
+            ImGuiRenderer.SetDefaultFont("resources\\fonts\\SplineSansMono-Medium.ttf", 16);
 
             var io = ImGui.GetIO();
             io.BackendFlags = ImGuiBackendFlags.None;
@@ -41,11 +42,8 @@ namespace Editor
             imguiStyle.FrameRounding = 2;
             imguiStyle.GrabRounding = 2;
 
-            //io.Fonts.AddFontFromFileTTF("resources\\fonts\\Arvo-Regular.ttf", 15.0f, null, io.Fonts.GetGlyphRangesDefault());
-            //RebuildFontAtlas();
-
             FileStream stream = File.OpenRead("resources\\test.png");
-            testTexture = Texture2D.FromStream(stream);
+            testTexture = Texture2D.FromStream(stream, TextureParameters.Default with { Filters = TextureFilter.Nearest });
 
             Logger.Info($"{Context.GetStringS(GLEnum.Vendor)}\n{Context.GetStringS(GLEnum.Version)}\n");
         }
@@ -60,7 +58,7 @@ namespace Editor
             Graphics.Clear();
 
             //Editor Render Loop
-            ImGuiController?.Update((float)deltaTime);
+            ImGuiRenderer?.BeginLayout((float)deltaTime);
 
             ImGui.BeginMainMenuBar();
             ImGui.Text("Glide Engine");
@@ -77,30 +75,9 @@ namespace Editor
             }
             ImGui.End();
 
-            ImGuiController?.Render();
+            ImGuiRenderer?.EndLayout();
         }
 
-        //Sposta in una classe a parte, idealmente una che gestisce in modo più specifico DearImgui nel contesto di un Editor
-        //Forse the cherno aveva un video al riguardo boh :)
-        //Senno una cosa simile: https://github.com/dovker/Monogame.ImGui/blob/master/MonoGame.ImGui/ImGUIRenderer.cs#L29
-        unsafe void RebuildFontAtlas()
-        {     
-            // Get font texture from ImGui
-            var io = ImGui.GetIO();
-            io.Fonts.GetTexDataAsRGBA32(out byte* pixelData, out var width, out var height, out var bytesPerPixel);
-
-            // Copy the data to a managed array
-            var pixels = new byte[width * height * bytesPerPixel];
-            Marshal.Copy(new IntPtr(pixelData), pixels, 0, pixels.Length);
-
-            // Create and register the texture
-            Texture2D texture = new(width, height);
-            texture.SetData(pixels);
-
-            // Let ImGui know where to find the texture
-            io.Fonts.SetTexID((nint)texture.TextureID);
-            io.Fonts.ClearTexData(); // Clears CPU side texture data
-        }
 
     }
 }
