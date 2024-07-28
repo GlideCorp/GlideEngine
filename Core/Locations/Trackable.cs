@@ -1,4 +1,5 @@
-﻿namespace Core.Locations
+﻿
+namespace Core.Locations
 {
     public abstract class Trackable(Location location) : IComparable<Trackable>
     {

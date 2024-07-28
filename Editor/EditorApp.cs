@@ -1,13 +1,12 @@
-﻿using Core.Logs;
+﻿
+using Core.Logs;
 using Editor.ImGUI;
 using Engine;
 using Engine.Rendering;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
-using Silk.NET.OpenGL.Extensions.ImGui;
 using System.Numerics;
-using System.Runtime.InteropServices;
 
 namespace Editor
 {
