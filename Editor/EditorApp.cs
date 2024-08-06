@@ -37,9 +37,6 @@ namespace Editor
             imguiStyle.FrameRounding = 2;
             imguiStyle.GrabRounding = 2;
 
-            FileStream stream = File.OpenRead("resources\\test.png");
-            testTexture = Texture2D.FromStream(stream, TextureParameters.Default with { Filters = TextureFilter.Nearest });
-
             Logger.Info($"{Context.GetStringS(GLEnum.Vendor)}\n{Context.GetStringS(GLEnum.Version)}\n");
         }
 
