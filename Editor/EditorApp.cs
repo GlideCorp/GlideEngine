@@ -15,8 +15,6 @@ namespace Editor
         private ImGuiRenderer? ImGuiRenderer { get; set; }
         private IInputContext? InputContext { get; set; }
 
-        Texture2D? testTexture;
-
         public override void Startup()
         {
             base.Startup();
@@ -50,8 +48,6 @@ namespace Editor
             base.OnUpdate(deltaTime);
         }
 
-        bool firstFrame = true;
-        uint dockSpace = 0;
         protected override void OnRender(double deltaTime)
         {
             Graphics.Clear();
