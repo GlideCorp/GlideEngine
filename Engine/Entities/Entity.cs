@@ -1,19 +1,14 @@
-﻿using Core.Locations;
+﻿
+using Core.Locations;
 using Core.Logs;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine.Entities
 {
-    public abstract class Entity
+    public abstract class Entity : Trackable
     {
         protected Tree Registry { get; init; }
 
-        public Entity() 
+        public Entity(string name) : base($"entity:{name}")
         {
             Registry = new Tree();
         }
@@ -24,24 +19,24 @@ namespace Engine.Entities
 
         public virtual void Update() { }
 
-        public virtual void Draw() 
-        { 
+        public virtual void Draw()
+        {
             //TODO: Check if meshComponent is present and draw automatically mesh
         }
 
         public virtual void Destroy() { }
 
-        public void Add(Component component) 
+        public void Add(Component component)
         {
             bool result = Registry.Insert(component);
 
-            if (!result) 
+            if (!result)
             {
                 Logger.Error($"{component} is already present into {this} at location {component.Location}");
             }
         }
 
-        public void Add(Behaviour behaviour) 
+        public void Add(Behaviour behaviour)
         {
             bool result = Registry.Insert(behaviour);
 
@@ -51,14 +46,14 @@ namespace Engine.Entities
             }
         }
 
-        public bool TryGetComponent<T>(out T? component) where T:Component 
+        public bool TryGetComponent<T>(out T? component) where T : Component
         {
             Location componentLocation = new("component");
             var values = Registry.RetriveValues(componentLocation);
 
             foreach (var element in values)
             {
-                if(element.GetType() == typeof(T))
+                if (element.GetType() == typeof(T))
                 {
                     component = (T)element;
                     return true;
@@ -66,10 +61,10 @@ namespace Engine.Entities
             }
 
             component = null;
-            return false; 
+            return false;
         }
 
-        public bool TryGetBehaviour<T>(out T? behaviour) where T:Behaviour
+        public bool TryGetBehaviour<T>(out T? behaviour) where T : Behaviour
         {
             Location behaviourLocation = new("behaviour");
             var values = Registry.RetriveValues(behaviourLocation);

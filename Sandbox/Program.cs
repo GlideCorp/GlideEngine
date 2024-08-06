@@ -1,21 +1,30 @@
-using Core.Locations;
+
 using Core.Logs;
+using Engine.Entities;
+using Sandbox;
 
-Logger.Startup();
+MyApplication app = new();
+app.Startup();
 
-string path = "primo_livello:secondo_livello:primo_livello:secondo_livello";
-Location location = new(path);
+MyEntity pipo = new();
+pipo.Add(new MyBehaviour());
+pipo.Add(new MyComp());
 
+Component[] components = pipo.GetAllComponents();
+Behaviour[] behaviours = pipo.GetAllBehaviours();
 
-ReadOnlyMemory<char> memory = path.AsMemory();
-
-Print(location);
-Print(path);
-
-
-Logger.Shutdown();
-
-void Print(Location location)
+string debugInfo = "\ncomponents:\n";
+foreach (Component component in components)
 {
-    Logger.Dump(location);
+    debugInfo += $"\t{component}\n";
 }
+
+debugInfo += "\nbehaviours:\n";
+foreach (Behaviour behaviour in behaviours)
+{
+    debugInfo += $"\t{behaviour}\n";
+}
+Logger.Info(debugInfo);
+
+app.Run();
+app.Shutdown();

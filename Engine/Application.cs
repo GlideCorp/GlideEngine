@@ -1,11 +1,8 @@
 ﻿
 using Core.Logs;
-using Core.Serialization;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
-using Silk.NET.SDL;
 using Silk.NET.Windowing;
-using StbImageSharp;
 using SilkWindow = Silk.NET.Windowing.Window;
 
 namespace Engine
@@ -14,7 +11,7 @@ namespace Engine
     {
         const string WindowSettingsPath = "Settings/Window.json";
 
-        protected static Application? _instance = null;
+        private static Application? _instance = null;
         protected static Application Instance
         {
             get
@@ -24,57 +21,60 @@ namespace Engine
             }
         }
 
-        public static GL Context
-        {
-            get
-            {
-                if (Instance.ContextInternal is null)
-                {
-                    Logger.Error("Null context");
-                    throw new NullReferenceException();
-                }
-
-                return Instance.ContextInternal;
-            }
-        }
         protected static IWindow Window
         {
             get
             {
-                if (Instance.WindowInternal is null)
+                if (Instance.WindowPrivate is null)
                 {
                     Logger.Error("Null context");
                     throw new NullReferenceException();
                 }
 
-                return Instance.WindowInternal;
+                return Instance.WindowPrivate;
             }
         }
 
-        public static Vector2D<int> FramebufferSize { get { return Instance.WindowInternal.FramebufferSize; } }
+        public static GL Context
+        {
+            get
+            {
+                if (Instance.ContextPrivate is null)
+                {
+                    Logger.Error("Null context");
+                    throw new NullReferenceException();
+                }
 
-        private IWindow WindowInternal { get; init; }
-        private GL? ContextInternal { get; set; }
+                return Instance.ContextPrivate;
+            }
+        }
 
-        protected Application()
+        public static Vector2D<int> FramebufferSize { get { return Instance.WindowPrivate.FramebufferSize; } }
+
+        private IWindow WindowPrivate { get; init; }
+        private GL? ContextPrivate { get; set; }
+
+        public Application()
         {
             Logger.Startup();
 
             WindowOptions options = LoadWindowOptions();
 
-            WindowInternal = SilkWindow.Create(options);
-            WindowInternal.Load += OnLoad;
-            WindowInternal.Update += OnUpdate;
-            WindowInternal.Render += OnRender;
-            WindowInternal.FramebufferResize += OnFramebufferResize;
+            WindowPrivate = SilkWindow.Create(options);
+            WindowPrivate.Load += OnLoad;
+            WindowPrivate.Update += OnUpdate;
+            WindowPrivate.Render += OnRender;
+            WindowPrivate.FramebufferResize += OnFramebufferResize;
 
-            ContextInternal = null;
+            ContextPrivate = null;
 
             _instance = this;
         }
 
+        // TODO: rewrite WindowOptions to be serializable
         private static WindowOptions LoadWindowOptions()
         {
+            /*
             FileInfo fileInfo = new(WindowSettingsPath);
             DirectoryInfo directoryInfo = fileInfo.Directory!;
 
@@ -88,13 +88,14 @@ namespace Engine
                     API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6))
                 };
             }
+            */
 
-            return windowOptions = WindowOptions.Default with
+            return WindowOptions.Default with
             {
                 Size = new Vector2D<int>(800, 600),
                 Title = "GlideEngine",
                 API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6))
-            }; ;
+            };
         }
 
         public virtual void Startup()
@@ -103,20 +104,20 @@ namespace Engine
 
         public virtual void Run()
         {
-            Instance.WindowInternal.Run();
+            WindowPrivate.Run();
         }
 
         public virtual void Shutdown()
         {
             Logger.Shutdown();
 
-            WindowInternal.Dispose();
+            WindowPrivate.Dispose();
             _instance = null;
         }
 
         protected virtual void OnLoad()
         {
-            ContextInternal = WindowInternal.CreateOpenGL();
+            ContextPrivate = WindowPrivate.CreateOpenGL();
         }
 
         protected virtual void OnUpdate(double deltaTime)
@@ -129,9 +130,9 @@ namespace Engine
 
         }
 
-        private static void OnFramebufferResize(Vector2D<int> newSize)
+        protected virtual void OnFramebufferResize(Vector2D<int> newSize)
         {
-            Context.Viewport(newSize);
+            ContextPrivate.Viewport(newSize);
         }
     }
 }
