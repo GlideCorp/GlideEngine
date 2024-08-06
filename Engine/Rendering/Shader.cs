@@ -11,12 +11,12 @@ namespace Engine.Rendering
         public string FragmentSource { get; set; }
     }
 
-    public class Shader
+    public class Shader : IResource
     {
         private uint ProgramID { get; set; }
 
-        private FileInfo VertexFile { get; init; }
-        private FileInfo FragmentFile { get; init; }
+        private FileInfo? VertexFile { get; init; }
+        private FileInfo? FragmentFile { get; init; }
 
         private Dictionary<string, int> UniformLocationCache { get; set; }
 
@@ -41,7 +41,7 @@ namespace Engine.Rendering
 
             if (!FragmentFile.Exists)
             {
-                Logger.Error($"ShaderFile {VertexFile.Name} does not exist!");
+                Logger.Error($"ShaderFile {FragmentFile.Name} does not exist!");
                 return;
             }
 
@@ -54,7 +54,6 @@ namespace Engine.Rendering
             if (ProgramID != 0)
                 Logger.Info($"Successfuly created ShaderProgram #{ProgramID}");
         }
-
 
         ~Shader()
         {
@@ -201,6 +200,12 @@ namespace Engine.Rendering
 
             UniformLocationCache.Clear();
             Logger.Info($"Successfuly reloaded ShaderProgram #{oldId} -> #{ProgramID}");
+        }
+
+        //TODO: Implement better dispose
+        public void Dispose()
+        {
+            Application.Context.DeleteProgram(ProgramID);
         }
     }
 }

@@ -11,11 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Editor", "Editor\Editor.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "Sandbox\Sandbox.csproj", "{6DB47F0A-26CB-4584-8AC7-0961AACA1EA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Peek", "Peek\Peek.csproj", "{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8D6B6662-5F0C-42A0-B1E0-EE61C3C0B15E} = {8D6B6662-5F0C-42A0-B1E0-EE61C3C0B15E}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,24 +96,6 @@ Global
 		{6DB47F0A-26CB-4584-8AC7-0961AACA1EA8}.Release|x64.Build.0 = Release|Any CPU
 		{6DB47F0A-26CB-4584-8AC7-0961AACA1EA8}.Release|x86.ActiveCfg = Release|Any CPU
 		{6DB47F0A-26CB-4584-8AC7-0961AACA1EA8}.Release|x86.Build.0 = Release|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Debug|x64.Build.0 = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Debug|x86.Build.0 = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Distro|Any CPU.ActiveCfg = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Distro|Any CPU.Build.0 = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Distro|x64.ActiveCfg = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Distro|x64.Build.0 = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Distro|x86.ActiveCfg = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Distro|x86.Build.0 = Debug|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Release|x64.ActiveCfg = Release|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Release|x64.Build.0 = Release|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Release|x86.ActiveCfg = Release|Any CPU
-		{E16BCA59-135C-4DC5-8965-C0545F3DCCD1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

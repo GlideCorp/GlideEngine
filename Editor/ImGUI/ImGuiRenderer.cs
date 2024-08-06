@@ -2,7 +2,6 @@
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
-using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
 using System;
 using System.Collections.Generic;
@@ -11,7 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Editor.ImGUI
+namespace Editor.ImGuiController
 {
     public class ImGuiRenderer
     {
@@ -40,6 +39,7 @@ namespace Editor.ImGUI
 
         public void BeginLayout(double deltaTime)
         {
+            ImGui.GetIO().DeltaTime = (float)deltaTime;
             ImGuiController?.Update((float)deltaTime);
             ImGui.PushFont(defaultFontPtr);
         }
