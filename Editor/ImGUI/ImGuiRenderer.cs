@@ -1,4 +1,5 @@
-﻿using Engine.Rendering;
+﻿using Editor.ImGUI;
+using Engine.Rendering;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
@@ -6,11 +7,12 @@ using Silk.NET.Windowing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Editor.ImGuiController
+namespace Editor.ImGUI
 {
     public class ImGuiRenderer
     {
@@ -59,9 +61,30 @@ namespace Editor.ImGuiController
             SetDefaultFont(fontPath, fontPixelSize, configs, ImGui.GetIO().Fonts.GetGlyphRangesDefault());
         }
 
-        public void SetDefaultFont(string fontPath, float fontPixelSize, ImFontConfigPtr configs, nint glyphRanges)
+        public unsafe void SetDefaultFont(string fontPath, float fontPixelSize, ImFontConfigPtr configs, nint glyphRanges)
         {
-            defaultFontPtr = ImGui.GetIO().Fonts.AddFontFromFileTTF(fontPath, fontPixelSize, configs, glyphRanges);
+            ImGui.GetIO().Fonts.AddFontFromFileTTF(fontPath, fontPixelSize, configs, glyphRanges);
+
+            ImFontConfigPtr configuration = ImGuiNative.ImFontConfig_ImFontConfig();
+            configuration.MergeMode = true;
+            configuration.PixelSnapH = true;
+            configuration.GlyphOffset = new Vector2(0, 3f);
+
+            ushort[] IconRanges = new ushort[3];
+            IconRanges[0] = Lucide.IconMin;
+            IconRanges[1] = Lucide.IconMax;
+            IconRanges[2] = 0;
+
+            GCHandle rangeHandle = GCHandle.Alloc(IconRanges, GCHandleType.Pinned);
+            try
+            {
+                defaultFontPtr = ImGui.GetIO().Fonts.AddFontFromFileTTF("resources\\fonts\\lucide-icon.ttf", fontPixelSize, configuration, rangeHandle.AddrOfPinnedObject());
+            }
+            finally
+            {
+                if (rangeHandle.IsAllocated)
+                    rangeHandle.Free();
+            }
 
             RebuildFontAtlas();
         }

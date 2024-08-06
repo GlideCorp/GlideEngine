@@ -64,6 +64,7 @@ namespace Engine
             WindowPrivate.Load += OnLoad;
             WindowPrivate.Update += OnUpdate;
             WindowPrivate.Render += OnRender;
+            WindowPrivate.Closing += OnClosing;
             WindowPrivate.FramebufferResize += OnFramebufferResize;
 
             ContextPrivate = null;
@@ -126,6 +127,11 @@ namespace Engine
         }
 
         protected virtual void OnRender(double deltaTime)
+        {
+
+        }
+
+        protected virtual void OnClosing()
         {
 
         }

@@ -1,19 +1,20 @@
-﻿using ImGuiNET;
+﻿using Editor.ImGUI;
+using ImGuiNET;
 using System.Numerics;
 
 namespace Editor
 {
-    public class TextureMemoryViewer : EditorWindow
+    public class TextureMemoryViewer : Tool
     {
         private int CurrentID;
 
-        public TextureMemoryViewer() : base("Texture Viewer")
+        public TextureMemoryViewer() : base($"{Lucide.Image} Texture Viewer")
         {
         }
 
         protected override void ToolGui()
         {
-            ImGui.SliderInt("Texture ID", ref CurrentID, 0, 32);
+            ImGui.SliderInt($"{Lucide.Hash}Texture ID", ref CurrentID, 0, 32);
 
             Vector2 windowSize = ImGui.GetItemRectSize();
             float max = MathF.Max(windowSize.X, windowSize.Y);

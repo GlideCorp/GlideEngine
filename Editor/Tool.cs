@@ -4,18 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Editor
 {
-    public abstract class EditorWindow
+    public abstract class Tool
     {
         public string Name { get; private set; }
 
         bool windowOpen;
         public bool Open { get => windowOpen; set => windowOpen = value; }
 
-        public EditorWindow(string windowName)
+        public Tool(string windowName)
         {
             Name = windowName;
             Open = false;

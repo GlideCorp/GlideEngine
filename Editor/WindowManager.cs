@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Core.Logs;
+using Core.Serialization;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +11,17 @@ namespace Editor
 {
     public static class WindowManager
     {
-        public static List<EditorWindow> Windows { get; private set; }
+        public static List<Tool> Windows { get; private set; }
 
-        public static void Register(EditorWindow window)
+        public static void SaveWindowsState()
+        {
+        }
+
+        public static void LoadWindowsState()
+        {
+        }
+
+        public static void Register(Tool window)
         {
             if (Windows.Contains(window))
             {
@@ -23,7 +33,7 @@ namespace Editor
 
         static WindowManager()
         {
-            Windows = new List<EditorWindow>();
+            Windows = new List<Tool>();
         }
     }
 }

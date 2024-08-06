@@ -1,12 +1,11 @@
-﻿
-using Core.Logs;
-using Editor.ImGuiController;
+﻿using Core.Logs;
+using Editor.ImGUI;
+using Editor.Tools;
 using Engine;
 using Engine.Rendering;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
-using System.Numerics;
 
 namespace Editor
 {
@@ -20,12 +19,14 @@ namespace Editor
             base.Startup();
 
 
+            WindowManager.Register(new SceneInspector());
             WindowManager.Register(new TextureMemoryViewer());
         }
 
         protected override void OnLoad()
         {
             base.OnLoad();
+            //WindowManager.LoadWindowsState();
 
             InputContext = Window.CreateInput();
 
@@ -53,7 +54,7 @@ namespace Editor
             ImGuiRenderer?.BeginLayout(deltaTime);
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport());
             ImGui.BeginMainMenuBar();
-            ImGui.Text("Glide Engine");
+            ImGui.Text($"{Lucide.Wind} Glide Engine");
             ImGui.Separator();
 
             foreach (var window in WindowManager.Windows)
@@ -67,14 +68,15 @@ namespace Editor
             ImGui.EndMainMenuBar();
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
 
+            ImGui.ShowDemoWindow();
+
             foreach (var window in WindowManager.Windows)
             {
                 window.DrawGui();
             }
 
             ImGuiRenderer?.EndLayout();
+
         }
-
-
     }
 }

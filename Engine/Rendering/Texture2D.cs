@@ -12,11 +12,10 @@ namespace Engine.Rendering
         RG = GLEnum.RG,
         RGB = GLEnum.Rgb,
         RGBA = GLEnum.Rgba,
-        DEPTH = GLEnum.Depth,
-        DEPTH_STENCIL = GLEnum.DepthStencil
+        DEPTH = GLEnum.DepthComponent24,
+        DEPTH_STENCIL = GLEnum.Depth24Stencil8
     }
 
-    //https://stackoverflow.com/questions/538060/proper-use-of-the-idisposable-interface dicono di usarlo
     public class Texture2D : IResource
     {
 
@@ -27,7 +26,6 @@ namespace Engine.Rendering
 
         public TextureParameters Params { get; private set; }
 
-        //TODO: Add Format
         public Texture2D(int width, int heigth, TextureParameters textureParameters)
         {
             if(width <= 0 || heigth <= 0)
