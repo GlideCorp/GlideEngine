@@ -1,5 +1,4 @@
-﻿using Editor.ImGUI;
-using Engine.Rendering;
+﻿using Engine.Rendering;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
@@ -12,7 +11,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Editor.ImGUI
+namespace Editor.Gui
 {
     public class ImGuiRenderer
     {

@@ -1,11 +1,12 @@
 ﻿using Core.Logs;
-using Editor.ImGUI;
+using Editor.Gui;
 using Editor.Tools;
 using Engine;
 using Engine.Rendering;
 using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
+using Silk.NET.Maths;
 
 namespace Editor
 {
@@ -17,7 +18,7 @@ namespace Editor
         public override void Startup()
         {
             base.Startup();
-
+            Window.Size = new Vector2D<int>(1280, 800);
 
             WindowManager.Register(new SceneInspector());
             WindowManager.Register(new TextureMemoryViewer());
@@ -26,7 +27,7 @@ namespace Editor
         protected override void OnLoad()
         {
             base.OnLoad();
-            //WindowManager.LoadWindowsState();
+            WindowManager.LoadWindowsState();
 
             InputContext = Window.CreateInput();
 
@@ -68,8 +69,6 @@ namespace Editor
             ImGui.EndMainMenuBar();
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
 
-            ImGui.ShowDemoWindow();
-
             foreach (var window in WindowManager.Windows)
             {
                 window.DrawGui();
@@ -77,6 +76,11 @@ namespace Editor
 
             ImGuiRenderer?.EndLayout();
 
+        }
+
+        protected override void OnClosing()
+        {
+            WindowManager.SaveWindowsState();
         }
     }
 }

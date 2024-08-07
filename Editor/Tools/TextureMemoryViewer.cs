@@ -1,4 +1,4 @@
-﻿using Editor.ImGUI;
+﻿using Editor.Gui;
 using ImGuiNET;
 using System.Numerics;
 

@@ -5,7 +5,7 @@
 // for use with font https://unpkg.com/lucide-static@latest/font/lucide.ttf
 // </auto-generated>
 
-namespace Editor.ImGUI
+namespace Editor.Gui
 {
     public class Lucide
     {

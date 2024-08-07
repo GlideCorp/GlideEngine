@@ -16,7 +16,7 @@ using Silk.NET.Windowing;
 using Shader = Engine.Rendering.Shader;
 using Texture = Engine.Rendering.Texture2D;
 
-namespace Editor.ImGUI;
+namespace Editor.Gui;
 
 public class ImGuiController : IDisposable
 {
