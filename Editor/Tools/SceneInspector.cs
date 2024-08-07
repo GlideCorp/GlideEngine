@@ -30,40 +30,15 @@ namespace Editor.Tools
             Vector3 size = transform.Size;
 
             ImGui.SeparatorText("Transform");
-            
-            if (ImGui.BeginTable("table", 2, ImGuiTableFlags.SizingFixedFit))
-            {
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed);
-                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
 
-                ImGui.TableNextRow();
-                ImGui.TableSetColumnIndex(0);
-                ImGui.Text($"{Lucide.Move3d} Position");
-                ImGui.TableSetColumnIndex(1);
+            if (ImGui.DragFloat3($"{Lucide.Move3d} Position", ref pos))
+                transform.Position = pos;
 
-                if (ImGui.DragFloat3("", ref pos))
-                    transform.Position = pos;
+            if (ImGui.DragFloat3($"{Lucide.Rotate3d} Rotation", ref rotation))
+                transform.Rotation = (rotation * MathHelper.Deg2Rad).ToQuat();
 
-                ImGui.TableNextRow();
-
-                ImGui.TableSetColumnIndex(0);
-                ImGui.Text($"{Lucide.Rotate3d} Rotation");
-                ImGui.TableSetColumnIndex(1);
-
-                if (ImGui.DragFloat3("", ref rotation))
-                    transform.Rotation = (rotation * MathHelper.Deg2Rad).ToQuat();
-
-                ImGui.TableNextRow();
-
-                ImGui.TableSetColumnIndex(0);
-                ImGui.Text($"{Lucide.Scale3d} Size");
-                ImGui.TableSetColumnIndex(1);
-
-                if (ImGui.DragFloat3("", ref size))
-                    transform.Size = size;
-
-                ImGui.EndTable();
-            }
+            if (ImGui.DragFloat3($"{Lucide.Scale3d} Size", ref size))
+                transform.Size = size;
 
             ImGui.Separator();
 
