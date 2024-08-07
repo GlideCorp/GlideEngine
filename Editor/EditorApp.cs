@@ -69,6 +69,8 @@ namespace Editor
             ImGui.EndMainMenuBar();
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
 
+            ImGui.ShowDemoWindow();
+
             foreach (var window in WindowManager.Windows)
             {
                 window.DrawGui();
