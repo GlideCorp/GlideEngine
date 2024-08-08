@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Silk.NET.Maths;
 
 namespace Core.Extensions
 {
-    public static class Vector3Extensions
+    public static class Vector3DExtensions
     {
-        public static Quaternion ToQuat(this Vector3 v)
+        public static Quaternion<float> ToQuat(this Vector3D<float> v)
         {
             float cy = MathF.Cos(v.Z * 0.5f);
             float sy = MathF.Sin(v.Z * 0.5f);
@@ -18,7 +13,7 @@ namespace Core.Extensions
             float cr = MathF.Cos(v.X * 0.5f);
             float sr = MathF.Sin(v.X * 0.5f);
 
-            return new Quaternion
+            return new Quaternion<float>
             {
                 W = (cr * cp * cy + sr * sp * sy),
                 X = (sr * cp * cy - cr * sp * sy),

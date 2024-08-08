@@ -9,6 +9,9 @@ namespace Sandbox
 {
     public class MyEntity : Entity
     {
+        public MyEntity() : base("cacca")
+        {
+        }
     }
 
     public class MyComp : Component

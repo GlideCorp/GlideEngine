@@ -7,6 +7,8 @@ using ImGuiNET;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Silk.NET.Maths;
+using Shader = Engine.Rendering.Shader;
+using Engine.Entities.Components;
 
 namespace Editor
 {
@@ -15,18 +17,22 @@ namespace Editor
         private ImGuiRenderer? ImGuiRenderer { get; set; }
         private IInputContext? InputContext { get; set; }
 
+        Transform transform;
+        Camera camera;
+        Mesh mTest;
+        Shader sTest;
+
+
         public override void Startup()
         {
             base.Startup();
             Window.Size = new Vector2D<int>(1280, 800);
-
-            WindowManager.Register(new SceneInspector());
-            WindowManager.Register(new TextureMemoryViewer());
         }
 
         protected override void OnLoad()
         {
             base.OnLoad();
+
             WindowManager.LoadWindowsState();
 
             InputContext = Window.CreateInput();
@@ -39,7 +45,42 @@ namespace Editor
             imguiStyle.FrameRounding = 2;
             imguiStyle.GrabRounding = 2;
 
-            Logger.Info($"{Context.GetStringS(GLEnum.Vendor)}\n{Context.GetStringS(GLEnum.Version)}\n");
+            Logger.Info($"{Context.GetStringS(StringName.Vendor)}\n{Context.GetStringS(StringName.Version)}\n");
+
+
+            //Robe di testing-----------------------------------------------------------------------
+
+            transform = new Transform();
+            camera = new Camera();
+            camera.Position = new Vector3D<float>(2, 2, 3);
+            camera.LookAt(Vector3D<float>.Zero);
+
+            sTest = new Engine.Rendering.Shader("resources/shaders/basic.vs", "resources/shaders/basic.fg");
+
+            List<Vertex> vertices = new List<Vertex>
+            {
+                new(){ Position = new(0.5f, 0.5f, 0.0f)},
+                new(){ Position = new (0.5f, -0.5f, 0.0f)},
+                new(){ Position = new (-0.5f, -0.5f, 0.0f)},
+                new(){ Position =  new(-0.5f, 0.5f, 0.0f)}
+            };
+
+            List<uint> indices = new List<uint>
+            {
+                0, 1, 3,  // first Triangle
+                1, 2, 3   // second Triangle
+            };
+
+            mTest = new Mesh(vertices, indices);
+            sTest.Use();
+
+            sTest.SetMatrix4("uView", camera.View);
+            sTest.SetMatrix4("uProjection", camera.Projection);
+
+            //Fine robe di testing------------------------------------------------------------------
+
+            WindowManager.Register(new SceneInspector(transform));
+            WindowManager.Register(new TextureMemoryViewer());
         }
 
         protected override void OnUpdate(double deltaTime)
@@ -51,9 +92,12 @@ namespace Editor
         {
             Graphics.Clear();
 
+            sTest.SetMatrix4("uModel", transform.ModelMatrix);
+            Graphics.Draw(mTest);
+            
             //Editor Render Loop
             ImGuiRenderer?.BeginLayout(deltaTime);
-            ImGui.DockSpaceOverViewport(ImGui.GetMainViewport());
+            ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
             ImGui.BeginMainMenuBar();
             ImGui.Text($"{Lucide.Wind} Glide Engine");
             ImGui.Separator();
@@ -77,7 +121,6 @@ namespace Editor
             }
 
             ImGuiRenderer?.EndLayout();
-
         }
 
         protected override void OnClosing()

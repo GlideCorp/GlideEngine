@@ -1,23 +1,18 @@
 ﻿using Core.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+using Silk.NET.Maths;
 
 namespace Engine.Entities.Components
 {
     public class Transform : Component
     {
-        Vector3 m_Position;
-        Quaternion m_Rotation;
-        Vector3 m_Size;
+        Vector3D<float> m_Position;
+        Vector3D<float> m_Rotation;
+        Vector3D<float> m_Size;
 
-        Matrix4x4 m_ModelMatrix;
+        Matrix4X4<float> m_ModelMatrix;
 
         bool IsDirty { get; set; }
-        public Vector3 Position
+        public Vector3D<float> Position
         {
             get => m_Position;
             set
@@ -26,7 +21,7 @@ namespace Engine.Entities.Components
                 IsDirty |= true;
             }
         }
-        public Quaternion Rotation
+        public Vector3D<float> Rotation
         {
             get => m_Rotation;
             set
@@ -36,7 +31,7 @@ namespace Engine.Entities.Components
             }
         }
 
-        public Vector3 Size
+        public Vector3D<float> Size
         {
             get => m_Size;
             set
@@ -46,7 +41,7 @@ namespace Engine.Entities.Components
             }
         }
 
-        public Matrix4x4 ModelMatrix
+        public Matrix4X4<float> ModelMatrix
         {
             get
             {
@@ -55,9 +50,9 @@ namespace Engine.Entities.Components
                     return m_ModelMatrix;
                 }
 
-                Matrix4x4 translation = Matrix4x4.CreateTranslation(m_Position);
-                Matrix4x4 rotoationMat = Matrix4x4.CreateFromQuaternion(m_Rotation);
-                Matrix4x4 scaleMat = Matrix4x4.CreateScale(m_Size);
+                Matrix4X4<float> translation = Matrix4X4.CreateTranslation(m_Position);
+                Matrix4X4<float> rotoationMat = Matrix4X4.CreateFromQuaternion(m_Rotation.ToQuat());
+                Matrix4X4<float> scaleMat = Matrix4X4.CreateScale(m_Size);
                 IsDirty = false;
 
                 return m_ModelMatrix = scaleMat * rotoationMat * translation;
@@ -66,23 +61,23 @@ namespace Engine.Entities.Components
 
         public Transform() : base("transform")
         {
-            Position = Vector3.Zero;
-            Rotation = Quaternion.Identity;
-            Size = Vector3.One;
+            Position = Vector3D<float>.Zero;
+            Rotation = Vector3D<float>.Zero;
+            Size = Vector3D<float>.One;
             IsDirty = true;
         }
 
-        public void Translate(Vector3 amount)
+        public void Translate(Vector3D<float> amount)
         {
             Position += amount;
         }
 
-        public void Rotate(Quaternion amount)
+        public void Rotate(Vector3D<float> amount)
         {
-            Rotation = Rotation * amount;
+            Rotation = Rotation + amount * MathHelper.Deg2Rad;
         }
 
-        public void Scale(Vector3 amount)
+        public void Scale(Vector3D<float> amount)
         {
             Size *= amount;
         }
