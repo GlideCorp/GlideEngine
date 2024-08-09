@@ -20,46 +20,84 @@ namespace Engine.Rendering
         }
         */
 
-        public static uint CreateProgram(ShaderSource shaderSource)
+        public static ShaderSource Parse(FileInfo vertexShader, FileInfo fragmentShader)
         {
-            uint ProgramID = Application.Context.CreateProgram();
-            uint vs = CompileShader(GLEnum.VertexShader, shaderSource.VertexSource);
-            uint fs = CompileShader(GLEnum.FragmentShader, shaderSource.FragmentSource);
+            if (!vertexShader.Exists)
+            {
+                Logger.Error($"ShaderFile {vertexShader.Name} does not exist!");
+                return default(ShaderSource);
+            }
 
-            Application.Context.AttachShader(ProgramID, vs);
-            Application.Context.AttachShader(ProgramID, fs);
+            if (!fragmentShader.Exists)
+            {
+                Logger.Error($"ShaderFile {fragmentShader.Name} does not exist!");
+                return default(ShaderSource);
+            }
 
-            Application.Context.LinkProgram(ProgramID);
-            Application.Context.ValidateProgram(ProgramID);
+            ShaderSource source = new();
+            StringBuilder builder = new();
 
-            Application.Context.DeleteShader(vs);
-            Application.Context.DeleteShader(fs);
+            // FEATURE: shader preprocessing
+            using (StreamReader stream = vertexShader.OpenText())
+            {
+                string s = "";
+                while ((s = stream.ReadLine()) != null)
+                {
+                    builder.AppendLine(s);
+                }
 
-            return ProgramID;
+                source.VertexSource = builder.ToString();
+            }
+
+            builder.Clear();
+            using (StreamReader stream = fragmentShader.OpenText())
+            {
+                string s = "";
+                while ((s = stream.ReadLine()) != null)
+                {
+                    builder.AppendLine(s);
+                }
+
+                source.FragmentSource = builder.ToString();
+            }
+
+            return source;
         }
 
-        private static uint CompileShader(GLEnum shaderType, string shaderSource)
+        public static uint CompileShader(GLEnum shaderType, string shaderSource, out string shaderError)
         {
             uint id = Application.Context.CreateShader(shaderType);
             Application.Context.ShaderSource(id, shaderSource);
             Application.Context.CompileShader(id);
 
             //Check for errors
-            string result = Application.Context.GetShaderInfoLog(id);
+            shaderError = Application.Context.GetShaderInfoLog(id);
 
-            if (!string.IsNullOrEmpty(result))
+            if (!string.IsNullOrEmpty(shaderError))
             {
-                Logger.Error($"{shaderType}\n{result}");
-
                 Application.Context.DeleteShader(id);
                 return 0;
             }
             else
             {
-                Logger.Info($"{shaderType} compiled succesfully!");
+                return id;
             }
+        }
 
-            return id;
+        public static uint BuildProgram( uint vsId, uint fsId)
+        {
+            uint ProgramID = Application.Context.CreateProgram();
+
+            Application.Context.AttachShader(ProgramID, vsId);
+            Application.Context.AttachShader(ProgramID, fsId);
+
+            Application.Context.LinkProgram(ProgramID);
+            Application.Context.ValidateProgram(ProgramID);
+
+            Application.Context.DeleteShader(vsId);
+            Application.Context.DeleteShader(fsId);
+
+            return ProgramID;
         }
     }
 }

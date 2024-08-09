@@ -459,9 +459,10 @@ public ImGuiController(GL gl, IView view, IInputContext input, ImGuiFontConfig? 
         _gl.GetInteger(GLEnum.ArrayBufferBinding, out var data2);
         _gl.GetInteger(GLEnum.VertexArrayBinding, out var data3);
 
-        //source.VertexSource = "#version 330\n        layout (location = 0) in vec2 Position;\n        layout (location = 1) in vec2 UV;\n        layout (location = 2) in vec4 Color;\n        uniform mat4 ProjMtx;\n        out vec2 Frag_UV;\n        out vec4 Frag_Color;\n        void main()\n        {\n            Frag_UV = UV;\n            Frag_Color = Color;\n            gl_Position = ProjMtx * vec4(Position.xy,0,1);\n        }";
-        //source.FragmentSource = "#version 330\n        in vec2 Frag_UV;\n        in vec4 Frag_Color;\n        uniform sampler2D Texture;\n        layout (location = 0) out vec4 Out_Color;\n        void main()\n        {\n            Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n        }";
-        _shader = new Shader("resources\\shaders\\imgui.vs", "resources\\shaders\\imgui.fg");
+        ShaderSource source = new ShaderSource();
+        source.VertexSource = "#version 330\n        layout (location = 0) in vec2 Position;\n        layout (location = 1) in vec2 UV;\n        layout (location = 2) in vec4 Color;\n        uniform mat4 ProjMtx;\n        out vec2 Frag_UV;\n        out vec4 Frag_Color;\n        void main()\n        {\n            Frag_UV = UV;\n            Frag_Color = Color;\n            gl_Position = ProjMtx * vec4(Position.xy,0,1);\n        }";
+        source.FragmentSource = "#version 330\n        in vec2 Frag_UV;\n        in vec4 Frag_Color;\n        uniform sampler2D Texture;\n        layout (location = 0) out vec4 Out_Color;\n        void main()\n        {\n            Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n        }";
+        _shader = new Shader(source);
         _attribLocationTex = _shader.GetLocation("Texture");
         _attribLocationProjMtx = _shader.GetLocation("ProjMtx");
         _attribLocationVtxPos = 0;//_shader.GetLocation("Position");

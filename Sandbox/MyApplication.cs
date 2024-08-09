@@ -3,6 +3,7 @@ using Engine;
 using Engine.Rendering;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
+using Shader = Engine.Rendering.Shader;
 
 namespace Sandbox
 {
@@ -32,7 +33,7 @@ namespace Sandbox
             Logger.Info($"{Context.GetStringS(GLEnum.Vendor)}\n{Context.GetStringS(GLEnum.Version)}\n");
 
             //Da mettere in Sandbox per Testing
-            sTest = new Engine.Rendering.Shader("shaders/basic.vs", "shaders/basic.fg");
+            sTest = Shader.FromStream("shaders/basic.vs", "shaders/basic.fg");
 
             List<Vertex> vertices = new List<Vertex>
             {

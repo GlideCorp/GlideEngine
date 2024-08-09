@@ -55,7 +55,7 @@ namespace Editor
             camera.Position = new Vector3D<float>(2, 2, 3);
             camera.LookAt(Vector3D<float>.Zero);
 
-            sTest = new Engine.Rendering.Shader("resources/shaders/basic.vs", "resources/shaders/basic.fg");
+            sTest = Shader.FromStream("resources/shaders/basic.vs", "resources/shaders/basic.fg");
 
             List<Vertex> vertices = new List<Vertex>
             {
