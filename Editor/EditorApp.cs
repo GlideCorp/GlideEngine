@@ -33,9 +33,6 @@ namespace Editor
         protected override void OnLoad()
         {
             base.OnLoad();
-
-            WindowManager.LoadWindowsState();
-
             InputContext = Window.CreateInput();
 
             ImGuiRenderer = new ImGuiRenderer(Context, Window, InputContext);
@@ -45,6 +42,7 @@ namespace Editor
             imguiStyle.WindowRounding = 5;
             imguiStyle.FrameRounding = 2;
             imguiStyle.GrabRounding = 2;
+            imguiStyle.Alpha = 0.8f;
 
             Logger.Info($"{Context.GetStringS(StringName.Vendor)}\n{Context.GetStringS(StringName.Version)}\n");
 
@@ -82,6 +80,7 @@ namespace Editor
 
             WindowManager.Register(new SceneInspector(transform));
             WindowManager.Register(new TextureMemoryViewer());
+            WindowManager.LoadWindowsState();
         }
 
         protected override void OnUpdate(double deltaTime)

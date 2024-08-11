@@ -15,6 +15,5 @@ void main(void)
 {
     // Send vertex attributes to fragment shader
     fragNormal = aNormal;
-
     gl_Position = uProjection * uView * uModel * vec4(aPosition, 1);
 }
