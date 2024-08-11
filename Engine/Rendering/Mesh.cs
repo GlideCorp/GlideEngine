@@ -12,6 +12,11 @@ namespace Engine.Rendering
         public Vector3D<float> Normal { get; set; }
     }
 
+    //TODO: Rework mesh creation into:
+    //          -Set mesh values/properties like mesh postprocessing flags
+    //          -Set mesh vertices or/and indices
+    //          -meshICreated.Build()
+    //  This should make mesh much more flexile and more importantly reusable if needed
     public class Mesh
     {
         public uint VAO {  get; private set; }

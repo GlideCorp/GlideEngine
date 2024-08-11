@@ -1,8 +1,27 @@
 ﻿#version 460 core
 
+in vec2 fragTexCoord;
+in vec4 fragColor;
+in vec3 fragNormal;
+
 out vec4 oColor;
 
 void main(void)
 {	
-	oColor = vec4(1, 0, 0, 1);
+    //Info della scena, TODO: falle diventare uniform
+    vec3 ligthDir = normalize(vec3(0, 1, 0.5));
+    vec4 colDiffuse = vec4(1, 0, 0, 1);
+    vec4 ambient = vec4(0.79, 0.94, 0.97, 1);
+
+    vec3 normal = normalize(fragNormal);
+
+    //Calcolo diffuse
+    float dotH = dot(ligthDir, normal);
+    dotH = pow(dotH * 0.5 + 0.5, 2.0);
+
+    //Calcola colore finale del pixel
+    oColor = colDiffuse*vec4(dotH, dotH, dotH, 1);
+    oColor += (ambient/20.0);
+
+	//oColor = vec4(1, 0, 0, 1);
 }

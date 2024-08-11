@@ -95,7 +95,8 @@ namespace Engine
             {
                 Size = new Vector2D<int>(800, 600),
                 Title = "GlideEngine",
-                API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6))
+                API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6)),
+                Samples = 4
             };
         }
 
@@ -119,6 +120,8 @@ namespace Engine
         protected virtual void OnLoad()
         {
             ContextPrivate = WindowPrivate.CreateOpenGL();
+            ContextPrivate.Enable(EnableCap.Multisample);
+            ContextPrivate.Enable(EnableCap.DepthTest);
         }
 
         protected virtual void OnUpdate(double deltaTime)
