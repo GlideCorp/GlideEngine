@@ -1,9 +1,15 @@
 ﻿using Silk.NET.Maths;
+using System.Numerics;
 
 namespace Core.Extensions
 {
     public static class Vector3DExtensions
     {
+        public static Vector3D<float> ToSilk(this Vector3 v)
+        {
+            return new Vector3D<float>(v.X, v.Y, v.Z);
+        }
+
         public static Quaternion<float> ToQuat(this Vector3D<float> v)
         {
             float cy = MathF.Cos(v.Z * 0.5f);

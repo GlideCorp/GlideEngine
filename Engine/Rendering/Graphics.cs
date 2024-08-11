@@ -32,5 +32,11 @@ namespace Engine.Rendering
             Application.Context.BindVertexArray(mesh.VAO);
             Application.Context.DrawElements(PrimitiveType.Triangles, mesh.IndicesCount, DrawElementsType.UnsignedInt, (void*)0);
         }
+
+        public static void DrawPrimitive(PrimitiveType primitiveType, Mesh mesh, Shader shader)
+        {
+            shader.Use();
+            Application.Context.DrawArrays(primitiveType, 0, mesh.VerticesCount);
+        }
     }
 }

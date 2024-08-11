@@ -9,6 +9,7 @@ using Silk.NET.OpenGL;
 using Silk.NET.Maths;
 using Shader = Engine.Rendering.Shader;
 using Engine.Entities.Components;
+using Engine.Utilities;
 
 namespace Editor
 {
@@ -71,7 +72,7 @@ namespace Editor
                 1, 2, 3   // second Triangle
             };
 
-            mTest = new Mesh(vertices, indices);
+            mTest = ModelLoader.Load("resources\\models\\test.glb");
             sTest.Use();
 
             sTest.SetMatrix4("uView", camera.View);

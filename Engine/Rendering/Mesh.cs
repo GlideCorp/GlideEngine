@@ -15,6 +15,7 @@ namespace Engine.Rendering
     public class Mesh
     {
         public uint VAO {  get; private set; }
+        public uint VerticesCount { get; private set; }
         public uint IndicesCount { get; private set; }
 
         public static VertexLayout VertexLayout => new(
@@ -64,6 +65,7 @@ namespace Engine.Rendering
                 Application.Context.BindBuffer(BufferTargetARB.ElementArrayBuffer, 0);
             }
 
+            VerticesCount = (uint)vertices.Count;
             IndicesCount = (uint)indices.Count;
         }
 

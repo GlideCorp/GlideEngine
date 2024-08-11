@@ -1,4 +1,5 @@
 ﻿using Core.Logs;
+using Engine.Rendering;
 using Silk.NET.OpenGL;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine.Rendering
+namespace Engine.Utilities
 {
     public static class ShaderBuilder
     {
@@ -25,13 +26,13 @@ namespace Engine.Rendering
             if (!vertexShader.Exists)
             {
                 Logger.Error($"ShaderFile {vertexShader.Name} does not exist!");
-                return default(ShaderSource);
+                return default;
             }
 
             if (!fragmentShader.Exists)
             {
                 Logger.Error($"ShaderFile {fragmentShader.Name} does not exist!");
-                return default(ShaderSource);
+                return default;
             }
 
             ShaderSource source = new();
@@ -84,7 +85,7 @@ namespace Engine.Rendering
             }
         }
 
-        public static uint BuildProgram( uint vsId, uint fsId)
+        public static uint BuildProgram(uint vsId, uint fsId)
         {
             uint ProgramID = Application.Context.CreateProgram();
 
