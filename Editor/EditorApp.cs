@@ -34,7 +34,6 @@ namespace Editor
         {
             base.OnLoad();
 
-            WindowManager.LoadWindowsState();
 
             InputContext = Window.CreateInput();
 
@@ -82,6 +81,7 @@ namespace Editor
 
             WindowManager.Register(new SceneInspector(transform));
             WindowManager.Register(new TextureMemoryViewer());
+            WindowManager.LoadWindowsState();
         }
 
         protected override void OnUpdate(double deltaTime)
