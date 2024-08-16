@@ -1,5 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 using System.Drawing;
+using static Silk.NET.Core.Native.WinString;
 
 namespace Engine.Rendering
 {
@@ -29,14 +30,27 @@ namespace Engine.Rendering
 
         public static unsafe void Draw(Mesh mesh)
         {
-            Application.Context.BindVertexArray(mesh.VAO);
-            Application.Context.DrawElements(PrimitiveType.Triangles, mesh.IndicesCount, DrawElementsType.UnsignedInt, (void*)0);
+            if (mesh.IndicesCount > 0)
+            {
+                Application.Context.BindVertexArray(mesh.VAO);
+                Application.Context.DrawElements(PrimitiveType.Triangles, mesh.IndicesCount, DrawElementsType.UnsignedInt, (void*)0);
+            }
+            else
+            {
+                DrawPrimitive(PrimitiveType.Triangles, mesh);
+            }
+        }
+
+
+        public static void DrawPrimitive(PrimitiveType primitiveType, Mesh mesh)
+        {
+            Application.Context.DrawArrays(primitiveType, 0, mesh.VerticesCount);
         }
 
         public static void DrawPrimitive(PrimitiveType primitiveType, Mesh mesh, Shader shader)
         {
             shader.Use();
-            Application.Context.DrawArrays(primitiveType, 0, mesh.VerticesCount);
+            DrawPrimitive(primitiveType, mesh);
         }
     }
 }

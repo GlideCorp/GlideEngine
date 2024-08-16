@@ -2,9 +2,11 @@
 using Core.Logs;
 using Engine.Rendering;
 using Silk.NET.Assimp;
+using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -47,6 +49,7 @@ namespace Engine.Utilities
 
         private static unsafe Mesh ProcessMesh(AssimpMesh* mesh, Scene* scene)
         {
+            Mesh m = new Mesh();
             List<Vertex> vertices = new List<Vertex>();
             List<uint> indices = new List<uint>();
 
@@ -58,7 +61,16 @@ namespace Engine.Utilities
                 // normals
                 if (mesh->MNormals != null)
                     v.Normal = mesh->MNormals[i].ToSilk();
-                
+
+                if (mesh->MTextureCoords[0] != null)
+                {
+                    Vector3 nativeUv = mesh->MTextureCoords[0][i];
+                    Vector2D<float> uv = new Vector2D<float>(nativeUv.X, nativeUv.Y);
+                    v.UV = uv;
+                }
+                else
+                    v.UV = Vector2D<float>.Zero;
+
                 vertices.Add(v);
             }
 
@@ -72,7 +84,10 @@ namespace Engine.Utilities
                 }
             }
 
-            return new Mesh(vertices, indices);
+            m.Vertices = vertices;
+            m.Indices = indices;
+            m.Build();
+            return m;
         }
     }
 }
