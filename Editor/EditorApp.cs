@@ -110,6 +110,12 @@ namespace Editor
                 }
             }
 
+            string fpsMenuItem = $"{Lucide.Film} {Time.FPS:D} {Lucide.Dot} {Time.DeltaTime:N5}";
+            ImGui.SameLine(ImGui.GetWindowWidth() - ImGui.CalcTextSize(fpsMenuItem).X - 20);
+            if(ImGui.MenuItem(fpsMenuItem))
+            {
+                
+            }
             ImGui.EndMainMenuBar();
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
 

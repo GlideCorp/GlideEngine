@@ -1,5 +1,6 @@
 ﻿
 using Core.Logs;
+using Engine.Utilities;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -96,7 +97,8 @@ namespace Engine
                 Size = new Vector2D<int>(800, 600),
                 Title = "GlideEngine",
                 API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6)),
-                Samples = 4
+                Samples = 4,
+                VSync = false
             };
         }
 
@@ -126,7 +128,7 @@ namespace Engine
 
         protected virtual void OnUpdate(double deltaTime)
         {
-
+            Time.DeltaTime = (float)deltaTime;
         }
 
         protected virtual void OnRender(double deltaTime)
