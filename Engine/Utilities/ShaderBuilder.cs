@@ -11,15 +11,32 @@ namespace Engine.Utilities
 {
     public static class ShaderBuilder
     {
-        /*
-        ~Shader()
-        {
-            if (ProgramID != 0)
-            {
-                Application.Context.DeleteProgram(ProgramID);
-            }
-        }
-        */
+
+        public static readonly ShaderSource FallBack = new(
+                VertexSource: """
+                                #version 460 core
+                                layout (location = 0) in vec3 aPosition;
+                                                            
+                                uniform mat4 uModel;
+                                uniform mat4 uView;
+                                uniform mat4 uProjection;
+                                
+                                void main(void)
+                                {
+                                    gl_Position = vec4(0, 0, 0, 1);
+                                }
+                            """,
+                FragmentSource: """
+                                #version 460 core
+
+                                out vec4 oColor;
+
+                                void main(void)
+                                {	
+                	                oColor = vec4(1, 0, 1, 1);
+                                }
+                """
+            );
 
         public static ShaderSource Parse(FileInfo vertexShader, FileInfo fragmentShader)
         {

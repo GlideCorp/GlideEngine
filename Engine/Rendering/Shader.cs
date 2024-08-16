@@ -11,6 +11,12 @@ namespace Engine.Rendering
     {
         public string VertexSource { get; set; }
         public string FragmentSource { get; set; }
+
+        public ShaderSource(string VertexSource, string FragmentSource)
+        {
+            this.VertexSource = VertexSource;
+            this.FragmentSource = FragmentSource;
+        }
     }
 
     public class Shader : IResource
@@ -31,11 +37,13 @@ namespace Engine.Rendering
             if (vs == 0)
             {
                 Logger.Error($"VertexShader:\n{vertexError}");
+                vs = ShaderBuilder.CompileShader(GLEnum.VertexShader, ShaderBuilder.FallBack.VertexSource, out _);
             }
 
             if (fs == 0)
             {
                 Logger.Error($"VertexShader: \n{fragmentError}");
+                fs = ShaderBuilder.CompileShader(GLEnum.FragmentShader, ShaderBuilder.FallBack.FragmentSource, out _);
             }
 
             ProgramID = ShaderBuilder.BuildProgram(vs, fs);
@@ -128,18 +136,15 @@ namespace Engine.Rendering
             if(vs == 0)
             {
                 Logger.Error($"VertexShader: {vertexShaderFile.Name}\n{vertexError}");
+                vs = ShaderBuilder.CompileShader(GLEnum.VertexShader, ShaderBuilder.FallBack.VertexSource, out _);
             }
 
             if (fs == 0)
             {
                 Logger.Error($"VertexShader: {fragmentShaderFile.Name}\n{fragmentError}");
+                fs = ShaderBuilder.CompileShader(GLEnum.FragmentShader, ShaderBuilder.FallBack.FragmentSource, out _);
             }
 
-            //TODO: Sta cosa la odio, ma vabb, almeno se entrambe le shaders hanno errori li mostrano
-            if(vs == 0 || fs == 0)
-            {
-                return null;
-            }
 
             uint ID = ShaderBuilder.BuildProgram(vs, fs);
 
