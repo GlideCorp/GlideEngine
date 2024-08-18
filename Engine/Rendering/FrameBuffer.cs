@@ -24,7 +24,7 @@ namespace Engine.Rendering
 
         public FrameBuffer(int width, int heigth, TextureParameters textureParameters)
         {
-            if (width <= 0 || heigth <= 0)
+            if (width < 0 || heigth < 0)
             {
                 Logger.Error($"Cannot create FrameBuffer of size {width}, {heigth}");
                 throw new Exception();
@@ -40,16 +40,17 @@ namespace Engine.Rendering
             Bind();
 
             Color = new Texture2D(Width, Height, textureParameters);
-            Color.SetData(null, TextureFormat.RGB);
+            Color.SetData(new Span<byte>([]), TextureFormat.RGB);
             Gl.FramebufferTexture2D(GLEnum.Framebuffer, GLEnum.ColorAttachment0, GLEnum.Texture2D, Color.TextureID, 0);
             
             Depth = new Texture2D(Width, Height, textureParameters);
-            Depth.SetData(null, TextureFormat.DEPTH);
+            Depth.SetData(null, TextureFormat.DEPTH, PixelFormat.DepthComponent, PixelType.Float);
             Gl.FramebufferTexture2D(GLEnum.Framebuffer, GLEnum.DepthAttachment, GLEnum.Texture2D, Depth.TextureID, 0);
 
             GLEnum status = Gl.CheckFramebufferStatus(GLEnum.Framebuffer);
             CheckStatus(status);
             //Params.Apply(TextureID);
+
         }
 
         public FrameBuffer(int width, int heigth) : this(width, heigth, TextureParameters.Default) { }
@@ -68,6 +69,10 @@ namespace Engine.Rendering
             }
 
             Application.Context.BindFramebuffer(FramebufferTarget.Framebuffer, FrameBufferID);
+        }
+        public void Unbind()
+        {
+            Application.Context.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
         void CheckStatus(GLEnum status)

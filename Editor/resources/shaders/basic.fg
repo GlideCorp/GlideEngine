@@ -23,5 +23,5 @@ void main(void)
     oColor = colDiffuse*vec4(dotH, dotH, dotH, 1);
     oColor += (ambient/20.0);
 
-	//oColor = vec4(1, 0, 0, 1);
+	//oColor = vec4(gl_FragCoord.z, 0.0f, 0.0f, 1.0f);
 }

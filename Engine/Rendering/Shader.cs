@@ -42,7 +42,7 @@ namespace Engine.Rendering
 
             if (fs == 0)
             {
-                Logger.Error($"VertexShader: \n{fragmentError}");
+                Logger.Error($"FragmentShader: \n{fragmentError}");
                 fs = ShaderBuilder.CompileShader(GLEnum.FragmentShader, ShaderBuilder.FallBack.FragmentSource, out _);
             }
 

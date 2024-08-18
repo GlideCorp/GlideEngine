@@ -1,9 +1,12 @@
 ﻿
 using Core.Logs;
+using Engine.Rendering;
+using Engine.Rendering.PostProcessing;
 using Engine.Utilities;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using System.Drawing;
 using SilkWindow = Silk.NET.Windowing.Window;
 
 namespace Engine
@@ -54,6 +57,7 @@ namespace Engine
 
         private IWindow WindowPrivate { get; init; }
         private GL? ContextPrivate { get; set; }
+        public static FrameBuffer? FrameBuffer { get; private set; }
 
         public Application()
         {
@@ -67,7 +71,6 @@ namespace Engine
             WindowPrivate.Render += OnRender;
             WindowPrivate.Closing += OnClosing;
             WindowPrivate.FramebufferResize += OnFramebufferResize;
-
             ContextPrivate = null;
 
             _instance = this;
@@ -124,6 +127,11 @@ namespace Engine
             ContextPrivate = WindowPrivate.CreateOpenGL();
             ContextPrivate.Enable(EnableCap.Multisample);
             ContextPrivate.Enable(EnableCap.DepthTest);
+
+            Graphics.ClearColor = Color.LightSkyBlue;
+
+            Vector2D<int> frameBufferSize = WindowPrivate.FramebufferSize;
+            FrameBuffer = new FrameBuffer(frameBufferSize.X, frameBufferSize.Y);
         }
 
         protected virtual void OnUpdate(double deltaTime)
@@ -144,6 +152,7 @@ namespace Engine
         protected virtual void OnFramebufferResize(Vector2D<int> newSize)
         {
             ContextPrivate.Viewport(newSize);
+            PostProcessing.Resize(newSize);
         }
     }
 }

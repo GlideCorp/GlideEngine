@@ -10,6 +10,10 @@ using Silk.NET.Maths;
 using Shader = Engine.Rendering.Shader;
 using Engine.Entities.Components;
 using Engine.Utilities;
+using System.Drawing;
+using Core.Extensions;
+using Engine.Rendering.PostProcessing;
+using System.Numerics;
 
 namespace Editor
 {
@@ -23,7 +27,6 @@ namespace Editor
         Mesh mTest;
         Shader sTest;
 
-
         public override void Startup()
         {
             base.Startup();
@@ -33,6 +36,7 @@ namespace Editor
         protected override void OnLoad()
         {
             base.OnLoad();
+
             InputContext = Window.CreateInput();
 
             ImGuiRenderer = new ImGuiRenderer(Context, Window, InputContext);
@@ -46,6 +50,7 @@ namespace Editor
 
             Logger.Info($"{Context.GetStringS(StringName.Vendor)}\n{Context.GetStringS(StringName.Version)}\n");
 
+            PostProcessing.Push(new SimpleFogEffect());
 
             //Robe di testing-----------------------------------------------------------------------
 
@@ -71,10 +76,6 @@ namespace Editor
             };
 
             mTest = ModelLoader.Load("resources\\models\\test.glb");
-            sTest.Use();
-
-            sTest.SetMatrix4("uView", camera.View);
-            sTest.SetMatrix4("uProjection", camera.Projection);
 
             //Fine robe di testing------------------------------------------------------------------
 
@@ -90,11 +91,19 @@ namespace Editor
 
         protected override void OnRender(double deltaTime)
         {
+            Context.BindFramebuffer(FramebufferTarget.Framebuffer, FrameBuffer.FrameBufferID);
             Graphics.Clear();
-
+            sTest.Use();
+            sTest.SetMatrix4("uView", camera.View);
+            sTest.SetMatrix4("uProjection", camera.Projection);
             sTest.SetMatrix4("uModel", transform.ModelMatrix);
             Graphics.Draw(mTest);
-            
+            Context.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
+            Graphics.Clear();
+            PostProcessing.Execute();
+
+
             //Editor Render Loop
             ImGuiRenderer?.BeginLayout(deltaTime);
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
@@ -112,10 +121,7 @@ namespace Editor
 
             string fpsMenuItem = $"{Lucide.Film} {Time.FPS:D} {Lucide.Dot} {Time.DeltaTime:N5}";
             ImGui.SameLine(ImGui.GetWindowWidth() - ImGui.CalcTextSize(fpsMenuItem).X - 20);
-            if(ImGui.MenuItem(fpsMenuItem))
-            {
-                
-            }
+            ImGui.TextColored((Time.FPS >= 60 ? Color.GreenYellow : (Time.FPS < 30 ? Color.OrangeRed : Color.LightGoldenrodYellow)).ToVec4(), fpsMenuItem);
             ImGui.EndMainMenuBar();
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
 
@@ -132,6 +138,12 @@ namespace Editor
         protected override void OnClosing()
         {
             WindowManager.SaveWindowsState();
+        }
+
+        protected override void OnFramebufferResize(Vector2D<int> newSize)
+        {
+            camera.Refresh();
+            base.OnFramebufferResize(newSize);
         }
     }
 }

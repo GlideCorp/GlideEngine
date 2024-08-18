@@ -1,0 +1,12 @@
+﻿#version 460 core
+
+in vec2 fragTexCoord;
+
+uniform sampler2D uFboColor;
+
+out vec4 oColor;
+
+void main(void)
+{	
+    oColor = texture2D(uFboColor, fragTexCoord);
+}

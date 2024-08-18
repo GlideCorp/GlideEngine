@@ -23,6 +23,7 @@ namespace Engine.Rendering
         public int Height { get; private set; }
 
         public uint TextureID { get; private set; }
+        public uint CurrentUnit { get; private set; }
 
         public TextureParameters Params { get; private set; }
 
@@ -30,13 +31,17 @@ namespace Engine.Rendering
         {
             if(width <= 0 || heigth <= 0)
             {
-                Logger.Error($"Cannot create texture of size {width}, {heigth}");
-                throw new Exception();
+                Logger.Warning($"Cannot create texture of size {width}, {heigth}. Size was rescaled to <1, 1>s");
+                
+                width = 1;
+                heigth = 1;
+                //throw new Exception();
             }
 
             Width = width;
             Height = heigth;
             Params = textureParameters;
+            CurrentUnit = 0;
 
             GL Gl = Application.Context;
 
@@ -53,21 +58,35 @@ namespace Engine.Rendering
             Dispose(false);
         }
 
-        public unsafe void SetData(Span<byte> data, TextureFormat format = TextureFormat.RGB)
+        public unsafe void SetData(Span<byte> data, TextureFormat internalFormat = TextureFormat.RGBA, PixelFormat format = PixelFormat.Rgba, PixelType pixelType = PixelType.UnsignedByte)
         {
             Bind();
+
+            if(data.IsEmpty)
+            {
+                Application.Context.TexImage2D(GLEnum.Texture2D,
+                                               0,
+                                               (int)internalFormat,
+                                               (uint)Width,
+                                               (uint)Height,
+                                               0,
+                                               format,
+                                               pixelType,
+                                               (void*)null);
+                return;
+            }
 
             //fixed(byte* ptr = MemoryMarshal.AsBytes(data))
             fixed(byte* ptr = &data[0])
             {
                 Application.Context.TexImage2D(GLEnum.Texture2D,
                                                0,
-                                               (int)format,
+                                               (int)internalFormat,
                                                (uint)Width,
                                                (uint)Height,
                                                0,
-                                               (GLEnum)PixelFormat.Rgba,
-                                               GLEnum.UnsignedByte,
+                                               format,
+                                               pixelType,
                                                (void*)ptr);
             }
 
@@ -77,7 +96,7 @@ namespace Engine.Rendering
             }
         }
 
-        public void Bind(TextureUnit textureUnit = TextureUnit.Texture0)
+        public void Bind(uint textureUnit = 0)
         {
             if(TextureID <= 0)
             {
@@ -85,7 +104,8 @@ namespace Engine.Rendering
                 return;
             }
 
-            Application.Context.ActiveTexture(textureUnit);
+            CurrentUnit = textureUnit;
+            Application.Context.ActiveTexture((GLEnum)((uint)GLEnum.Texture0 + textureUnit));
             Application.Context.BindTexture(TextureTarget.Texture2D, TextureID);
         }
 

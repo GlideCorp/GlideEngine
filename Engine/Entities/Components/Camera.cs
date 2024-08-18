@@ -52,8 +52,6 @@ namespace Engine.Entities.Components
                 }
 
                 Vector2D<int> size = Application.FramebufferSize;
-                Matrix4X4.CreatePerspectiveFieldOfView(MathF.PI / 180f * 60.0f, (float)size.X / size.Y, 0.1f, 100.0f);
-
                 m_Projection = Matrix4X4.CreatePerspectiveFieldOfView(Fov * MathHelper.Deg2Rad, (float)size.X/size.Y, 0.1f, 100.0f);
 
                 IsProjDirty = false;
@@ -88,6 +86,11 @@ namespace Engine.Entities.Components
 
             IsViewDirty = true;
             IsProjDirty = true;
+        }
+
+        public void Refresh()
+        {
+            IsViewDirty = IsProjDirty = true;
         }
 
         public void LookAt(Vector3D<float> point)
