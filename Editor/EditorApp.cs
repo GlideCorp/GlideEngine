@@ -121,7 +121,11 @@ namespace Editor
 
             string fpsMenuItem = $"{Lucide.Film} {Time.FPS:D} {Lucide.Dot} {Time.DeltaTime:N5}";
             ImGui.SameLine(ImGui.GetWindowWidth() - ImGui.CalcTextSize(fpsMenuItem).X - 20);
-            ImGui.TextColored((Time.FPS >= 60 ? Color.GreenYellow : (Time.FPS < 30 ? Color.OrangeRed : Color.LightGoldenrodYellow)).ToVec4(), fpsMenuItem);
+
+            Vector3 fpsColor = (Time.FPS >= 60 ? Color.LawnGreen : (Time.FPS < 30 ? Color.OrangeRed : Color.LightGoldenrodYellow)).ToVec3();
+            fpsColor = Vector3.Normalize(fpsColor);
+
+            ImGui.TextColored(new Vector4(fpsColor, 1)  , fpsMenuItem);
             ImGui.EndMainMenuBar();
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
 
