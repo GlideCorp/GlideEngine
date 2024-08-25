@@ -20,7 +20,6 @@ namespace Editor
     public class EditorApp : Application
     {
         private ImGuiRenderer? ImGuiRenderer { get; set; }
-        private IInputContext? InputContext { get; set; }
 
         Transform transform;
         Camera camera;
@@ -37,50 +36,29 @@ namespace Editor
         {
             base.OnLoad();
 
-            InputContext = Window.CreateInput();
-
             ImGuiRenderer = new ImGuiRenderer(Context, Window, InputContext);
             ImGuiRenderer.SetDefaultFont("resources\\fonts\\SplineSansMono-Medium.ttf", 16);
 
-            ImGuiStylePtr imguiStyle = ImGui.GetStyle();
-            imguiStyle.WindowRounding = 5;
-            imguiStyle.FrameRounding = 2;
-            imguiStyle.GrabRounding = 2;
-            imguiStyle.Alpha = 0.8f;
-
-            Logger.Info($"{Context.GetStringS(StringName.Vendor)}\n{Context.GetStringS(StringName.Version)}\n");
-
-            PostProcessing.Push(new SimpleFogEffect());
+            Logger.Info($"{Context.GetStringS(StringName.Vendor)} \t {Context.GetStringS(StringName.Version)}");
 
             //Robe di testing-----------------------------------------------------------------------
-
-            transform = new Transform();
-            camera = new Camera();
-            camera.Position = new Vector3D<float>(2, 2, 3);
+            transform = new();
+            camera = new()
+            {
+                Position = new Vector3D<float>(-2, 2, -3)
+            };
             camera.LookAt(Vector3D<float>.Zero);
 
             sTest = Shader.FromStream("resources/shaders/basic.vs", "resources/shaders/basic.fg");
+            mTest = ModelLoader.Load("resources\\models\\shapes.glb");
 
-            List<Vertex> vertices = new List<Vertex>
-            {
-                new(){ Position = new(0.5f, 0.5f, 0.0f)},
-                new(){ Position = new (0.5f, -0.5f, 0.0f)},
-                new(){ Position = new (-0.5f, -0.5f, 0.0f)},
-                new(){ Position =  new(-0.5f, 0.5f, 0.0f)}
-            };
-
-            List<uint> indices = new List<uint>
-            {
-                0, 1, 3,  // first Triangle
-                1, 2, 3   // second Triangle
-            };
-
-            mTest = ModelLoader.Load("resources\\models\\test.glb");
+            PostProcessing.Push(new DrawDepthEffect());
 
             //Fine robe di testing------------------------------------------------------------------
 
             WindowManager.Register(new SceneInspector(transform));
             WindowManager.Register(new TextureMemoryViewer());
+            WindowManager.Register(new InputTester());
             WindowManager.LoadWindowsState();
         }
 
@@ -97,11 +75,19 @@ namespace Editor
             sTest.SetMatrix4("uView", camera.View);
             sTest.SetMatrix4("uProjection", camera.Projection);
             sTest.SetMatrix4("uModel", transform.ModelMatrix);
-            Graphics.Draw(mTest);
-            Context.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
-            Graphics.Clear();
+            sTest.SetVector3("uCameraWorldPosition", camera.Position);
+
+            sTest.SetVector3("uLigthPos", new Vector3D<float>(2, 2, 1));
+            sTest.SetVector3("uLigthColor", new Vector3D<float>(1, 1, 1));
+            sTest.SetVector3("uAmbientColor", new Vector3D<float>(0.79f, 0.94f, 0.97f));
+
+            sTest.SetVector3("uBaseColor", new Vector3D<float>(1, 0, 0));
+            sTest.SetFloat("uSmoothness", 0.5f);
+            Graphics.Draw(mTest);
+
             PostProcessing.Execute();
+            Context.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
 
             //Editor Render Loop

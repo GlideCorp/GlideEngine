@@ -113,6 +113,13 @@ namespace Editor.Gui
 
         public void GlideEngineTheme()
         {
+            ImGuiStylePtr imguiStyle = ImGui.GetStyle();
+            imguiStyle.WindowRounding = 5;
+            imguiStyle.FrameRounding = 2;
+            imguiStyle.GrabRounding = 2;
+            imguiStyle.Alpha = 0.8f;
+
+
             RangeAccessor<Vector4> colors = ImGui.GetStyle().Colors;
 
             colors[(int)ImGuiCol.Text] = new Vector4(1.00f, 1.00f, 1.00f, 1.00f);

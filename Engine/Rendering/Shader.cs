@@ -60,13 +60,8 @@ namespace Engine.Rendering
 
         ~Shader()
         {
-            if (ProgramID != 0)
-            {
-                Application.Context.DeleteProgram(ProgramID);
-            }
+            Dispose(false);
         }
-
-        #region Uniform Setters
 
         public int GetLocation(string uniformName)
         {
@@ -91,6 +86,10 @@ namespace Engine.Rendering
         {
             Application.Context.Uniform1(GetLocation(uniformName), value);
         }
+        public void SetInt(string uniformName, uint value)
+        {
+            SetInt(uniformName, (int)value);
+        }
 
         public void SetFloat(string uniformName, float value)
         {
@@ -112,8 +111,6 @@ namespace Engine.Rendering
             Application.Context.UniformMatrix4(GetLocation(uniformName), 1, false, (float*)&matrix);
         }
 
-        #endregion
-
         public void Use()
         {
             Application.Context.UseProgram(ProgramID);
@@ -133,7 +130,7 @@ namespace Engine.Rendering
             uint vs = ShaderBuilder.CompileShader(GLEnum.VertexShader, shaderSource.VertexSource, out string vertexError);
             uint fs = ShaderBuilder.CompileShader(GLEnum.FragmentShader, shaderSource.FragmentSource, out string fragmentError);
 
-            if(vs == 0)
+            if (vs == 0)
             {
                 Logger.Error($"VertexShader: {vertexShaderFile.Name}\n{vertexError}");
                 vs = ShaderBuilder.CompileShader(GLEnum.VertexShader, ShaderBuilder.FallBack.VertexSource, out _);
@@ -141,7 +138,7 @@ namespace Engine.Rendering
 
             if (fs == 0)
             {
-                Logger.Error($"VertexShader: {fragmentShaderFile.Name}\n{fragmentError}");
+                Logger.Error($"FragmentShader: {fragmentShaderFile.Name}\n{fragmentError}");
                 fs = ShaderBuilder.CompileShader(GLEnum.FragmentShader, ShaderBuilder.FallBack.FragmentSource, out _);
             }
 
@@ -154,7 +151,18 @@ namespace Engine.Rendering
         //TODO: Implement better dispose
         public void Dispose()
         {
-            Application.Context.DeleteProgram(ProgramID);
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
+
+        private void Dispose(bool dispose)
+        {
+
+            if (ProgramID != 0)
+            {
+                Application.Context.DeleteProgram(ProgramID);
+            }
+        }
+
     }
 }

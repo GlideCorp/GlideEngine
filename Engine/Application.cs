@@ -3,6 +3,7 @@ using Core.Logs;
 using Engine.Rendering;
 using Engine.Rendering.PostProcessing;
 using Engine.Utilities;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -53,10 +54,26 @@ namespace Engine
             }
         }
 
+        public static IInputContext InputContext
+        {
+            get
+            {
+                if (Instance.InputPrivate is null)
+                {
+                    Logger.Error("Null context");
+                    throw new NullReferenceException();
+                }
+
+                return Instance.InputPrivate;
+            }
+        }
+
         public static Vector2D<int> FramebufferSize { get { return Instance.WindowPrivate.FramebufferSize; } }
 
         private IWindow WindowPrivate { get; init; }
         private GL? ContextPrivate { get; set; }
+        private IInputContext? InputPrivate { get; set; }
+
         public static FrameBuffer? FrameBuffer { get; private set; }
 
         public Application()
@@ -100,7 +117,6 @@ namespace Engine
                 Size = new Vector2D<int>(800, 600),
                 Title = "GlideEngine",
                 API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6)),
-                Samples = 4,
                 VSync = false
             };
         }
@@ -128,10 +144,14 @@ namespace Engine
             ContextPrivate.Enable(EnableCap.Multisample);
             ContextPrivate.Enable(EnableCap.DepthTest);
 
+            InputPrivate = WindowPrivate.CreateInput();
+            Input.Keyboard = InputPrivate.Keyboards[0];
+            Input.Mouse = InputPrivate.Mice[0];
+
             Graphics.ClearColor = Color.LightSkyBlue;
 
             Vector2D<int> frameBufferSize = WindowPrivate.FramebufferSize;
-            FrameBuffer = new FrameBuffer(frameBufferSize.X, frameBufferSize.Y);
+            FrameBuffer = new FrameBuffer(frameBufferSize.X, frameBufferSize.Y, true);
         }
 
         protected virtual void OnUpdate(double deltaTime)
@@ -151,7 +171,10 @@ namespace Engine
 
         protected virtual void OnFramebufferResize(Vector2D<int> newSize)
         {
-            ContextPrivate.Viewport(newSize);
+            ContextPrivate?.Viewport(newSize);
+
+            FrameBuffer.Dispose();
+            FrameBuffer = new FrameBuffer(newSize.X, newSize.Y, true);
             PostProcessing.Resize(newSize);
         }
     }

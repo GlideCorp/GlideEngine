@@ -7,19 +7,26 @@ using System.Threading.Tasks;
 
 namespace Engine.Rendering.PostProcessing
 {
-    public abstract class Effect
+    public abstract class ScreenEffect
     {
-        protected Shader ShaderEffect { get; set; }
+        private ScreenMaterial MainMaterial { get; set; }
 
-        protected Effect() 
+        protected ScreenEffect() 
         {
             ShaderSource screenDraw = new(GetVertex(), GetFragment());
-            ShaderEffect = new Shader(screenDraw);
+            MainMaterial = new ScreenMaterial(new(screenDraw));
         }
 
-        protected Effect(string vertexShader, string fragmentShader)
+        protected ScreenEffect(string vertexShader, string fragmentShader)
         {
-            ShaderEffect = Shader.FromStream(vertexShader, fragmentShader);
+            Shader shader = Shader.FromStream(vertexShader, fragmentShader);
+            MainMaterial = new ScreenMaterial(shader);
+        }
+
+        public virtual void RenderImage(FrameBuffer source, FrameBuffer destination)
+        {
+            MainMaterial.ScreenBuffer = source;
+            Graphics.Blit(source, destination, MainMaterial);
         }
 
         protected virtual string GetVertex()
@@ -60,28 +67,10 @@ namespace Engine.Rendering.PostProcessing
                 }
                 """;
         }
-
-        public virtual void Apply(FrameBuffer source)
-        {
-            ShaderEffect.Use();
-            source.Color.Bind(0);
-            Application.FrameBuffer.Depth.Bind(1);
-            ShaderEffect.SetInt("uColorBuffer", (int)source.Color.CurrentUnit);
-            ShaderEffect.SetInt("uDepthBuffer", (int)Application.FrameBuffer.Depth.CurrentUnit);
-        }
     }
 
-    public class ScreenDrawEffect : Effect
+    public class ScreenDrawEffect : ScreenEffect
     {
-        public override void Apply(FrameBuffer source)
-        {
-            ShaderEffect.Use();
-            Application.FrameBuffer.Color.Bind(0);
-            Application.FrameBuffer.Depth.Bind(1);
-            ShaderEffect.SetInt("uColorBuffer", (int)Application.FrameBuffer.Color.CurrentUnit);
-            ShaderEffect.SetInt("uDepthBuffer", (int)Application.FrameBuffer.Depth.CurrentUnit);
-        }
-
         protected override string GetFragment()
         {
             return """
@@ -102,7 +91,7 @@ namespace Engine.Rendering.PostProcessing
         }
     }
 
-    public class NegativeEffect : Effect
+    public class NegativeEffect : ScreenEffect
     {
         protected override string GetFragment()
         {
@@ -123,7 +112,7 @@ namespace Engine.Rendering.PostProcessing
                 """;
         }
     }
-    public class DrawDepthEffect : Effect
+    public class DrawDepthEffect : ScreenEffect
     {
         protected override string GetFragment()
         {
@@ -152,7 +141,7 @@ namespace Engine.Rendering.PostProcessing
         }
     }
 
-    public class SimpleFogEffect : Effect
+    public class SimpleFogEffect : ScreenEffect
     {
         protected override string GetFragment()
         {
@@ -176,17 +165,10 @@ namespace Engine.Rendering.PostProcessing
                 void main(void)
                 {	
                     float depth = texture2D(uDepthBuffer, fragTexCoord).r * 2.0 - 1.0;
-                    float linearDepth = linearize_depth(depth, 0.1, 100);
+                    float linearDepth = linearize_depth(depth, 0.1, 100)/100;
 
                     vec4 color = texture2D(uColorBuffer, fragTexCoord);
-                    if(linearDepth >= 100)
-                    {
-                        oColor = color;
-                    }
-                    else
-                    {
-                        oColor = mix(color, fogColor, linearDepth / 100);
-                    }
+                    oColor = mix(color, fogColor, linearDepth);
                 }
                 """;
         }

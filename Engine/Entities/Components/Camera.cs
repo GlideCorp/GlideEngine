@@ -5,12 +5,12 @@ namespace Engine.Entities.Components
 {
     public class Camera : Component
     {
-        Vector3D<float> m_Position;
-        Vector3D<float> m_Direction;
-        float m_Fov;
+        private Vector3D<float> m_Position;
+        private Vector3D<float> m_Direction;
+        private float m_Fov;
 
-        Matrix4X4<float> m_Projection;
-        Matrix4X4<float> m_View;
+        private Matrix4X4<float> m_Projection;
+        private Matrix4X4<float> m_View;
 
         public Vector3D<float> Position 
         { 

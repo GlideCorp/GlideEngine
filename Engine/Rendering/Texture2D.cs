@@ -6,32 +6,13 @@ using System.Runtime.InteropServices;
 
 namespace Engine.Rendering
 {
-    public enum TextureFormat
+    public class Texture2D : Texture
     {
-        R = GLEnum.R8,
-        RG = GLEnum.RG,
-        RGB = GLEnum.Rgb,
-        RGBA = GLEnum.Rgba,
-        DEPTH = GLEnum.DepthComponent24,
-        DEPTH_STENCIL = GLEnum.Depth24Stencil8
-    }
-
-    public class Texture2D : IResource
-    {
-
-        public int Width { get; private set; }
-        public int Height { get; private set; }
-
-        public uint TextureID { get; private set; }
-        public uint CurrentUnit { get; private set; }
-
-        public TextureParameters Params { get; private set; }
-
         public Texture2D(int width, int heigth, TextureParameters textureParameters)
         {
             if(width <= 0 || heigth <= 0)
             {
-                Logger.Warning($"Cannot create texture of size {width}, {heigth}. Size was rescaled to <1, 1>s");
+                Logger.Warning($"Cannot create texture of size {width}, {heigth}. Size was rescaled to <1, 1>");
                 
                 width = 1;
                 heigth = 1;
@@ -58,77 +39,24 @@ namespace Engine.Rendering
             Dispose(false);
         }
 
-        public unsafe void SetData(Span<byte> data, TextureFormat internalFormat = TextureFormat.RGBA, PixelFormat format = PixelFormat.Rgba, PixelType pixelType = PixelType.UnsignedByte)
+        public override void Bind(uint textureUnit = 0)
         {
-            Bind();
-
-            if(data.IsEmpty)
+            if (TextureID <= 0)
             {
-                Application.Context.TexImage2D(GLEnum.Texture2D,
-                                               0,
-                                               (int)internalFormat,
-                                               (uint)Width,
-                                               (uint)Height,
-                                               0,
-                                               format,
-                                               pixelType,
-                                               (void*)null);
-                return;
-            }
-
-            //fixed(byte* ptr = MemoryMarshal.AsBytes(data))
-            fixed(byte* ptr = &data[0])
-            {
-                Application.Context.TexImage2D(GLEnum.Texture2D,
-                                               0,
-                                               (int)internalFormat,
-                                               (uint)Width,
-                                               (uint)Height,
-                                               0,
-                                               format,
-                                               pixelType,
-                                               (void*)ptr);
-            }
-
-            if(Params.Mipmaps)
-            {
-                Application.Context.GenerateMipmap(TextureTarget.Texture2D);
-            }
-        }
-
-        public void Bind(uint textureUnit = 0)
-        {
-            if(TextureID <= 0)
-            {
-                Logger.Error("Cannot bind not initialized Texture2D.");
+                Logger.Error("Cannot bind not initialized Texture");
                 return;
             }
 
             CurrentUnit = textureUnit;
-            Application.Context.ActiveTexture((GLEnum)((uint)GLEnum.Texture0 + textureUnit));
+            Application.Context.ActiveTexture((GLEnum)((uint)GLEnum.Texture0 + CurrentUnit));
             Application.Context.BindTexture(TextureTarget.Texture2D, TextureID);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool dispose)
-        {
-            if(TextureID != 0)
-            {
-                Application.Context.DeleteTexture(TextureID);
-                Logger.Info($"Deleted Texture #{TextureID}");
-                TextureID = 0;
-            }
         }
 
         public static Texture2D FromStream(Stream stream)
         {
             return FromStream(stream, TextureParameters.Default);
         }
+
         public static Texture2D FromStream(Stream stream, TextureFormat format)
         {
             return FromStream(stream, TextureParameters.Default, format);
@@ -139,7 +67,7 @@ namespace Engine.Rendering
             ImageResult imageData = ImageResult.FromStream(stream);
 
 
-            Texture2D texture = new Texture2D(imageData.Width, imageData.Height, textureParameters);
+            Texture2D texture = new(imageData.Width, imageData.Height, textureParameters);
             texture.SetData(imageData.Data, format);
 
             return texture;

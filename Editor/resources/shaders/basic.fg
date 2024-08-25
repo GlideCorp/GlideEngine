@@ -1,27 +1,46 @@
 ﻿#version 460 core
 
-in vec2 fragTexCoord;
-in vec4 fragColor;
+in vec3 fragWorldPos;
 in vec3 fragNormal;
+in vec2 fragTexCoord;
+
+uniform vec3 uCameraWorldPos;
+
+uniform vec3 uLigthPos;
+uniform vec3 uLigthColor;
+uniform vec3 uAmbientColor;
+
+uniform vec3 uBaseColor;
+uniform float uSmoothness;
 
 out vec4 oColor;
 
+float DotClamped(vec3 a, vec3 b)
+{
+    return max(0.0, dot(a, b));
+}
+
 void main(void)
 {	
-    //Info della scena, TODO: falle diventare uniform
-    vec3 ligthDir = normalize(vec3(0, 1, 0.5));
-    vec4 colDiffuse = vec4(1, 0, 0, 1);
-    vec4 ambient = vec4(0.79, 0.94, 0.97, 1);
-
+    vec3 viewDir = normalize(uCameraWorldPos - fragWorldPos);
+    vec3 ligthDir = normalize(uLigthPos - fragWorldPos);
     vec3 normal = normalize(fragNormal);
+
+    vec3 albedo = uBaseColor; //Eventualmente uBaseColor * texture2D(uTexture, ...);
 
     //Calcolo diffuse
     float dotH = dot(ligthDir, normal);
     dotH = pow(dotH * 0.5 + 0.5, 2.0);
 
-    //Calcola colore finale del pixel
-    oColor = colDiffuse*vec4(dotH, dotH, dotH, 1);
-    oColor += (ambient/20.0);
+    vec3 diffuse = albedo * uLigthColor * dotH;
 
+    //Calcolo specular
+    vec3 halfVector = reflect(-ligthDir, normal);
+    vec3 specular = uLigthColor * pow(DotClamped(halfVector, normal), uSmoothness * 100);
+
+    //Calcolo ambient
+    vec3 ambient = albedo*uAmbientColor/10;
+
+    oColor = vec4(diffuse + specular + ambient, 1);
 	//oColor = vec4(gl_FragCoord.z, 0.0f, 0.0f, 1.0f);
 }
