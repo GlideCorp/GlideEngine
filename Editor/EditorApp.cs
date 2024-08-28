@@ -61,7 +61,7 @@ namespace Editor
 
             mTest = ModelLoader.Load("resources\\models\\shapes.glb");
 
-            //PostProcessing.Push(new SimpleFogEffect());
+            PostProcessing.Push(new SimpleFogEffect());
 
             oldMousePos = Vector2D<float>.Zero;
 
