@@ -12,12 +12,12 @@ namespace Core.Extensions
     {
         public static Vector3 ToVec3(this Color c)
         {
-            return new Vector3(c.R, c.G, c.B);
+            return new Vector3(c.R, c.G, c.B) / 255.0f;
         }
 
         public static Vector4 ToVec4(this Color c)
         {
-            return new Vector4(c.R, c.G, c.B, c.A);
+            return new Vector4(c.R, c.G, c.B, c.A) / 255.0f;
         }
     }
 }

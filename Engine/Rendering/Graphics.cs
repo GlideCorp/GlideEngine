@@ -1,4 +1,4 @@
-﻿using Engine.Rendering.PostProcessing;
+﻿using Engine.Rendering.Effects;
 using Engine.Utilities;
 using Silk.NET.OpenGL;
 using System.Drawing;
@@ -25,7 +25,8 @@ namespace Engine.Rendering
             Ad esempio per lo shadowMapping*/
         public static void Draw(Mesh mesh, Material material)
         {
-            material.Apply();
+            material.Shader.Use();
+            material.ApplyProperties();
             Draw(mesh);
         }
 
@@ -63,10 +64,12 @@ namespace Engine.Rendering
             Clear();
             Draw(MeshPrimitives.Quad, material);
 
+            CopyFrameBuffer(source, destination, ClearBufferMask.DepthBufferBit);
+            /*
             Application.Context.BlitFramebuffer(0, 0, source.Width, source.Height,
                                                 0, 0, destination.Width, destination.Height,
                                                 ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
-            
+             */
             Application.Context.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
             
             /*
@@ -81,9 +84,16 @@ namespace Engine.Rendering
             Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source.FrameBufferID);
             Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination.FrameBufferID);
 
+            Application.Context.BlitNamedFramebuffer(source.FrameBufferID, destination.FrameBufferID,
+                                                        0, 0, source.Width, source.Height,
+                                                        0, 0, destination.Width, destination.Height,
+                                                        copyMask, BlitFramebufferFilter.Nearest);
+
+            /*
             Application.Context.BlitFramebuffer(0, 0, source.Width, source.Height,
                                                 0, 0, destination.Width, destination.Height,
                                                 copyMask, BlitFramebufferFilter.Nearest);
+            */
         }
 
         public static void CopyFrameBuffer(uint source, FrameBuffer destination, ClearBufferMask copyMask)
@@ -91,9 +101,15 @@ namespace Engine.Rendering
             Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source);
             Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination.FrameBufferID);
 
+            Application.Context.BlitNamedFramebuffer(source, destination.FrameBufferID,
+                                                        0, 0, destination.Width, destination.Height,
+                                                        0, 0, destination.Width, destination.Height,
+                                                        copyMask, BlitFramebufferFilter.Nearest);
+            /*
             Application.Context.BlitFramebuffer(0, 0, destination.Width, destination.Height,
                                                 0, 0, destination.Width, destination.Height,
                                                 copyMask, BlitFramebufferFilter.Nearest);
+            */
         }
 
         public static void CopyFrameBuffer(FrameBuffer source, uint destination, ClearBufferMask copyMask)
@@ -101,9 +117,15 @@ namespace Engine.Rendering
             Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source.FrameBufferID);
             Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination);
 
+            Application.Context.BlitNamedFramebuffer(source.FrameBufferID, destination,
+                                                        0, 0, source.Width, source.Height,
+                                                        0, 0, source.Width, source.Height,
+                                                        copyMask, BlitFramebufferFilter.Nearest);
+            /*
             Application.Context.BlitFramebuffer(0, 0, source.Width, source.Height,
                                                 0, 0, source.Width, source.Height,
                                                 copyMask, BlitFramebufferFilter.Nearest);
+            */
         }
     }
 }

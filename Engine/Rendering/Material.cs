@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using Engine.Utilities;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System;
 using System.Collections.Generic;
@@ -13,15 +14,12 @@ namespace Engine.Rendering
 
         public Shader Shader { get; private set; }
 
-        public Material(Shader shader)
+        public Material(string shaderName)
         {
-            Shader = shader;
+            Shader = ShaderDatabase.Load(shaderName);
         }
 
-        public virtual void Apply()
-        {
-            Shader.Use();
-        }
+        public abstract void ApplyProperties();
 
         public void Dispose()
         {

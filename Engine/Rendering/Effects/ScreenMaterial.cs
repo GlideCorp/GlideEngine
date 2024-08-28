@@ -4,20 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine.Rendering.PostProcessing
+namespace Engine.Rendering.Effects
 {
     public class ScreenMaterial : Material
     {
         public FrameBuffer? ScreenBuffer;
 
-        public ScreenMaterial(Shader shader) : base(shader)
+        public ScreenMaterial(string shaderName) : base(shaderName)
         {
         }
 
-        public override void Apply()
+        public override void ApplyProperties()
         {
-            base.Apply();
-
             if(ScreenBuffer == null ) { return; }
 
             ScreenBuffer.Color.Bind(0);

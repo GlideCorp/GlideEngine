@@ -1,0 +1,20 @@
+﻿#version 460 core
+                
+in vec2 fragTexCoord;
+                
+uniform sampler2D uColorBuffer;
+uniform sampler2D uDepthBuffer;
+                
+out vec4 oColor;
+                
+float linearize_depth(float d,float zNear,float zFar)
+{
+    return (2.0 * zNear * zFar) / (zFar + zNear - d * (zFar - zNear));	
+}
+                
+void main(void)
+{	
+    float depth = texture2D(uDepthBuffer, fragTexCoord).r * 2.0 - 1.0;
+    float linear = linearize_depth(depth, 0.1, 100) / 100;
+    oColor = vec4(vec3(linear.rrr), 1);//texture2D(uColorBuffer, fragTexCoord);
+}

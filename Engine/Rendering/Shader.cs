@@ -1,8 +1,11 @@
-﻿using Core.Logs;
+﻿using Core.Extensions;
+using Core.Logs;
 using Engine.Utilities;
 using Silk.NET.Core.Native;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
+using System.Drawing;
+using System.Numerics;
 using System.Text;
 
 namespace Engine.Rendering
@@ -65,8 +68,7 @@ namespace Engine.Rendering
 
         public int GetLocation(string uniformName)
         {
-            int location;
-            if (UniformLocationCache.TryGetValue(uniformName, out location))
+            if (UniformLocationCache.TryGetValue(uniformName, out int location))
             {
                 return location;
             }
@@ -104,6 +106,16 @@ namespace Engine.Rendering
         public void SetVector3(string uniformName, Vector3D<float> vector)
         {
             Application.Context.Uniform3(GetLocation(uniformName), vector.ToSystem());
+        }
+
+        public void SetVector4(string uniformName, Vector4D<float> vector)
+        {
+            Application.Context.Uniform4(GetLocation(uniformName), vector.ToSystem());
+        }
+
+        public void SetColor(string uniformName, Color color)
+        {
+            Application.Context.Uniform3(GetLocation(uniformName), color.ToVec3());
         }
 
         public unsafe void SetMatrix4(string uniformName, Matrix4X4<float> matrix)

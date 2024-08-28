@@ -1,6 +1,7 @@
 ﻿using Core.Logs;
 using Engine.Utilities;
 using ImGuiNET;
+using Silk.NET.Maths;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,11 @@ namespace Editor.Tools
 {
     public class InputTester : Tool
     {
+        Vector2D<float> previousMousePosition;
+
         public InputTester() : base("Input Tester")
         {
+            previousMousePosition = Vector2D<float>.Zero;
         }
 
         protected override void ToolGui()
@@ -25,6 +29,7 @@ namespace Editor.Tools
             ImGui.Separator();
             ImGui.Text($"Current Mouse: {Input.Mouse.Name}");
             ImGui.Text($"Mouse Position: {Input.MousePosition()}");
+            ImGui.Text($"Mouse Delta: {Input.MousePosition() - previousMousePosition}");
             ImGui.Text($"Scroll Value: {Input.MouseScroll()}");
             ImGui.Spacing();
             ImGui.Text($"LeftMousePressed {Input.MousePressed(0)}");
@@ -38,6 +43,8 @@ namespace Editor.Tools
             ImGui.Text($"LeftMouseReleased {Input.MouseReleased(0)}");
             ImGui.Text($"RigthMouseReleased {Input.MouseReleased(1)}");
             ImGui.Text($"MiddleMouseReleased {Input.MouseReleased(2)}");
+
+            previousMousePosition = Input.MousePosition();
         }
     }
 }

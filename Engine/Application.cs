@@ -1,7 +1,7 @@
 ﻿
 using Core.Logs;
 using Engine.Rendering;
-using Engine.Rendering.PostProcessing;
+using Engine.Rendering.Effects;
 using Engine.Utilities;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -73,8 +73,6 @@ namespace Engine
         private IWindow WindowPrivate { get; init; }
         private GL? ContextPrivate { get; set; }
         private IInputContext? InputPrivate { get; set; }
-
-        public static FrameBuffer? FrameBuffer { get; private set; }
 
         public Application()
         {
@@ -148,10 +146,8 @@ namespace Engine
             Input.Keyboard = InputPrivate.Keyboards[0];
             Input.Mouse = InputPrivate.Mice[0];
 
+            Renderer.Startup();
             Graphics.ClearColor = Color.LightSkyBlue;
-
-            Vector2D<int> frameBufferSize = WindowPrivate.FramebufferSize;
-            FrameBuffer = new FrameBuffer(frameBufferSize.X, frameBufferSize.Y, true);
         }
 
         protected virtual void OnUpdate(double deltaTime)
@@ -173,9 +169,7 @@ namespace Engine
         {
             ContextPrivate?.Viewport(newSize);
 
-            FrameBuffer.Dispose();
-            FrameBuffer = new FrameBuffer(newSize.X, newSize.Y, true);
-            PostProcessing.Resize(newSize);
+            Renderer.ResizeMainBuffer(newSize);
         }
     }
 }

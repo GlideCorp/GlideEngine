@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Engine.Rendering.PostProcessing
+namespace Engine.Rendering.Effects
 {
     public static class PostProcessing
     {        
@@ -17,10 +17,6 @@ namespace Engine.Rendering.PostProcessing
         static FrameBuffer[] FrameBuffers { get; set; }
 
         public static Stack<ScreenEffect> EffectsStack { get; private set; }
-
-
-        static NegativeEffect ne = new NegativeEffect();
-        static ScreenDrawEffect sd = new ScreenDrawEffect();
 
         static PostProcessing()
         {
@@ -50,7 +46,7 @@ namespace Engine.Rendering.PostProcessing
         public static void Execute()
         {
             Index = 0;
-            Graphics.CopyFrameBuffer(Application.FrameBuffer, CurrentFrameBuffer, ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            Graphics.CopyFrameBuffer(Renderer.FrameBuffer, CurrentFrameBuffer, ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             Stack<ScreenEffect> runTimeStack = new Stack<ScreenEffect>(EffectsStack);
             while (runTimeStack.Count > 0)
@@ -74,7 +70,7 @@ namespace Engine.Rendering.PostProcessing
             */
         }
 
-        public static void Resize(Vector2D<int> newSize)
+        internal static void ResizeBuffers(Vector2D<int> newSize)
         {
             FrameBuffers[0].Dispose();
             FrameBuffers[1].Dispose();

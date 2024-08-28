@@ -4,7 +4,6 @@ using Editor.Tools;
 using Engine;
 using Engine.Rendering;
 using ImGuiNET;
-using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Silk.NET.Maths;
 using Shader = Engine.Rendering.Shader;
@@ -12,11 +11,13 @@ using Engine.Entities.Components;
 using Engine.Utilities;
 using System.Drawing;
 using Core.Extensions;
-using Engine.Rendering.PostProcessing;
+using Engine.Rendering.Effects;
 using System.Numerics;
+using Editor.resources.materials;
 
 namespace Editor
 {
+
     public class EditorApp : Application
     {
         private ImGuiRenderer? ImGuiRenderer { get; set; }
@@ -24,7 +25,10 @@ namespace Editor
         Transform transform;
         Camera camera;
         Mesh mTest;
-        Shader sTest;
+        BasicMaterial objMaterial;
+
+        Vector2D<float> oldMousePos;
+        Vector2D<float> startMousePos;
 
         public override void Startup()
         {
@@ -35,11 +39,11 @@ namespace Editor
         protected override void OnLoad()
         {
             base.OnLoad();
+            Logger.Info($"{Context.GetStringS(StringName.Vendor)} \t {Context.GetStringS(StringName.Version)}");
 
             ImGuiRenderer = new ImGuiRenderer(Context, Window, InputContext);
             ImGuiRenderer.SetDefaultFont("resources\\fonts\\SplineSansMono-Medium.ttf", 16);
 
-            Logger.Info($"{Context.GetStringS(StringName.Vendor)} \t {Context.GetStringS(StringName.Version)}");
 
             //Robe di testing-----------------------------------------------------------------------
             transform = new();
@@ -49,10 +53,17 @@ namespace Editor
             };
             camera.LookAt(Vector3D<float>.Zero);
 
-            sTest = Shader.FromStream("resources/shaders/basic.vs", "resources/shaders/basic.fg");
+            objMaterial = new BasicMaterial
+            {
+                DiffuseColor = Color.Red,
+                Shininess = 2
+            };
+
             mTest = ModelLoader.Load("resources\\models\\shapes.glb");
 
-            PostProcessing.Push(new DrawDepthEffect());
+            //PostProcessing.Push(new SimpleFogEffect());
+
+            oldMousePos = Vector2D<float>.Zero;
 
             //Fine robe di testing------------------------------------------------------------------
 
@@ -65,29 +76,43 @@ namespace Editor
         protected override void OnUpdate(double deltaTime)
         {
             base.OnUpdate(deltaTime);
+
+            if(ImGui.GetIO().WantCaptureMouse) { return; }
+
+            Vector2D<float> mouseDelta = Input.MousePosition() - oldMousePos;
+            float scrollDelta = Input.MouseScroll();
+
+            if(Input.MouseDown(0))
+            {
+
+                float alpha = mouseDelta.X * Time.DeltaTime * 8;
+                float beta = -mouseDelta.Y * Time.DeltaTime * 8;
+
+                Vector3D<float> newPosition = camera.Position.RotateAround(Vector3D<float>.Zero, alpha, beta);
+                Vector3D<float> originToCamera = Vector3D.Normalize(Vector3D.Subtract(newPosition, Vector3D<float>.Zero));
+                float closenessToAxis = Vector3D.Dot(originToCamera, Vector3D<float>.Zero);
+                if (closenessToAxis >= 0.99 || closenessToAxis <= -0.99)
+                {
+                    return;
+                }
+                camera.Position = newPosition;
+                camera.LookAt(Vector3D<float>.Zero);
+                oldMousePos = Input.MousePosition();
+            }
+            else if (scrollDelta != 0)
+            {
+                camera.Position = (Vector3D.Add(camera.Position, Vector3D.Multiply(camera.Direction, scrollDelta)));
+            }
+            oldMousePos = Input.MousePosition();
         }
 
         protected override void OnRender(double deltaTime)
         {
-            Context.BindFramebuffer(FramebufferTarget.Framebuffer, FrameBuffer.FrameBufferID);
-            Graphics.Clear();
-            sTest.Use();
-            sTest.SetMatrix4("uView", camera.View);
-            sTest.SetMatrix4("uProjection", camera.Projection);
-            sTest.SetMatrix4("uModel", transform.ModelMatrix);
+            Renderer.Begin(camera);
 
-            sTest.SetVector3("uCameraWorldPosition", camera.Position);
+            Renderer.Draw(mTest, transform.ModelMatrix, objMaterial);
 
-            sTest.SetVector3("uLigthPos", new Vector3D<float>(2, 2, 1));
-            sTest.SetVector3("uLigthColor", new Vector3D<float>(1, 1, 1));
-            sTest.SetVector3("uAmbientColor", new Vector3D<float>(0.79f, 0.94f, 0.97f));
-
-            sTest.SetVector3("uBaseColor", new Vector3D<float>(1, 0, 0));
-            sTest.SetFloat("uSmoothness", 0.5f);
-            Graphics.Draw(mTest);
-
-            PostProcessing.Execute();
-            Context.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            Renderer.End();
 
 
             //Editor Render Loop
@@ -105,7 +130,7 @@ namespace Editor
                 }
             }
 
-            string fpsMenuItem = $"{Lucide.Film} {Time.FPS:D} {Lucide.Dot} {Time.DeltaTime:N5}";
+            string fpsMenuItem = $"{Lucide.Film} {Time.FPS:D} {Lucide.Dot} {Time.DeltaTime * 1000:N5} ms";
             ImGui.SameLine(ImGui.GetWindowWidth() - ImGui.CalcTextSize(fpsMenuItem).X - 20);
 
             Vector3 fpsColor = (Time.FPS >= 60 ? Color.LawnGreen : (Time.FPS < 30 ? Color.OrangeRed : Color.LightGoldenrodYellow)).ToVec3();
