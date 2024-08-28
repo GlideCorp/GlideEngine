@@ -22,6 +22,7 @@ namespace Core.Serialization
             SerializationOptions = new()
             {
                 WriteIndented = true,
+                PropertyNameCaseInsensitive = true
             };
         }
 

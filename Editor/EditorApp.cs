@@ -1,102 +1,164 @@
-﻿
-using Core.Logs;
-using Editor.ImGUI;
+﻿using Core.Logs;
+using Editor.Gui;
+using Editor.Tools;
 using Engine;
 using Engine.Rendering;
 using ImGuiNET;
-using Silk.NET.Input;
 using Silk.NET.OpenGL;
+using Silk.NET.Maths;
+using Shader = Engine.Rendering.Shader;
+using Engine.Entities.Components;
+using Engine.Utilities;
+using System.Drawing;
+using Core.Extensions;
+using Engine.Rendering.Effects;
 using System.Numerics;
+using Editor.resources.materials;
 
 namespace Editor
 {
+
     public class EditorApp : Application
     {
         private ImGuiRenderer? ImGuiRenderer { get; set; }
-        private IInputContext? InputContext { get; set; }
 
-        List<EditorWindow> EditorWindows { get; set; }
+        Transform transform;
+        Camera camera;
+        Mesh mTest;
+        BasicMaterial objMaterial;
 
-        Texture2D? testTexture;
+        Vector2D<float> oldMousePos;
+        Vector2D<float> startMousePos;
 
         public override void Startup()
         {
             base.Startup();
-            EditorWindows = new();
+            Window.Size = new Vector2D<int>(1280, 800);
         }
 
         protected override void OnLoad()
         {
             base.OnLoad();
-
-            InputContext = Window.CreateInput();
+            Logger.Info($"{Context.GetStringS(StringName.Vendor)} \t {Context.GetStringS(StringName.Version)}");
 
             ImGuiRenderer = new ImGuiRenderer(Context, Window, InputContext);
             ImGuiRenderer.SetDefaultFont("resources\\fonts\\SplineSansMono-Medium.ttf", 16);
 
-            var io = ImGui.GetIO();
-            io.BackendFlags = ImGuiBackendFlags.None;
-            io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
-            ImGuiStylePtr imguiStyle = ImGui.GetStyle();
-            imguiStyle.WindowRounding = 5;
-            imguiStyle.FrameRounding = 2;
-            imguiStyle.GrabRounding = 2;
+            //Robe di testing-----------------------------------------------------------------------
+            transform = new();
+            camera = new()
+            {
+                Position = new Vector3D<float>(-2, 2, -3)
+            };
+            camera.LookAt(Vector3D<float>.Zero);
 
-            FileStream stream = File.OpenRead("resources\\test.png");
-            testTexture = Texture2D.FromStream(stream, TextureParameters.Default with { Filters = TextureFilter.Nearest });
+            objMaterial = new BasicMaterial
+            {
+                DiffuseColor = Color.Red,
+                Shininess = 2
+            };
 
-            EditorWindows.Add(new TestWindow());
+            mTest = ModelLoader.Load("resources\\models\\shapes.glb");
 
-            Logger.Info($"{Context.GetStringS(GLEnum.Vendor)}\n{Context.GetStringS(GLEnum.Version)}\n");
+            PostProcessing.Push(new SimpleFogEffect());
+
+            oldMousePos = Vector2D<float>.Zero;
+
+            //Fine robe di testing------------------------------------------------------------------
+
+            WindowManager.Register(new SceneInspector(transform));
+            WindowManager.Register(new TextureMemoryViewer());
+            WindowManager.Register(new InputTester());
+            WindowManager.LoadWindowsState();
         }
 
         protected override void OnUpdate(double deltaTime)
         {
             base.OnUpdate(deltaTime);
+
+            if(ImGui.GetIO().WantCaptureMouse) { return; }
+
+            Vector2D<float> mouseDelta = Input.MousePosition() - oldMousePos;
+            float scrollDelta = Input.MouseScroll();
+
+            if(Input.MouseDown(0))
+            {
+
+                float alpha = mouseDelta.X * Time.DeltaTime * 8;
+                float beta = -mouseDelta.Y * Time.DeltaTime * 8;
+
+                Vector3D<float> newPosition = camera.Position.RotateAround(Vector3D<float>.Zero, alpha, beta);
+                Vector3D<float> originToCamera = Vector3D.Normalize(Vector3D.Subtract(newPosition, Vector3D<float>.Zero));
+                float closenessToAxis = Vector3D.Dot(originToCamera, Vector3D<float>.Zero);
+                if (closenessToAxis >= 0.99 || closenessToAxis <= -0.99)
+                {
+                    return;
+                }
+                camera.Position = newPosition;
+                camera.LookAt(Vector3D<float>.Zero);
+                oldMousePos = Input.MousePosition();
+            }
+            else if (scrollDelta != 0)
+            {
+                camera.Position = (Vector3D.Add(camera.Position, Vector3D.Multiply(camera.Direction, scrollDelta)));
+            }
+            oldMousePos = Input.MousePosition();
         }
 
         protected override void OnRender(double deltaTime)
         {
-            Graphics.Clear();
+            Renderer.Begin(camera);
+
+            Renderer.Draw(mTest, transform.ModelMatrix, objMaterial);
+
+            Renderer.End();
+
 
             //Editor Render Loop
-            ImGuiRenderer?.BeginLayout((float)deltaTime);
-
+            ImGuiRenderer?.BeginLayout(deltaTime);
+            ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
             ImGui.BeginMainMenuBar();
-            ImGui.Text("Glide Engine");
+            ImGui.Text($"{Lucide.Wind} Glide Engine");
+            ImGui.Separator();
 
-            if (ImGui.BeginMenu("Tools"))
+            foreach (var window in WindowManager.Windows)
             {
-                foreach (var window in EditorWindows)
+                if (ImGui.MenuItem(window.Name))
                 {
-                    if (ImGui.MenuItem(window.Name))
-                    {
-                        window.Open = true;
-                    }
+                    window.Toggle();
                 }
-                ImGui.EndMenu();
             }
+
+            string fpsMenuItem = $"{Lucide.Film} {Time.FPS:D} {Lucide.Dot} {Time.DeltaTime * 1000:N5} ms";
+            ImGui.SameLine(ImGui.GetWindowWidth() - ImGui.CalcTextSize(fpsMenuItem).X - 20);
+
+            Vector3 fpsColor = (Time.FPS >= 60 ? Color.LawnGreen : (Time.FPS < 30 ? Color.OrangeRed : Color.LightGoldenrodYellow)).ToVec3();
+            fpsColor = Vector3.Normalize(fpsColor);
+
+            ImGui.TextColored(new Vector4(fpsColor, 1)  , fpsMenuItem);
             ImGui.EndMainMenuBar();
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
 
-            foreach (var window in EditorWindows)
+            ImGui.ShowDemoWindow();
+
+            foreach (var window in WindowManager.Windows)
             {
                 window.DrawGui();
             }
 
-            ImGui.Begin("TextureTest");
-            if (testTexture != null)
-            {
-                ImGui.Text($"Texture ID: {testTexture.TextureID}");
-                //ImGui.SliderInt("TextureID", ref id, 1, 10);
-                ImGui.Image((nint)testTexture.TextureID, new Vector2(256, 256));
-            }
-            ImGui.End();
-
             ImGuiRenderer?.EndLayout();
         }
 
+        protected override void OnClosing()
+        {
+            WindowManager.SaveWindowsState();
+        }
 
+        protected override void OnFramebufferResize(Vector2D<int> newSize)
+        {
+            camera.Refresh();
+            base.OnFramebufferResize(newSize);
+        }
     }
 }

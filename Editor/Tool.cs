@@ -2,19 +2,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Editor
 {
-    public abstract class EditorWindow
+    public abstract class Tool
     {
         public string Name { get; private set; }
 
         bool windowOpen;
         public bool Open { get => windowOpen; set => windowOpen = value; }
 
-        public EditorWindow(string windowName)
+        public Tool(string windowName)
         {
             Name = windowName;
             Open = false;
@@ -23,12 +25,11 @@ namespace Editor
         public void DrawGui()
         {
             if (!Open) return;
-
+                
             ImGui.Begin(Name, ref windowOpen);
             ToolGui();
             ImGui.End();
         }
-
 
         protected virtual void ToolGui()
         {
@@ -36,6 +37,11 @@ namespace Editor
             for (var n = 0; n < samples.Length; n++)
                 samples[n] = (float)Math.Sin(n * 0.2f + ImGui.GetTime() * 1.5f);
             ImGui.PlotLines("TestPlot", ref samples[0], 100);
+        }
+
+        public void Toggle()
+        {
+            Open = !Open;
         }
     }
 }

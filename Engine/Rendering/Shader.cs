@@ -1,6 +1,11 @@
-﻿using Core.Logs;
+﻿using Core.Extensions;
+using Core.Logs;
+using Engine.Utilities;
+using Silk.NET.Core.Native;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
+using System.Drawing;
+using System.Numerics;
 using System.Text;
 
 namespace Engine.Rendering
@@ -9,139 +14,61 @@ namespace Engine.Rendering
     {
         public string VertexSource { get; set; }
         public string FragmentSource { get; set; }
+
+        public ShaderSource(string VertexSource, string FragmentSource)
+        {
+            this.VertexSource = VertexSource;
+            this.FragmentSource = FragmentSource;
+        }
     }
 
-    public class Shader
+    public class Shader : IResource
     {
         private uint ProgramID { get; set; }
 
-        private FileInfo VertexFile { get; init; }
-        private FileInfo FragmentFile { get; init; }
-
         private Dictionary<string, int> UniformLocationCache { get; set; }
 
-        public Shader(string vertexShaderPath, string fragmentShaderPath)
-            :this(new FileInfo(vertexShaderPath), new FileInfo(fragmentShaderPath))
-        {
-        }
-
-        public Shader(FileInfo vertexShaderFile, FileInfo fragmentShaderFile)
+        public Shader(ShaderSource shaderSource)
         {
             ProgramID = 0;
-            VertexFile = vertexShaderFile;
-            FragmentFile = fragmentShaderFile;
 
             UniformLocationCache = new();
 
-            if (!VertexFile.Exists)
+            uint vs = ShaderBuilder.CompileShader(GLEnum.VertexShader, shaderSource.VertexSource, out string vertexError);
+            uint fs = ShaderBuilder.CompileShader(GLEnum.FragmentShader, shaderSource.FragmentSource, out string fragmentError);
+
+            if (vs == 0)
             {
-                Logger.Error($"ShaderFile {VertexFile.Name} does not exist!");
-                return;
+                Logger.Error($"VertexShader:\n{vertexError}");
+                vs = ShaderBuilder.CompileShader(GLEnum.VertexShader, ShaderBuilder.FallBack.VertexSource, out _);
             }
 
-            if (!FragmentFile.Exists)
+            if (fs == 0)
             {
-                Logger.Error($"ShaderFile {VertexFile.Name} does not exist!");
-                return;
+                Logger.Error($"FragmentShader: \n{fragmentError}");
+                fs = ShaderBuilder.CompileShader(GLEnum.FragmentShader, ShaderBuilder.FallBack.FragmentSource, out _);
             }
 
-            Logger.Info($"Creating ShaderProgram [vs: {VertexFile.Name}, fg: {FragmentFile.Name}]...");
-            ShaderSource shaderSource = Parse();
-            CreateProgram(shaderSource);
-
-
+            ProgramID = ShaderBuilder.BuildProgram(vs, fs);
 
             if (ProgramID != 0)
                 Logger.Info($"Successfuly created ShaderProgram #{ProgramID}");
         }
 
+        private Shader(uint programID)
+        {
+            ProgramID = programID;
+            UniformLocationCache = new();
+        }
 
         ~Shader()
         {
-            if (ProgramID != 0)
-            {
-                Application.Context.DeleteProgram(ProgramID);
-            }
+            Dispose(false);
         }
-
-        private ShaderSource Parse()
-        {
-            ShaderSource source = new();
-            StringBuilder builder = new();
-
-            // FEATURE: shader preprocessing
-            using (StreamReader stream = VertexFile.OpenText())
-            {
-                string s = "";
-                while ((s = stream.ReadLine()) != null)
-                {
-                    builder.AppendLine(s);
-                }
-
-                source.VertexSource = builder.ToString();
-            }
-
-            builder.Clear();
-            using (StreamReader stream = FragmentFile.OpenText())
-            {
-                string s = "";
-                while ((s = stream.ReadLine()) != null)
-                {
-                    builder.AppendLine(s);
-                }
-
-                source.FragmentSource = builder.ToString();
-            }
-
-            return source;
-        }
-
-        private void CreateProgram(ShaderSource shaderSource)
-        {
-            ProgramID = Application.Context.CreateProgram();
-            uint vs = CompileShader(GLEnum.VertexShader, shaderSource.VertexSource);
-            uint fs = CompileShader(GLEnum.FragmentShader, shaderSource.FragmentSource);
-
-            Application.Context.AttachShader(ProgramID, vs);
-            Application.Context.AttachShader(ProgramID, fs);
-
-            Application.Context.LinkProgram(ProgramID);
-            Application.Context.ValidateProgram(ProgramID);
-
-            Application.Context.DeleteShader(vs);
-            Application.Context.DeleteShader(fs);
-        }
-
-        private uint CompileShader(GLEnum shaderType, string shaderSource)
-        {
-            uint id = Application.Context.CreateShader(shaderType);
-            Application.Context.ShaderSource(id, shaderSource);
-            Application.Context.CompileShader(id);
-
-            //Check for errors
-            string result = Application.Context.GetShaderInfoLog(id);
-
-            if (!string.IsNullOrEmpty(result))
-            {
-                Logger.Error($"{(shaderType == GLEnum.VertexShader ? VertexFile.Name : FragmentFile.Name)}\n{result}");
-
-                Application.Context.DeleteShader(id);
-                return 0;
-            }
-            else
-            {
-                Logger.Info($"{(shaderType == GLEnum.VertexShader ? VertexFile.Name : FragmentFile.Name)} compiled succesfully!");
-            }
-
-            return id;
-        }
-
-        #region Uniform Setters
 
         public int GetLocation(string uniformName)
         {
-            int location;
-            if (UniformLocationCache.TryGetValue(uniformName, out location))
+            if (UniformLocationCache.TryGetValue(uniformName, out int location))
             {
                 return location;
             }
@@ -161,6 +88,10 @@ namespace Engine.Rendering
         {
             Application.Context.Uniform1(GetLocation(uniformName), value);
         }
+        public void SetInt(string uniformName, uint value)
+        {
+            SetInt(uniformName, (int)value);
+        }
 
         public void SetFloat(string uniformName, float value)
         {
@@ -177,30 +108,73 @@ namespace Engine.Rendering
             Application.Context.Uniform3(GetLocation(uniformName), vector.ToSystem());
         }
 
+        public void SetVector4(string uniformName, Vector4D<float> vector)
+        {
+            Application.Context.Uniform4(GetLocation(uniformName), vector.ToSystem());
+        }
+
+        public void SetColor(string uniformName, Color color)
+        {
+            Application.Context.Uniform3(GetLocation(uniformName), color.ToVec3());
+        }
+
         public unsafe void SetMatrix4(string uniformName, Matrix4X4<float> matrix)
         {
             Application.Context.UniformMatrix4(GetLocation(uniformName), 1, false, (float*)&matrix);
         }
-
-        #endregion
 
         public void Use()
         {
             Application.Context.UseProgram(ProgramID);
         }
 
-        public void Reload()
+        public static Shader FromStream(string vertexShaderFileName, string fragmentShaderFileName)
         {
-            Logger.Info($"Reloading ShaderProgram #{ProgramID}");
-
-            uint oldId = ProgramID;
-            Application.Context.DeleteProgram(ProgramID);
-
-            ShaderSource shaderSource = Parse();
-            CreateProgram(shaderSource);
-
-            UniformLocationCache.Clear();
-            Logger.Info($"Successfuly reloaded ShaderProgram #{oldId} -> #{ProgramID}");
+            return FromStream(new FileInfo(vertexShaderFileName), new FileInfo(fragmentShaderFileName));
         }
+
+        public static Shader FromStream(FileInfo vertexShaderFile, FileInfo fragmentShaderFile)
+        {
+            Logger.Info($"Creating ShaderProgram [vs: {vertexShaderFile.Name}, fg: {fragmentShaderFile.Name}]...");
+
+            ShaderSource shaderSource = ShaderBuilder.Parse(vertexShaderFile, fragmentShaderFile);
+
+            uint vs = ShaderBuilder.CompileShader(GLEnum.VertexShader, shaderSource.VertexSource, out string vertexError);
+            uint fs = ShaderBuilder.CompileShader(GLEnum.FragmentShader, shaderSource.FragmentSource, out string fragmentError);
+
+            if (vs == 0)
+            {
+                Logger.Error($"VertexShader: {vertexShaderFile.Name}\n{vertexError}");
+                vs = ShaderBuilder.CompileShader(GLEnum.VertexShader, ShaderBuilder.FallBack.VertexSource, out _);
+            }
+
+            if (fs == 0)
+            {
+                Logger.Error($"FragmentShader: {fragmentShaderFile.Name}\n{fragmentError}");
+                fs = ShaderBuilder.CompileShader(GLEnum.FragmentShader, ShaderBuilder.FallBack.FragmentSource, out _);
+            }
+
+
+            uint ID = ShaderBuilder.BuildProgram(vs, fs);
+
+            return new Shader(ID);
+        }
+
+        //TODO: Implement better dispose
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool dispose)
+        {
+
+            if (ProgramID != 0)
+            {
+                Application.Context.DeleteProgram(ProgramID);
+            }
+        }
+
     }
 }

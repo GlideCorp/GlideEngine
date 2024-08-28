@@ -1,27 +1,131 @@
-﻿using Silk.NET.OpenGL;
+﻿using Engine.Rendering.Effects;
+using Engine.Utilities;
+using Silk.NET.OpenGL;
+using System.Drawing;
 
 namespace Engine.Rendering
 {
     //TODO: Valutare se conviene tenere perennemente un riferimento a App.Gl
     public static class Graphics
     {
+        public static Color ClearColor
+        {
+            set
+            {
+                Application.Context.ClearColor(value);
+            }
+        }
+
         public static void Clear()
         {
-            Application.Context.Clear(ClearBufferMask.ColorBufferBit);
+            Application.Context.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 
         /*Da usare soltanto quando vogliamo forzare il rendering di una mesh con una shader particolare
             Ad esempio per lo shadowMapping*/
-        public static void Draw(Mesh mesh, Shader shader)
+        public static void Draw(Mesh mesh, Material material)
         {
-            shader.Use();
+            material.Shader.Use();
+            material.ApplyProperties();
             Draw(mesh);
         }
 
         public static unsafe void Draw(Mesh mesh)
         {
-            Application.Context.BindVertexArray(mesh.VAO);
-            Application.Context.DrawElements(PrimitiveType.Triangles, mesh.IndicesCount, DrawElementsType.UnsignedInt, (void*)0);
+            if (mesh.IndicesCount > 0)
+            {
+                Application.Context.BindVertexArray(mesh.VAO);
+                Application.Context.DrawElements(PrimitiveType.Triangles, mesh.IndicesCount, DrawElementsType.UnsignedInt, (void*)0);
+            }
+            else
+            {
+                DrawPrimitive(PrimitiveType.Triangles, mesh);
+            }
+        }
+
+
+        public static void DrawPrimitive(PrimitiveType primitiveType, Mesh mesh)
+        {
+            Application.Context.DrawArrays(primitiveType, 0, mesh.VerticesCount);
+        }
+
+        public static void DrawPrimitive(PrimitiveType primitiveType, Mesh mesh, Shader shader)
+        {
+            shader.Use();
+            DrawPrimitive(primitiveType, mesh);
+        }
+
+        public static void Blit(FrameBuffer source, FrameBuffer destination, ScreenMaterial material)
+        {
+            Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source.FrameBufferID);
+            Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination.FrameBufferID);
+
+            material.ScreenBuffer = source;
+            Clear();
+            Draw(MeshPrimitives.Quad, material);
+
+            CopyFrameBuffer(source, destination, ClearBufferMask.DepthBufferBit);
+            /*
+            Application.Context.BlitFramebuffer(0, 0, source.Width, source.Height,
+                                                0, 0, destination.Width, destination.Height,
+                                                ClearBufferMask.DepthBufferBit, BlitFramebufferFilter.Nearest);
+             */
+            Application.Context.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            
+            /*
+            Application.Context.BlitFramebuffer(0, 0, source.Width, source.Height,
+                                                0, 0, destination.Width, destination.Height,
+                                                ClearBufferMask.ColorBufferBit, BlitFramebufferFilter.Nearest);
+            */
+        }
+
+        public static void CopyFrameBuffer(FrameBuffer source, FrameBuffer destination, ClearBufferMask copyMask)
+        {
+            Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source.FrameBufferID);
+            Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination.FrameBufferID);
+
+            Application.Context.BlitNamedFramebuffer(source.FrameBufferID, destination.FrameBufferID,
+                                                        0, 0, source.Width, source.Height,
+                                                        0, 0, destination.Width, destination.Height,
+                                                        copyMask, BlitFramebufferFilter.Nearest);
+
+            /*
+            Application.Context.BlitFramebuffer(0, 0, source.Width, source.Height,
+                                                0, 0, destination.Width, destination.Height,
+                                                copyMask, BlitFramebufferFilter.Nearest);
+            */
+        }
+
+        public static void CopyFrameBuffer(uint source, FrameBuffer destination, ClearBufferMask copyMask)
+        {
+            Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source);
+            Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination.FrameBufferID);
+
+            Application.Context.BlitNamedFramebuffer(source, destination.FrameBufferID,
+                                                        0, 0, destination.Width, destination.Height,
+                                                        0, 0, destination.Width, destination.Height,
+                                                        copyMask, BlitFramebufferFilter.Nearest);
+            /*
+            Application.Context.BlitFramebuffer(0, 0, destination.Width, destination.Height,
+                                                0, 0, destination.Width, destination.Height,
+                                                copyMask, BlitFramebufferFilter.Nearest);
+            */
+        }
+
+        public static void CopyFrameBuffer(FrameBuffer source, uint destination, ClearBufferMask copyMask)
+        {
+            Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source.FrameBufferID);
+            Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination);
+
+            Application.Context.BlitNamedFramebuffer(source.FrameBufferID, destination,
+                                                        0, 0, source.Width, source.Height,
+                                                        0, 0, source.Width, source.Height,
+                                                        copyMask, BlitFramebufferFilter.Nearest);
+            /*
+            Application.Context.BlitFramebuffer(0, 0, source.Width, source.Height,
+                                                0, 0, source.Width, source.Height,
+                                                copyMask, BlitFramebufferFilter.Nearest);
+            */
         }
     }
 }

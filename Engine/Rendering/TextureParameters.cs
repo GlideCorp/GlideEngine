@@ -14,7 +14,7 @@ namespace Engine.Rendering
 
         public TextureFilter Minification { get; set; }
         public TextureFilter Magnification { get; set; }
-
+            
         public TextureFilter Filters 
         { 
             set => Minification = Magnification = value;
@@ -43,12 +43,19 @@ namespace Engine.Rendering
             Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)Minification.ToGLEnum(Mipmaps));
             Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)Magnification.ToGLEnum(Mipmaps));
         }
-
+        
         public static TextureParameters Default = new(verticalWrap: TextureWrap.Clamp,
                                                                horizontalWrap: TextureWrap.Clamp,
                                                                minification: TextureFilter.Linear,
                                                                magification: TextureFilter.Linear,
                                                                mipmaps: false);
+
+        //TODO: Forse è inutile BOOH
+        public static TextureParameters DefaultFramBuffer = new(verticalWrap: TextureWrap.Clamp,
+                                                                horizontalWrap: TextureWrap.Clamp,
+                                                                minification: TextureFilter.Linear,
+                                                                magification: TextureFilter.Linear,
+                                                                mipmaps: false);
     }
 
     public enum TextureWrap

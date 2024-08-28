@@ -1,8 +1,13 @@
 ﻿
 using Core.Logs;
+using Engine.Rendering;
+using Engine.Rendering.Effects;
+using Engine.Utilities;
+using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using System.Drawing;
 using SilkWindow = Silk.NET.Windowing.Window;
 
 namespace Engine
@@ -49,10 +54,25 @@ namespace Engine
             }
         }
 
+        public static IInputContext InputContext
+        {
+            get
+            {
+                if (Instance.InputPrivate is null)
+                {
+                    Logger.Error("Null context");
+                    throw new NullReferenceException();
+                }
+
+                return Instance.InputPrivate;
+            }
+        }
+
         public static Vector2D<int> FramebufferSize { get { return Instance.WindowPrivate.FramebufferSize; } }
 
         private IWindow WindowPrivate { get; init; }
         private GL? ContextPrivate { get; set; }
+        private IInputContext? InputPrivate { get; set; }
 
         public Application()
         {
@@ -64,8 +84,8 @@ namespace Engine
             WindowPrivate.Load += OnLoad;
             WindowPrivate.Update += OnUpdate;
             WindowPrivate.Render += OnRender;
+            WindowPrivate.Closing += OnClosing;
             WindowPrivate.FramebufferResize += OnFramebufferResize;
-
             ContextPrivate = null;
 
             _instance = this;
@@ -94,7 +114,8 @@ namespace Engine
             {
                 Size = new Vector2D<int>(800, 600),
                 Title = "GlideEngine",
-                API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6))
+                API = new(ContextAPI.OpenGL, ContextProfile.Core, ContextFlags.Debug, new(4, 6)),
+                VSync = false
             };
         }
 
@@ -118,11 +139,20 @@ namespace Engine
         protected virtual void OnLoad()
         {
             ContextPrivate = WindowPrivate.CreateOpenGL();
+            ContextPrivate.Enable(EnableCap.Multisample);
+            ContextPrivate.Enable(EnableCap.DepthTest);
+
+            InputPrivate = WindowPrivate.CreateInput();
+            Input.Keyboard = InputPrivate.Keyboards[0];
+            Input.Mouse = InputPrivate.Mice[0];
+
+            Renderer.Startup();
+            Graphics.ClearColor = Color.LightSkyBlue;
         }
 
         protected virtual void OnUpdate(double deltaTime)
         {
-
+            Time.DeltaTime = (float)deltaTime;
         }
 
         protected virtual void OnRender(double deltaTime)
@@ -130,9 +160,16 @@ namespace Engine
 
         }
 
+        protected virtual void OnClosing()
+        {
+
+        }
+
         protected virtual void OnFramebufferResize(Vector2D<int> newSize)
         {
-            ContextPrivate.Viewport(newSize);
+            ContextPrivate?.Viewport(newSize);
+
+            Renderer.ResizeMainBuffer(newSize);
         }
     }
 }
