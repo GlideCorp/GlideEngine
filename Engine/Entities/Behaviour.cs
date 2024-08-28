@@ -1,5 +1,5 @@
 ﻿
-using Core.Locations;
+using Core.Trackables;
 
 namespace Engine.Entities
 {

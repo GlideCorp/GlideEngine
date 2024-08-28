@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Editor", "Editor\Editor.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sandbox", "Sandbox\Sandbox.csproj", "{6DB47F0A-26CB-4584-8AC7-0961AACA1EA8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{90452373-C6A2-4767-A48B-E45BC2C29F0D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +98,24 @@ Global
 		{6DB47F0A-26CB-4584-8AC7-0961AACA1EA8}.Release|x64.Build.0 = Release|Any CPU
 		{6DB47F0A-26CB-4584-8AC7-0961AACA1EA8}.Release|x86.ActiveCfg = Release|Any CPU
 		{6DB47F0A-26CB-4584-8AC7-0961AACA1EA8}.Release|x86.Build.0 = Release|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Debug|x64.Build.0 = Debug|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Debug|x86.Build.0 = Debug|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Distro|Any CPU.ActiveCfg = Distro|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Distro|Any CPU.Build.0 = Distro|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Distro|x64.ActiveCfg = Distro|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Distro|x64.Build.0 = Distro|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Distro|x86.ActiveCfg = Debug|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Distro|x86.Build.0 = Debug|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Release|x64.ActiveCfg = Release|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Release|x64.Build.0 = Release|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Release|x86.ActiveCfg = Release|Any CPU
+		{90452373-C6A2-4767-A48B-E45BC2C29F0D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

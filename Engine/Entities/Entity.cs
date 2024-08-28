@@ -1,16 +1,15 @@
 ﻿
-using Core.Locations;
-using Core.Logs;
+using Core.Trackables;
 
 namespace Engine.Entities
 {
     public abstract class Entity : Trackable
     {
-        protected Tree Registry { get; init; }
+        //protected SortedTree Registry { get; init; }
 
         public Entity(string name) : base($"entity:{name}")
         {
-            Registry = new Tree();
+            //Registry = new();
         }
 
         public virtual void Load() { }
@@ -28,30 +27,19 @@ namespace Engine.Entities
 
         public void Add(Component component)
         {
-            bool result = Registry.Insert(component);
-
-            if (!result)
-            {
-                Logger.Error($"{component} is already present into {this} at location {component.Location}");
-            }
+            //Registry.Insert(component);
         }
 
         public void Add(Behaviour behaviour)
         {
-            bool result = Registry.Insert(behaviour);
-
-            if (!result)
-            {
-                Logger.Error($"{behaviour} is already present into {this} at location {behaviour.Location}");
-            }
+            //Registry.Insert(behaviour);
         }
 
         public bool TryGetComponent<T>(out T? component) where T : Component
         {
-            Location componentLocation = new("component");
-            var values = Registry.RetriveValues(componentLocation);
-
-            foreach (var element in values)
+            DirectoryFilter directoryFilter = new("component");
+            /*
+            foreach (var element in Registry.ListDepthValues(directoryFilter))
             {
                 if (element.GetType() == typeof(T))
                 {
@@ -59,17 +47,17 @@ namespace Engine.Entities
                     return true;
                 }
             }
-
+            */
             component = null;
             return false;
         }
 
         public bool TryGetBehaviour<T>(out T? behaviour) where T : Behaviour
         {
-            Location behaviourLocation = new("behaviour");
-            var values = Registry.RetriveValues(behaviourLocation);
+            DirectoryFilter directoryFilter = new("behaviour");
 
-            foreach (var element in values)
+            /*
+            foreach (var element in Registry.ListDepthValues(directoryFilter))
             {
                 if (element.GetType() == typeof(T))
                 {
@@ -77,6 +65,7 @@ namespace Engine.Entities
                     return true;
                 }
             }
+            */
 
             behaviour = null;
             return false;
@@ -84,14 +73,16 @@ namespace Engine.Entities
 
         public Component[] GetAllComponents()
         {
-            Location componentsLocation = new("component");
-            return Registry.RetriveValues(componentsLocation).Cast<Component>().ToArray();
+            DirectoryFilter directoryFilter = new("behaviour");
+            //return Registry.ListDepthValues(directoryFilter).Cast<Component>().ToArray();
+            return null;
         }
 
         public Behaviour[] GetAllBehaviours()
         {
-            Location behavioursLocation = new("behaviour");
-            return Registry.RetriveValues(behavioursLocation).Cast<Behaviour>().ToArray();
+            DirectoryFilter directoryFilter = new("behaviour");
+            //return Registry.ListDepthValues(directoryFilter).Cast<Behaviour>().ToArray();
+            return null;
         }
 
         public override string ToString()
