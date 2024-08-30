@@ -36,45 +36,47 @@ namespace Engine.Rendering
             }
 
             CurrentUnit = textureUnit;
-            Application.Context.ActiveTexture((GLEnum)((uint)GLEnum.Texture0 + CurrentUnit));
-            Application.Context.BindTexture(TextureTarget.Texture2D, TextureID);
+            Application.Context.BindTextureUnit(CurrentUnit, TextureID);
+            //Application.Context.ActiveTexture((GLEnum)((uint)GLEnum.Texture0 + CurrentUnit));
+            //Application.Context.BindTexture(TextureTarget.Texture2D, TextureID);
         }
 
-        public virtual unsafe void SetData(Span<byte> data, TextureFormat internalFormat = TextureFormat.RGBA, PixelFormat format = PixelFormat.Rgba, PixelType pixelType = PixelType.UnsignedByte)
+        public virtual unsafe void SetData(Span<byte> data, PixelFormat format = PixelFormat.Rgba, PixelType pixelType = PixelType.UnsignedByte)
         {
-            Bind();
+            //Bind();
 
             if (data.IsEmpty)
             {
-                Application.Context.TexImage2D(GLEnum.Texture2D,
-                                               0,
-                                               (int)internalFormat,
-                                               (uint)Width,
-                                               (uint)Height,
-                                               0,
-                                               format,
-                                               pixelType,
-                                               (void*)null);
+                Application.Context.TextureSubImage2D(TextureID,
+                                            0,
+                                            0,
+                                            0,
+                                            (uint)Width,
+                                            (uint)Height,
+                                            format,
+                                            pixelType,
+                                            (void*)null);
+
                 return;
             }
 
             //fixed(byte* ptr = MemoryMarshal.AsBytes(data))
             fixed (byte* ptr = &data[0])
             {
-                Application.Context.TexImage2D(GLEnum.Texture2D,
+                Application.Context.TextureSubImage2D(TextureID,
                                                0,
-                                               (int)internalFormat,
+                                               0,
+                                               0,
                                                (uint)Width,
                                                (uint)Height,
-                                               0,
                                                format,
                                                pixelType,
                                                (void*)ptr);
             }
 
-            if (Params.Mipmaps)
+            if (Params.Mipmaps && !data.IsEmpty)
             {
-                Application.Context.GenerateMipmap(TextureTarget.Texture2D);
+                Application.Context.GenerateTextureMipmap(TextureID);
             }
         }
 

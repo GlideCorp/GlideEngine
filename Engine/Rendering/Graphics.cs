@@ -1,7 +1,9 @@
 ﻿using Engine.Rendering.Effects;
 using Engine.Utilities;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System.Drawing;
+using System.Numerics;
 
 namespace Engine.Rendering
 {
@@ -61,7 +63,6 @@ namespace Engine.Rendering
             Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination.FrameBufferID);
 
             material.ScreenBuffer = source;
-            Clear();
             Draw(MeshPrimitives.Quad, material);
 
             CopyFrameBuffer(source, destination, ClearBufferMask.DepthBufferBit);
@@ -81,45 +82,35 @@ namespace Engine.Rendering
 
         public static void CopyFrameBuffer(FrameBuffer source, FrameBuffer destination, ClearBufferMask copyMask)
         {
-            Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source.FrameBufferID);
-            Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination.FrameBufferID);
-
-            Application.Context.BlitNamedFramebuffer(source.FrameBufferID, destination.FrameBufferID,
-                                                        0, 0, source.Width, source.Height,
-                                                        0, 0, destination.Width, destination.Height,
-                                                        copyMask, BlitFramebufferFilter.Nearest);
-
-            /*
-            Application.Context.BlitFramebuffer(0, 0, source.Width, source.Height,
-                                                0, 0, destination.Width, destination.Height,
-                                                copyMask, BlitFramebufferFilter.Nearest);
-            */
+            CopyFrameBuffer(source.FrameBufferID, destination.FrameBufferID,
+                            new Vector2D<int>(0, 0), new Vector2D<int>(source.Width, source.Height),
+                            new Vector2D<int>(0, 0), new Vector2D<int>(destination.Width, destination.Height),
+                            copyMask);
         }
 
         public static void CopyFrameBuffer(uint source, FrameBuffer destination, ClearBufferMask copyMask)
         {
-            Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source);
-            Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination.FrameBufferID);
-
-            Application.Context.BlitNamedFramebuffer(source, destination.FrameBufferID,
-                                                        0, 0, destination.Width, destination.Height,
-                                                        0, 0, destination.Width, destination.Height,
-                                                        copyMask, BlitFramebufferFilter.Nearest);
-            /*
-            Application.Context.BlitFramebuffer(0, 0, destination.Width, destination.Height,
-                                                0, 0, destination.Width, destination.Height,
-                                                copyMask, BlitFramebufferFilter.Nearest);
-            */
+            CopyFrameBuffer(source, destination.FrameBufferID,
+                            new Vector2D<int>(0, 0), new Vector2D<int>(destination.Width, destination.Height),
+                            new Vector2D<int>(0, 0), new Vector2D<int>(destination.Width, destination.Height),
+                            copyMask);
         }
 
         public static void CopyFrameBuffer(FrameBuffer source, uint destination, ClearBufferMask copyMask)
         {
-            Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source.FrameBufferID);
-            Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination);
+            CopyFrameBuffer(source.FrameBufferID, destination,
+                            new Vector2D<int>(0, 0), new Vector2D<int>(source.Width, source.Height),
+                            new Vector2D<int>(0, 0), new Vector2D<int>(source.Width, source.Height),
+                            copyMask);
+        }
+        public static void CopyFrameBuffer(uint source, uint destination, Vector2D<int>source0, Vector2D<int> source1, Vector2D<int> dest0, Vector2D<int> dest1, ClearBufferMask copyMask)
+        {
+            //Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source);
+            //Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination);
 
-            Application.Context.BlitNamedFramebuffer(source.FrameBufferID, destination,
-                                                        0, 0, source.Width, source.Height,
-                                                        0, 0, source.Width, source.Height,
+            Application.Context.BlitNamedFramebuffer(source, destination,
+                                                        source0.X, source0.Y, source1.X, source1.Y,
+                                                        dest0.X, dest0.Y, dest1.X, dest1.Y,
                                                         copyMask, BlitFramebufferFilter.Nearest);
             /*
             Application.Context.BlitFramebuffer(0, 0, source.Width, source.Height,

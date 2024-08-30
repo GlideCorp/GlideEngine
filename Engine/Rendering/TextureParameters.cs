@@ -25,7 +25,7 @@ namespace Engine.Rendering
         public TextureParameters(TextureWrap verticalWrap, TextureWrap horizontalWrap, TextureFilter minification, TextureFilter magification, bool mipmaps)
         {
             VerticalWrap = verticalWrap;
-            VerticalWrap = horizontalWrap;
+            HorizontalWrap = horizontalWrap;
 
             Minification = minification;
             Magnification = magification;
@@ -37,11 +37,17 @@ namespace Engine.Rendering
         {
             GL Gl = Application.Context;
 
+            Gl.TextureParameter(TextureID, GLEnum.TextureWrapS, (int)HorizontalWrap);
+            Gl.TextureParameter(TextureID, GLEnum.TextureWrapT, (int)VerticalWrap);
+            Gl.TextureParameter(TextureID, TextureParameterName.TextureMinFilter, (int)Minification.ToGLEnum(Mipmaps));
+            Gl.TextureParameter(TextureID, TextureParameterName.TextureMagFilter, (int)Magnification.ToGLEnum(Mipmaps));
+            /*
             //TODO: Generalizzare sta cosa
             Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)HorizontalWrap);
             Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)VerticalWrap);
             Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)Minification.ToGLEnum(Mipmaps));
             Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)Magnification.ToGLEnum(Mipmaps));
+            */
         }
         
         public static TextureParameters Default = new(verticalWrap: TextureWrap.Clamp,

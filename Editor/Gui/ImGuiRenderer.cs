@@ -33,8 +33,8 @@ namespace Editor.Gui
                 Marshal.Copy(new IntPtr(pixelData), pixels, 0, pixels.Length);
 
                 // Create and register the texture
-                FontAtlas = new(width, height);
-                FontAtlas.SetData(pixels, TextureFormat.RGBA);
+                FontAtlas = new(width, height, TextureParameters.Default, SizedInternalFormat.Rgba32f);
+                FontAtlas.SetData(pixels, PixelFormat.Rgba);
             }
             GlideEngineTheme();
         }
@@ -103,8 +103,8 @@ namespace Editor.Gui
             // Create and register the texture
             FontAtlas.Dispose();
 
-            FontAtlas = new(width, height);
-            FontAtlas.SetData(pixels, TextureFormat.RGBA);
+            FontAtlas = new(width, height, TextureParameters.Default, SizedInternalFormat.Rgba32f);
+            FontAtlas.SetData(pixels, PixelFormat.Rgba);
 
             // Let ImGui know where to find the texture
             io.Fonts.SetTexID((nint)FontAtlas.TextureID);

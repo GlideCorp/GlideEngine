@@ -10,7 +10,7 @@ namespace Engine.Rendering
 {
     public class Texture2DMultisample : Texture
     {
-        public Texture2DMultisample(int width, int heigth, TextureParameters textureParameters, int samples = 4, InternalFormat internalFormat = InternalFormat.Rgb)
+        public Texture2DMultisample(int width, int heigth, TextureParameters textureParameters, int samples = 4, SizedInternalFormat internalFormat = SizedInternalFormat.Rgba16)
         {
             if (width <= 0 || heigth <= 0)
             {
@@ -28,11 +28,13 @@ namespace Engine.Rendering
 
             GL Gl = Application.Context;
 
-            TextureID = Gl.GenTexture();
-            Bind();
+            TextureID = Gl.CreateTexture(GLEnum.Texture2DMultisample);
+            //Bind();
 
-            Params.Apply(TextureID);
-            Gl.TexImage2DMultisample(TextureTarget.Texture2DMultisample, (uint)samples, internalFormat, (uint)Width, (uint)Height, true);
+            //Gl.TextureParameter(TextureID, GLEnum.TextureWrapS, (int)Params.HorizontalWrap);
+            //Gl.TextureParameter(TextureID, GLEnum.TextureWrapT, (int)Params.VerticalWrap);
+            Gl.TextureStorage2DMultisample(TextureID, (uint)samples, internalFormat, (uint)Width, (uint)Height, true);
+            //Gl.TexImage2DMultisample(TextureTarget.Texture2DMultisample, (uint)samples, internalFormat, (uint)Width, (uint)Height, true);
         }
 
         public Texture2DMultisample(int width, int heigth) : this(width, heigth, TextureParameters.Default) { }
@@ -51,8 +53,9 @@ namespace Engine.Rendering
             }
 
             CurrentUnit = textureUnit;
-            Application.Context.ActiveTexture((GLEnum)((uint)GLEnum.Texture0 + CurrentUnit));
-            Application.Context.BindTexture(TextureTarget.Texture2DMultisample, TextureID);
+            Application.Context.BindTextureUnit(CurrentUnit, TextureID);
+            //Application.Context.ActiveTexture((GLEnum)((uint)GLEnum.Texture0 + CurrentUnit));
+            //Application.Context.BindTexture(TextureTarget.Texture2DMultisample, TextureID);
         }
     }
 }
