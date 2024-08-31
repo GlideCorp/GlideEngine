@@ -48,6 +48,7 @@ namespace Editor
 
             //Robe di testing-----------------------------------------------------------------------
             transform = new();
+            //transform.Scale(new Vector3D<float>(0.25f));
             camera = new()
             {
                 Position = new Vector3D<float>(-2, 2, -3)
@@ -61,6 +62,7 @@ namespace Editor
             };
 
             mTest = ModelLoader.Load("resources\\models\\fox.glb");
+            //mTest = ModelLoader.Load("resources\\models\\XYZDragon.glb");
 
             oldMousePos = Vector2D<float>.Zero;
 
@@ -142,7 +144,7 @@ namespace Editor
             ImGui.EndMainMenuBar();
             ImGui.DockSpaceOverViewport(ImGui.GetMainViewport(), ImGuiDockNodeFlags.PassthruCentralNode);
 
-            ImGui.ShowDemoWindow();
+            //ImGui.ShowDemoWindow();
 
             foreach (var window in WindowManager.Windows)
             {

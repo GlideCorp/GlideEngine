@@ -17,34 +17,34 @@ namespace Core.Collections.Lists
             Count++;
 
             if (First is null) { First = Last = new(size, value); }
-            else if (Last!.Cursor == Last.Values.Length)
+            else if (Last!.NextItemIndex == Last.Values.Length)
             {
                 ChunkLinkedNode<TValue> newNode = new(size, value, previous: Last, next: null);
                 Last.Next = newNode;
                 Last = newNode;
             }
-            else { Last.Values[Last.Cursor++] = value; }
+            else { Last.Values[Last.NextItemIndex++] = value; }
         }
 
         private bool TryRemove(ChunkLinkedNode<TValue> current, IMatcher<TKey, TValue> matcher)
         {
-            for (int i = 0; i < current.Cursor; i++)
+            for (int i = 0; i < current.NextItemIndex; i++)
             {
                 if (!matcher.Match(current.Values[i])) { continue; }
 
                 Count--;
                 if (Count == 0) { First = Last = null; return true; }
 
-                Last!.Cursor--;
-                current.Values[i] = Last.Values[Last.Cursor];
-                if (Last.Cursor == 0)
+                Last!.NextItemIndex--;
+                current.Values[i] = Last.Values[Last.NextItemIndex];
+                if (Last.NextItemIndex == 0)
                 {
                     ChunkLinkedNode<TValue> toRemove = Last;
                     Last = Last.Previous;
                     Last!.Next = null;
                     toRemove.Previous = null;
                 }
-                else { Last.Values[Last.Cursor] = default!; }
+                else { Last.Values[Last.NextItemIndex] = default!; }
             }
 
             return false;
@@ -52,14 +52,8 @@ namespace Core.Collections.Lists
 
         public void Remove(TKey key)
         {
-            ChunkLinkedNode<TValue>? current = First;
             DefaultMatcher.Key = key;
-
-            while (current != null)
-            {
-                if (TryRemove(current, DefaultMatcher)) { return; }
-                current = current.Next;
-            }
+            Remove(DefaultMatcher);
         }
 
         public void Remove(IMatcher<TKey, TValue> matcher)
@@ -74,22 +68,8 @@ namespace Core.Collections.Lists
 
         public bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
         {
-            ChunkLinkedNode<TValue>? current = First;
-            while (current != null)
-            {
-                for (int i = 0; i < current.Cursor; i++)
-                {
-                    if (DefaultMatcher.Match(current.Values[i]))
-                    {
-                        value = current.Values[i]!;
-                        return true;
-                    }
-                }
-                current = current.Next;
-            }
-
-            value = default;
-            return false;
+            DefaultMatcher.Key = key;
+            return Find(DefaultMatcher, out value);
         }
 
         public bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
@@ -97,7 +77,7 @@ namespace Core.Collections.Lists
             ChunkLinkedNode<TValue>? current = First;
             while (current != null)
             {
-                for (int i = 0; i < current.Cursor; i++)
+                for (int i = 0; i < current.NextItemIndex; i++)
                 {
                     if (matcher.Match(current.Values[i]))
                     {

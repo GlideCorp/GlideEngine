@@ -83,20 +83,8 @@ namespace Core.Collections.Lists
 
         public void Remove(TKey key)
         {
-            if (First is null) { return; }
             DefaultMatcher.Key = key;
-
-            if (DefaultMatcher.Match(First.Value)) { RemoveFirst(); return; }
-            if (First.Next is null) { return; }
-
-            DoublyLinkedNode<TValue> current = First.Next;
-            while (current != Last)
-            {
-                if (DefaultMatcher.Match(current.Value)) { RemoveCurrent(current); return; }
-                current = current.Next!;
-            }
-
-            if (DefaultMatcher.Match(Last!.Value)) { RemoveLast(); }
+            Remove(DefaultMatcher);
         }
 
         public void Remove(IMatcher<TKey, TValue> matcher)
@@ -119,21 +107,7 @@ namespace Core.Collections.Lists
         public bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
         {
             DefaultMatcher.Key = key;
-            DoublyLinkedNode<TValue>? current = First;
-
-            while (current is not null)
-            {
-                if (DefaultMatcher.Match(current.Value))
-                {
-                    value = current.Value!;
-                    return true;
-                }
-
-                current = current.Next;
-            }
-
-            value = default;
-            return false;
+            return Find(DefaultMatcher, out value);
         }
 
         public bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)

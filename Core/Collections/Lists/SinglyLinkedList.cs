@@ -72,19 +72,8 @@ namespace Core.Collections.Lists
 
         public void Remove(TKey key)
         {
-            if (First is null) { return; }
             DefaultMatcher.Key = key;
-
-            if (DefaultMatcher.Match(First.Value)) { RemoveFirst(); return; }
-
-            SinglyLinkedNode<TValue> previous = First;
-            while (previous.Next != Last)
-            {
-                if (DefaultMatcher.Match(previous.Next!.Value)) { RemoveNext(previous); return; }
-                previous = previous.Next;
-            }
-
-            if (DefaultMatcher.Match(Last!.Value)) { RemoveLast(previous); }
+            Remove(DefaultMatcher);
         }
 
         public void Remove(IMatcher<TKey, TValue> matcher)
@@ -106,21 +95,7 @@ namespace Core.Collections.Lists
         public bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
         {
             DefaultMatcher.Key = key;
-            SinglyLinkedNode<TValue>? current = First;
-
-            while (current is not null)
-            {
-                if (DefaultMatcher.Match(current.Value))
-                {
-                    value = current.Value!;
-                    return true;
-                }
-
-                current = current.Next;
-            }
-
-            value = default;
-            return false;
+            return Find(DefaultMatcher, out value);
         }
 
         public bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)

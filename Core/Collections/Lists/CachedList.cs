@@ -1,41 +1,72 @@
-﻿/*
+﻿
 using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections.Lists
 {
-    public class CachedList<TKey, TValue>(int cacheSize = 8) : IList<TKey, TValue>
-        where TKey : notnull
-        where TValue : notnull
+    public class CachedList<TKey, TValue>(int size, IMatcher<TKey, TValue> defaultMatcher) : List<TKey, TValue>(defaultMatcher)
     {
-        private TValue[] _cache = new TValue[cacheSize];
-        private List<TValue> _list = [];
+        protected TValue[] Cache { get; set; } = new TValue[size];
+        protected int NextCachedIndex { get; set; } = 0;
+        //protected int InverseCachedIndex { get; set; } = 0;
+        protected bool Looped { get; set; } = false;
 
-        private int _cacheIndex = 0;
-
-        public void InsertFirst(TValue value) { throw new NotImplementedException(); }
-        public void InsertLast(TValue value) { throw new NotImplementedException(); }
-
-        public void Insert(TValue value)
+        public new bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
         {
-           // int indefx = _list.BinarySearch(value,);
-
+            DefaultMatcher.Key = key;
+            return Find(DefaultMatcher, out value);
         }
 
-        public void RemoveFirst(Match<TValue> match) { throw new NotImplementedException(); }
-        public void RemoveLast(Match<TValue> match) { throw new NotImplementedException(); }
-        public void RemoveAll(Match<TValue> match) { throw new NotImplementedException(); }
-        public void Remove(Match<TValue> match) { throw new NotImplementedException(); }
+        private bool FindInCache(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
+        {
+            if (Count == 0) { goto ReturnDefault; }
 
-        public bool FindFirst(Match<TValue> match, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
-        public bool FindLast(Match<TValue> match, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
-        public bool Find(Match<TValue> match, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
+            Span<TValue> span = Cache.AsSpan(0, !Looped ? NextCachedIndex : Cache.Length);
 
-        public int CountMatches(Match<TValue> match) { throw new NotImplementedException(); }
+            foreach (TValue val in span)
+            {
+                if (!matcher.Match(val)) { continue; }
 
-        public IEnumerable<TValue> Traverse() { throw new NotImplementedException(); }
-        public IEnumerable<TValue> TraverseInverse() { throw new NotImplementedException(); }
+                //Cache[NextCachedIndex] = val;
+                //InverseCachedIndex = NextCachedIndex;
+                //NextCachedIndex = (NextCachedIndex + 1) % Cache.Length;
+                //Looped |= InverseCachedIndex > NextCachedIndex;
 
-        public IEnumerable<TValue> Filter(Match<TValue> match) { throw new NotImplementedException(); }
+                value = val!;
+                return true;
+            }
+
+ReturnDefault:
+            value = default;
+            return false;
+        }
+
+        private bool FindInList(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
+        {
+            if (Count == 0) { goto ReturnDefault; }
+
+            Span<TValue> span = Array.AsSpan(0, Count);
+            foreach (TValue val in span)
+            {
+                if (!matcher.Match(val)) { continue; }
+
+                Cache[NextCachedIndex] = val;
+                //InverseCachedIndex = NextCachedIndex;
+                NextCachedIndex = (NextCachedIndex + 1) % Cache.Length;
+                Looped |= NextCachedIndex == 0;
+
+                value = val!;
+                return true;
+            }
+
+ReturnDefault:
+            value = default;
+            return false;
+        }
+
+        public new bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
+        {
+            return FindInCache(matcher, out value) || FindInList(matcher, out value);
+        }
+
     }
 }
-*/

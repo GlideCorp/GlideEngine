@@ -8,6 +8,7 @@ using MyDoublyLinkedList = Core.Collections.Lists.DoublyLinkedList<int, int>;
 using MyChunkLinkedList = Core.Collections.Lists.ChunkLinkedList<int, int>;
 using MyFrequentLinkedList = Core.Collections.Lists.FrequentLinkedList<int, int>;
 using MyList = Core.Collections.Lists.List<int, int>;
+using MyCachedList = Core.Collections.Lists.CachedList<int, int>;
 
 using BenchmarkDotNet.Attributes;
 using System;
@@ -258,6 +259,41 @@ namespace Benchmarks.Core.Lists
                 getCount: list => list.Count);
         }
 
+        [Benchmark]
+        public void MyCachedListX128()
+        {
+            IntMatcher matcher = new();
+            Operate(
+                createList: () => new MyCachedList(size: 128, matcher),
+                addElement: (list, key) => { list.InsertLast(key); },
+                removeElement: (list, key) => { list.Remove(key); },
+                findElement: (list, key) => list.Find(key, out int value) ? value : default,
+                getCount: list => list.Count);
+        }
+
+        [Benchmark]
+        public void MyCachedListX256()
+        {
+            IntMatcher matcher = new();
+            Operate(
+                createList: () => new MyCachedList(size: 256, matcher),
+                addElement: (list, key) => { list.InsertLast(key); },
+                removeElement: (list, key) => { list.Remove(key); },
+                findElement: (list, key) => list.Find(key, out int value) ? value : default,
+                getCount: list => list.Count);
+        }
+
+        [Benchmark]
+        public void MyCachedListX512()
+        {
+            IntMatcher matcher = new();
+            Operate(
+                createList: () => new MyCachedList(size: 512, matcher),
+                addElement: (list, key) => { list.InsertLast(key); },
+                removeElement: (list, key) => { list.Remove(key); },
+                findElement: (list, key) => list.Find(key, out int value) ? value : default,
+                getCount: list => list.Count);
+        }
     }
 }
 

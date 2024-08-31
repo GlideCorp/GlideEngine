@@ -4,7 +4,7 @@ namespace Core.Collections.Nodes
     public class ChunkLinkedNode<TValue>
     {
         public TValue[] Values { get; set; }
-        public int Cursor { get; set; }
+        public int NextItemIndex { get; set; }
 
         public ChunkLinkedNode<TValue>? Previous;
         public ChunkLinkedNode<TValue>? Next;
@@ -13,7 +13,7 @@ namespace Core.Collections.Nodes
         {
             Values = new TValue[size];
             Values[0] = value;
-            Cursor = 1;
+            NextItemIndex = 1;
 
             Previous = null;
             Next = null;
@@ -23,7 +23,7 @@ namespace Core.Collections.Nodes
         {
             Values = new TValue[size];
             Values[0] = value;
-            Cursor = 1;
+            NextItemIndex = 1;
 
             Previous = previous;
             Next = next;
