@@ -36,4 +36,10 @@ namespace Engine.Rendering.Effects
         {
         }
     }
+    public class ScreenDrawEffect : ScreenEffect
+    {
+        public ScreenDrawEffect() : base("pp_screenDraw")
+        {
+        }
+    }
 }

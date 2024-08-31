@@ -60,18 +60,18 @@ namespace Editor
                 Shininess = 2
             };
 
-            mTest = ModelLoader.Load("resources\\models\\shapes.glb");
+            mTest = ModelLoader.Load("resources\\models\\fox.glb");
 
             oldMousePos = Vector2D<float>.Zero;
 
             FileStream stream = File.OpenRead("resources\\test.png");
             testTexture = Texture2D.FromStream(stream);
-
             //Fine robe di testing------------------------------------------------------------------
 
             WindowManager.Register(new SceneInspector(transform));
             //WindowManager.Register(new TextureMemoryViewer());
-            WindowManager.Register(new InputTester());
+            //WindowManager.Register(new InputTester());
+            WindowManager.Register(new PerformanceInspector());
             WindowManager.LoadWindowsState();
         }
 

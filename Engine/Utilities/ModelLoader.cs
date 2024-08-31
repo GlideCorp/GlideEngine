@@ -44,6 +44,7 @@ namespace Engine.Utilities
             //Per il momento prende la prima mesh che trova.
             //TODO: Cambiare questa cosa per includere tutte le mesh della scena, usare o sub-meshes o entità-padre/figlio
             AssimpMesh* mesh = scene->MMeshes[scene->MRootNode->MMeshes[0]];
+            //AssimpMesh* mesh = scene->MMeshes[0];
             return ProcessMesh(mesh, scene);
         }
 

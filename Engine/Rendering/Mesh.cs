@@ -27,7 +27,7 @@ namespace Engine.Rendering
             new VertexElement(2, VertexAttribPointerType.Float, 2)
         );
 
-        private List<Vertex> _vertices;
+        private List<Vertex>? _vertices;
         public List<Vertex> Vertices 
         {
             get
@@ -50,7 +50,7 @@ namespace Engine.Rendering
         public uint VerticesCount { get; private set; }
 
 
-        private List<uint> _indices;
+        private List<uint>? _indices;
         public List<uint> Indices
         {
             get
@@ -105,8 +105,8 @@ namespace Engine.Rendering
                 uint offset = 0;
                 foreach (VertexElement element in VertexLayout.Elements)
                 {
-                    Application.Context.VertexAttribPointer(element.Index, (int)element.Count, element.Type, false, VertexLayout.Stride, (void*)offset);
                     Application.Context.EnableVertexAttribArray(element.Index);
+                    Application.Context.VertexAttribPointer(element.Index, (int)element.Count, element.Type, false, VertexLayout.Stride, (void*)offset);
 
                     offset += element.Count * VertexElement.GetSizeOf(element.Type);
                 }
