@@ -12,10 +12,8 @@ using MyCachedList = Core.Collections.Lists.CachedList<int, int>;
 
 using BenchmarkDotNet.Attributes;
 using System;
-using System.Collections.Generic;
 using BenchmarkDotNet.Order;
 using Core.Collections;
-using Core.Collections.Lists;
 
 /*
    | Method                 | Length | Mean       | Error     | StdDev    | Rank | Gen0    | Allocated |
