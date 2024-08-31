@@ -1,22 +1,11 @@
 ﻿
 namespace Core.Collections.Nodes
 {
-    public class SinglyLinkedNode<TValue>
-        where TValue : notnull
+    public class SinglyLinkedNode<TValue>(TValue value, SinglyLinkedNode<TValue>? next)
     {
-        public TValue Value;
-        public SinglyLinkedNode<TValue> Next;
+        public TValue Value { get; set; } = value;
+        public SinglyLinkedNode<TValue>? Next { get; set; } = next;
 
-        public SinglyLinkedNode(TValue value)
-        {
-            Value = value;
-            Next = this;
-        }
-
-        public SinglyLinkedNode(TValue value, SinglyLinkedNode<TValue> next)
-        {
-            Value = value;
-            Next = next;
-        }
+        public SinglyLinkedNode(TValue value) : this(value, null) { }
     }
 }

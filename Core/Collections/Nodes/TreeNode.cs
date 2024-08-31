@@ -1,4 +1,4 @@
-﻿
+﻿/*
 using Core.Collections.Lists;
 
 namespace Core.Collections.Nodes
@@ -11,6 +11,7 @@ namespace Core.Collections.Nodes
         public bool IsValueSet = false;
 
         public TreeNode<TKey, TValue>? Parent = parent;
-        public ChunkList<TKey, TreeNode<TKey, TValue>> Children = new(size);
+        //public ChunkLinkedList<TKey, TreeNode<TKey, TValue>> Children = new(size);
     }
 }
+*/

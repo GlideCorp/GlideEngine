@@ -1,8 +1,7 @@
-﻿
-namespace Core.Collections.Nodes
+
+namespace Core.Collections
 {
     public interface IMatcher<TKey, in TValue>
-        where TKey : notnull
     {
         public TKey Key { get; set; }
 

@@ -1,25 +1,15 @@
 ﻿
 namespace Core.Collections.Nodes
 {
-    public class DoublyLinkedNode<TValue> 
-        where TValue : notnull
+    public class DoublyLinkedNode<TValue>(
+        TValue value,
+        DoublyLinkedNode<TValue>? previous,
+        DoublyLinkedNode<TValue>? next)
     {
-        public TValue Value;
-        public DoublyLinkedNode<TValue> Previous;
-        public DoublyLinkedNode<TValue> Next;
+        public TValue Value { get; set; } = value;
+        public DoublyLinkedNode<TValue>? Previous { get; set; } = previous;
+        public DoublyLinkedNode<TValue>? Next { get; set; } = next;
 
-        public DoublyLinkedNode(TValue value)
-        {
-            Value = value;
-            Previous = this;
-            Next = this;
-        }
-
-        public DoublyLinkedNode(TValue value, DoublyLinkedNode<TValue> previous, DoublyLinkedNode<TValue> next)
-        {
-            Value = value;
-            Previous = previous;
-            Next = next;
-        }
+        public DoublyLinkedNode(TValue value) : this(value, null, null) { }
     }
 }

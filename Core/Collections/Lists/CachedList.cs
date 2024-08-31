@@ -1,11 +1,11 @@
-﻿
-using Core.Collections.Nodes;
+﻿/*
 using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections.Lists
 {
     public class CachedList<TKey, TValue>(int cacheSize = 8) : IList<TKey, TValue>
         where TKey : notnull
+        where TValue : notnull
     {
         private TValue[] _cache = new TValue[cacheSize];
         private List<TValue> _list = [];
@@ -21,20 +21,21 @@ namespace Core.Collections.Lists
 
         }
 
-        public void RemoveFirst(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
-        public void RemoveLast(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
-        public void RemoveAll(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
-        public void Remove(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
+        public void RemoveFirst(Match<TValue> match) { throw new NotImplementedException(); }
+        public void RemoveLast(Match<TValue> match) { throw new NotImplementedException(); }
+        public void RemoveAll(Match<TValue> match) { throw new NotImplementedException(); }
+        public void Remove(Match<TValue> match) { throw new NotImplementedException(); }
 
-        public bool FindFirst(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
-        public bool FindLast(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
-        public bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
+        public bool FindFirst(Match<TValue> match, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
+        public bool FindLast(Match<TValue> match, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
+        public bool Find(Match<TValue> match, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
 
-        public int CountMatches(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
+        public int CountMatches(Match<TValue> match) { throw new NotImplementedException(); }
 
         public IEnumerable<TValue> Traverse() { throw new NotImplementedException(); }
         public IEnumerable<TValue> TraverseInverse() { throw new NotImplementedException(); }
 
-        public IEnumerable<TValue> Filter(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
+        public IEnumerable<TValue> Filter(Match<TValue> match) { throw new NotImplementedException(); }
     }
 }
+*/

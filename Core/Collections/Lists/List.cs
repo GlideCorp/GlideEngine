@@ -1,58 +1,151 @@
 ﻿
-using Core.Collections.Nodes;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections.Lists
 {
-    public class List<TKey, TValue>(int initialSize = 2) : IList<TKey, TValue>
-        where TKey : notnull
+    public class List<TKey, TValue>(IMatcher<TKey, TValue> defaultMatcher) : ICollection<TKey, TValue>
     {
-        private TValue[] _array = new TValue[initialSize];
-        private int _count = 0;
+        public IMatcher<TKey, TValue> DefaultMatcher { get; init; } = defaultMatcher;
 
-        #region Insert
-        private void DoubleSize()
+        private TValue[] _array = [];
+        public int Count { get; private set; } = 0;
+
+        private int IncreaseSize() { return Math.Max(_array.Length * 2, 2); }
+        private int DecreaseSize() { return _array.Length / 2; }
+
+        public void InsertFirst(TValue value)
         {
-            int size = _array.Length;
-            TValue[] newArray = new TValue[size * 2];
-            Array.Copy(_array, newArray, size);
-            _array = newArray;
+            if (Count == _array.Length)
+            {
+                int newSize = IncreaseSize();
+                TValue[] newArray = new TValue[newSize];
+
+                Array.Copy(_array, sourceIndex: 0, newArray, destinationIndex: 1, length: Count);
+                _array = newArray;
+            }
+            else { Array.Copy(_array, sourceIndex: 0, _array, destinationIndex: 1, length: Count); }
+
+            _array[0] = value;
+            Count++;
         }
 
-        public void InsertFirst(TValue value) { throw new NotImplementedException(); }
-        public void InsertLast(TValue value) { throw new NotImplementedException(); }
-
-        public void Insert(TValue value)
+        public void InsertLast(TValue value)
         {
-            if (_count == _array.Length) { DoubleSize(); }
-        }
-        #endregion
+            if (Count == _array.Length)
+            {
+                int newSize = IncreaseSize();
+                TValue[] newArray = new TValue[newSize];
 
-        #region Remove
-        private void HalveSize()
+                Array.Copy(_array, newArray, Count);
+                _array = newArray;
+            }
+
+            _array[Count++] = value;
+        }
+
+        public void Insert(TValue value) { InsertLast(value); }
+
+        public void Remove(TKey key)
         {
-            int size = _array.Length / 2;
-            TValue[] newArray = new TValue[size];
-            Array.Copy(_array, newArray, size);
-            _array = newArray;
+            if (Count == 0) { return; }
+
+            DefaultMatcher.Key = key;
+            Span<TValue> span = _array.AsSpan(0, Count);
+
+            for (int i = 0; i < span.Length; i++)
+            {
+                if (!DefaultMatcher.Match(span[i])) { continue; }
+
+                Count--;
+                if (Count == 0) { _array = []; return; }
+
+                if (Count == _array.Length / 4)
+                {
+                    int newSize = DecreaseSize();
+
+                    TValue[] newArray = new TValue[newSize];
+                    Array.Copy(_array, sourceIndex: 0, newArray, destinationIndex: 0, length: i);
+                    Array.Copy(_array, sourceIndex: i + 1, newArray, destinationIndex: i, length: Count - i);
+                    _array = newArray;
+                }
+                else
+                {
+                    Array.Copy(_array, sourceIndex: i + 1, _array, destinationIndex: i, length: Count - i);
+                    _array[Count] = default!;
+                }
+
+                return;
+            }
         }
-        public void RemoveFirst(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
-        public void RemoveLast(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
-        public void RemoveAll(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
-        public void Remove(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
-        #endregion
 
-        #region Find
-        public bool FindFirst(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
-        public bool FindLast(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
-        public bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value) { throw new NotImplementedException(); }
-        #endregion
+        public void Remove(IMatcher<TKey, TValue> matcher)
+        {
+            if (Count == 0) { return; }
 
-        public int CountMatches(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
+            Span<TValue> span = _array.AsSpan(0, Count);
+            for (int i = 0; i < span.Length; i++)
+            {
+                if (!matcher.Match(span[i])) { continue; }
 
-        public IEnumerable<TValue> Traverse() { throw new NotImplementedException(); }
-        public IEnumerable<TValue> TraverseInverse() { throw new NotImplementedException(); }
+                Count--;
+                if (Count == 0) { _array = []; return; }
 
-        public IEnumerable<TValue> Filter(IMatcher<TKey, TValue> matcher) { throw new NotImplementedException(); }
+                if (Count == _array.Length / 4)
+                {
+                    int newSize = DecreaseSize();
+
+                    TValue[] newArray = new TValue[newSize];
+                    Array.Copy(_array, sourceIndex: 0, newArray, destinationIndex: 0, length: i);
+                    Array.Copy(_array, sourceIndex: i + 1, newArray, destinationIndex: i, length: Count - i);
+                    _array = newArray;
+                }
+                else
+                {
+                    Array.Copy(_array, sourceIndex: i + 1, _array, destinationIndex: i, length: Count - i);
+                    _array[Count] = default!;
+                }
+
+                return;
+            }
+        }
+
+        public bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
+        {
+            if (Count == 0) { goto ReturnDefault; }
+
+            DefaultMatcher.Key = key;
+            Span<TValue> span = _array.AsSpan(0, Count);
+
+            foreach (TValue val in span)
+            {
+                if (!DefaultMatcher.Match(val)) { continue; }
+
+                value = val!;
+                return true;
+            }
+
+ReturnDefault:
+            value = default;
+            return false;
+        }
+
+        public bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
+        {
+            if (Count == 0) { goto ReturnDefault; }
+
+            Span<TValue> span = _array.AsSpan(0, Count);
+
+            foreach (TValue val in span)
+            {
+                if (!matcher.Match(val)) { continue; }
+
+                value = val!;
+                return true;
+            }
+
+            ReturnDefault:
+            value = default;
+            return false;
+        }
     }
 }
