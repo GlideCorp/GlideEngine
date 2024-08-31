@@ -80,7 +80,6 @@ namespace Engine.Rendering
                 {
                     shad.SetMatrix4("uModel", transform);
                     material.ApplyProperties();
-
                     Graphics.Draw(mesh);
                 }
             }
