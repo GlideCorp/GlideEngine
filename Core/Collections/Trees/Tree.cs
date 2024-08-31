@@ -1,12 +1,11 @@
 ﻿
-using Core.Collections.Lists;
 using Core.Collections.Nodes;
 using System.Diagnostics.CodeAnalysis;
-// ReSharper disable All
 
 namespace Core.Collections.Trees
 {
-    public class Tree<TKey, TValue>(TKey rootKey, IMatcher<TKey, TreeNode<TKey, TValue>> basicMatcher) : ITree<TKey, TValue>
+    /*
+    public class Tree<TKey, TValue>(TKey rootKey, Match<TreeNode<TKey, TValue>> basicMatch) : ITree<TKey, TValue>
         where TKey : notnull
     {
         private readonly TreeNode<TKey, TValue> _root = new(rootKey, parent: null);
@@ -39,8 +38,7 @@ namespace Core.Collections.Trees
 
             foreach (TKey key in keyParts)
             {
-                basicMatcher.Key = key;
-                if (!currentNode.Children.Find(basicMatcher, out TreeNode<TKey, TValue>? newNode))
+                if (!currentNode.Children.Find(basicMatch, out TreeNode<TKey, TValue>? newNode))
                 {
                     newNode = new(key, parent: currentNode);
                     currentNode.Children.Insert(newNode);
@@ -58,9 +56,8 @@ namespace Core.Collections.Trees
             while (currentNode.Children.Count == 0 &&
                    currentNode is { IsValueSet: false, Parent: not null })
             {
-                basicMatcher.Key = currentNode.Key;
                 currentNode = currentNode.Parent;
-                currentNode.Children.Remove(basicMatcher);
+                currentNode.Children.Remove(basicMatch);
             }
         }
 
@@ -70,8 +67,7 @@ namespace Core.Collections.Trees
 
             foreach (TKey key in keyParts)
             {
-                basicMatcher.Key = key;
-                if (!currentNode.Children.Find(basicMatcher, out TreeNode<TKey, TValue>? newNode)) { return; }
+                if (!currentNode.Children.Find(basicMatch, out TreeNode<TKey, TValue>? newNode)) { return; }
                 currentNode = newNode;
             }
 
@@ -133,4 +129,5 @@ namespace Core.Collections.Trees
             }
         }
     }
+    */
 }

@@ -4,203 +4,132 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections.Lists
 {
-    public class DoublyLinkedList<TKey, TValue>() : IList<TKey, TValue>
-        where TKey : notnull
-        where TValue : notnull
+    public class DoublyLinkedList<TKey, TValue>(IMatcher<TKey, TValue> defaultMatcher) : ICollection<TKey, TValue>
     {
-        private DoublyLinkedNode<TValue>? _first = null;
+        public IMatcher<TKey, TValue> DefaultMatcher { get; init; } = defaultMatcher;
 
-        public int Count { get; private set; }
+        protected DoublyLinkedNode<TValue>? First { get; set; } = null;
+        protected DoublyLinkedNode<TValue>? Last { get; set; } = null;
 
-        #region Insert
+        public int Count { get; private set; } = 0;
+
         public void InsertFirst(TValue value)
         {
-            if (_first is null) { _first = new(value); }
+            Count++;
+
+            if (First is null) { First = Last = new(value); }
             else
             {
-                DoublyLinkedNode<TValue> newNode = new(value, previous: _first.Previous, next: _first);
-                _first.Previous.Next = newNode;
-                _first.Previous = newNode;
-                _first = newNode;
+                DoublyLinkedNode<TValue> newNode = new(value, previous: null, next: First);
+                First.Previous = newNode;
+                First = newNode;
             }
-
-            Count++;
         }
 
         public void InsertLast(TValue value)
         {
-            if (_first is null) { _first = new(value); }
+            Count++;
+
+            if (First is null) { First = Last = new(value); }
             else
             {
-                DoublyLinkedNode<TValue> newNode = new(value, previous: _first.Previous, next: _first);
-                _first.Previous.Next = newNode;
-                _first.Previous = newNode;
+                DoublyLinkedNode<TValue> newNode = new(value, previous: Last, next: null);
+                Last!.Next = newNode;
+                Last = newNode;
             }
-
-            Count++;
         }
 
-        public void Insert(TValue value)
+        public void Insert(TValue value) { InsertFirst(value); }
+
+        private void RemoveFirst()
         {
-            if (_first is null) { _first = new(value); }
+            Count--;
+            if (Count == 0) { First = Last = null; }
             else
             {
-                DoublyLinkedNode<TValue> newNode = new(value, previous: _first.Previous, next: _first);
-                _first.Previous.Next = newNode;
-                _first.Previous = newNode;
+                DoublyLinkedNode<TValue> toRemove = First!;
+                First = First!.Next;
+                First!.Previous = null;
+                toRemove.Next = null;
+            }
+        }
+
+        private void RemoveCurrent(DoublyLinkedNode<TValue> current)
+        {
+            Count--;
+            if (Count == 0) { First = Last = null; }
+            else
+            {
+                current.Previous!.Next = current.Next;
+                current.Next!.Previous = current.Previous;
+
+                current.Next = null;
+                current.Previous = null;
+            }
+        }
+
+        private void RemoveLast()
+        {
+            Count--;
+            if (Count == 0) { First = Last = null; }
+            else
+            {
+                DoublyLinkedNode<TValue> toRemove = Last!;
+                Last = Last!.Previous;
+                Last!.Next = null;
+                toRemove.Previous = null;
+            }
+        }
+
+        public void Remove(TKey key)
+        {
+            if (First is null) { return; }
+            DefaultMatcher.Key = key;
+
+            if (DefaultMatcher.Match(First.Value)) { RemoveFirst(); return; }
+            if (First.Next is null) { return; }
+
+            DoublyLinkedNode<TValue> current = First.Next;
+            while (current != Last)
+            {
+                if (DefaultMatcher.Match(current.Value)) { RemoveCurrent(current); return; }
+                current = current.Next!;
             }
 
-            Count++;
-        }
-        #endregion
-
-        #region Remove
-        public void RemoveFirst(IMatcher<TKey, TValue> matcher)
-        {
-            if (_first is null) { return; }
-
-            DoublyLinkedNode<TValue> current = _first;
-            do
-            {
-                if (!matcher.Match(current.Value))
-                {
-                    current = current.Next;
-                    continue;
-                }
-
-                Count--;
-                if (Count == 0) { _first = _first.Previous = _first.Next = null!; }
-                else
-                {
-                    current.Previous.Next = current.Next;
-                    current.Next.Previous = current.Previous;
-                    if (current == _first) { _first = _first.Next; }
-                    current.Previous = current.Next = null!;
-                }
-                return;
-            } while (current != _first);
-        }
-
-        public void RemoveLast(IMatcher<TKey, TValue> matcher)
-        {
-            if (_first is null) { return; }
-
-            DoublyLinkedNode<TValue> current = _first.Previous;
-            do
-            {
-                if (!matcher.Match(current.Value))
-                {
-                    current = current.Previous;
-                    continue;
-                }
-
-                Count--;
-                if (Count == 0) { _first = _first.Previous = _first.Next = null!; }
-                else
-                {
-                    current.Previous.Next = current.Next;
-                    current.Next.Previous = current.Previous;
-                    if (current == _first) { _first = _first.Next; }
-                    current.Previous = current.Next = null!;
-                }
-
-                return;
-            } while (current != _first.Previous);
-        }
-
-        public void RemoveAll(IMatcher<TKey, TValue> matcher)
-        {
-            if (_first is null) { return; }
-
-            DoublyLinkedNode<TValue> current = _first;
-            do
-            {
-                if (matcher.Match(current.Value))
-                {
-                    Count--;
-                    if (Count == 0)
-                    {
-                        _first = _first.Previous = _first.Next = null!;
-                        return;
-                    }
-
-                    DoublyLinkedNode<TValue> toRemove = current;
-                    current = current.Next;
-
-                    toRemove.Previous.Next = toRemove.Next;
-                    toRemove.Next.Previous = toRemove.Previous;
-                    if (toRemove == _first) { _first = _first.Next; }
-                    toRemove.Previous = toRemove.Next = null!;
-                }
-                else { current = current.Next; }
-
-            } while (current != _first);
+            if (DefaultMatcher.Match(Last!.Value)) { RemoveLast(); }
         }
 
         public void Remove(IMatcher<TKey, TValue> matcher)
         {
-            if (_first is null) { return; }
+            if (First is null) { return; }
 
-            DoublyLinkedNode<TValue> current = _first;
-            do
+            if (matcher.Match(First.Value)) { RemoveFirst(); return; }
+            if (First.Next is null) { return; }
+
+            DoublyLinkedNode<TValue> current = First.Next;
+            while (current != Last)
             {
-                if (!matcher.Match(current.Value))
-                {
-                    current = current.Next;
-                    continue;
-                }
-
-                Count--;
-                if (Count == 0) { _first = _first.Previous = _first.Next = null!; }
-                else
-                {
-                    current.Previous.Next = current.Next;
-                    current.Next.Previous = current.Previous;
-                    if (current == _first) { _first = _first.Next; }
-                    current.Previous = current.Next = null!;
-                }
-                return;
-            } while (current != _first);
-        }
-        #endregion
-
-        #region Find
-        public bool FindFirst(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
-        {
-            if (_first is not null)
-            {
-                DoublyLinkedNode<TValue> current = _first;
-                do
-                {
-                    if (matcher.Match(current.Value))
-                    {
-                        value = current.Value;
-                        return true;
-                    }
-
-                    current = current.Next;
-                } while (current != _first);
+                if (matcher.Match(current.Value)) { RemoveCurrent(current); return; }
+                current = current.Next!;
             }
 
-            value = default;
-            return false;
+            if (matcher.Match(Last!.Value)) { RemoveLast(); }
         }
 
-        public bool FindLast(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
+        public bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
         {
-            if (_first is not null)
-            {
-                DoublyLinkedNode<TValue> current = _first.Previous;
-                do
-                {
-                    if (matcher.Match(current.Value))
-                    {
-                        value = current.Value;
-                        return true;
-                    }
+            DefaultMatcher.Key = key;
+            DoublyLinkedNode<TValue>? current = First;
 
-                    current = current.Previous;
-                } while (current != _first.Previous);
+            while (current is not null)
+            {
+                if (DefaultMatcher.Match(current.Value))
+                {
+                    value = current.Value!;
+                    return true;
+                }
+
+                current = current.Next;
             }
 
             value = default;
@@ -209,79 +138,21 @@ namespace Core.Collections.Lists
 
         public bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
         {
-            if (_first is not null)
-            {
-                DoublyLinkedNode<TValue> current = _first;
-                do
-                {
-                    if (matcher.Match(current.Value))
-                    {
-                        value = current.Value;
-                        return true;
-                    }
+            DoublyLinkedNode<TValue>? current = First;
 
-                    current = current.Next;
-                } while (current != _first);
+            while (current is not null)
+            {
+                if (matcher.Match(current.Value))
+                {
+                    value = current.Value!;
+                    return true;
+                }
+
+                current = current.Next;
             }
 
             value = default;
             return false;
         }
-        #endregion
-
-        public int CountMatches(IMatcher<TKey, TValue> matcher)
-        {
-            if (_first is null) { return 0; }
-
-            int count = 0;
-            DoublyLinkedNode<TValue> current = _first;
-            do
-            {
-                if (matcher.Match(current.Value)) { count++; }
-                current = current.Next;
-
-            } while (current != _first);
-
-            return count;
-        }
-
-        public IEnumerable<TValue> Traverse()
-        {
-            if (_first is null) { yield break; }
-
-            DoublyLinkedNode<TValue> current = _first;
-            do
-            {
-                yield return current.Value;
-                current = current.Next;
-
-            } while (current != _first);
-        }
-
-        public IEnumerable<TValue> TraverseInverse()
-        {
-            if (_first is null) { yield break; }
-
-            DoublyLinkedNode<TValue> current = _first.Previous;
-            do
-            {
-                yield return current.Value;
-                current = current.Previous;
-
-            } while (current != _first.Previous);
-        }
-
-        public IEnumerable<TValue> Filter(IMatcher<TKey, TValue> matcher)
-        {
-            if (_first is null) { yield break; }
-
-            DoublyLinkedNode<TValue> current = _first;
-            do
-            {
-                if (matcher.Match(current.Value)) { yield return current.Value; }
-                current = current.Next;
-            } while (current != _first);
-        }
     }
 }
-

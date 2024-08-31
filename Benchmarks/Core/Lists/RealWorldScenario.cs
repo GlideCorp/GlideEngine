@@ -5,15 +5,16 @@ using SystemSortedList = System.Collections.Generic.SortedList<int, int>;
 using SystemDictionary = System.Collections.Generic.Dictionary<int, int>;
 using MySinglyLinkedList = Core.Collections.Lists.SinglyLinkedList<int, int>;
 using MyDoublyLinkedList = Core.Collections.Lists.DoublyLinkedList<int, int>;
-using MyChunkLinkedList = Core.Collections.Lists.ChunkList<int, int>;
-using MyFrequentLinkedList = Core.Collections.Lists.FrequentList<int, int>;
+using MyChunkLinkedList = Core.Collections.Lists.ChunkLinkedList<int, int>;
+using MyFrequentLinkedList = Core.Collections.Lists.FrequentLinkedList<int, int>;
+using MyList = Core.Collections.Lists.List<int, int>;
 
 using BenchmarkDotNet.Attributes;
 using System;
 using System.Collections.Generic;
-using Core.Collections.Nodes;
-using System.Runtime.CompilerServices;
 using BenchmarkDotNet.Order;
+using Core.Collections;
+using Core.Collections.Lists;
 
 /*
    | Method                 | Length | Mean       | Error     | StdDev    | Rank | Gen0    | Allocated |
@@ -36,8 +37,7 @@ namespace Benchmarks.Core.Lists
     [Orderer(summaryOrderPolicy: SummaryOrderPolicy.FastestToSlowest, methodOrderPolicy: MethodOrderPolicy.Alphabetical)]
     public class RealWorldScenario
     {
-        [Params(1000)]
-        public int Length { get; set; }
+        [Params(5_000)] public int Length { get; set; }
 
         private void Operate<TList>(
             Func<TList> createList,
@@ -49,66 +49,69 @@ namespace Benchmarks.Core.Lists
             const int baseline = 50;
             const int staticElements = 30;
             const int addAmount = 15;
-            const int removeAmount = addAmount - 2;
+            const int removeAmount = addAmount - 1;
             const double constItemRatio = 95 / 100d;
 
             Random random = new(69);
             TList list = createList();
 
-            int max = 0;
-            int indexA;
-
             // simulate scene loading
-            for (indexA = 0; indexA < baseline; indexA++) { addElement(list, max++); }
+            for (int indexA = 0; indexA < baseline; indexA++) { addElement(list, indexA); }
 
             // simulate game loop
-            for (indexA = 0; indexA < Length; indexA++)
+            for (int indexA = 0; indexA < Length; indexA++)
             {
-                for (int j = 0; j < addAmount; j++) { addElement(list, max++); }
+                for (int indexB = 0; indexB < addAmount; indexB++)
+                {
+                    addElement(list, baseline + addAmount * indexA + indexB);
+                }
 
-                int count = getCount(list) / 4;
+                int count = getCount(list);
 
-                int indexB;
-                for (indexB = 0; indexB < count; indexB++)
+                for (int indexB = 0; indexB < count / 4; indexB++)
                 {
                     double percent = random.NextDouble();
-                    int key = percent < constItemRatio ? random.Next(0, staticElements) : random.Next(staticElements + 1, max);
+                    int key = percent < constItemRatio
+                        ? random.Next(0, staticElements)
+                        : random.Next(staticElements + 1, count);
 
                     int value = findElement(list, key);
                     DoNothing(value);
                 }
 
-                int min = max - 1;
-                for (indexB = 0; indexB < removeAmount; indexB++) { removeElement(list, min--); }
+                for (int indexB = 0; indexB < removeAmount; indexB++)
+                {
+                    removeElement(list, baseline + addAmount * indexA + indexB);
+                }
             }
         }
 
         private static void DoNothing(int value) { }
 
-        private class IntComparator : IMatcher<int, int>
+        private class IntMatcher : IMatcher<int, int>
         {
             public int Key { get; set; }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public bool Match(int value) { return Key == value; }
+            public bool Match(int value)
+            {
+                return Key == value;
+            }
         }
 
-        //[Benchmark]
+        /*
+        [Benchmark]
         public void SystemLinkedList()
         {
             Operate(
-                createList: () => new SystemLinkedList(),
-                addElement: (list, value) => { list.AddFirst(value); },
+                createList: () => new LinkedList<int>(),
+                addElement: (list, value) => { list.AddLast(value); },
                 removeElement: (list, value) => { list.Remove(value); },
-                findElement: (list, value) =>
-                {
-                    LinkedListNode<int>? node = list.Find(value);
-                    return node?.Value ?? default;
-                },
-                getCount: (list) => list.Count);
+                findElement: (list, value) => list.Find(value) == null ? value : default,
+                getCount: list => list.Count);
         }
+        */
 
-        //[Benchmark]
+        [Benchmark]
         public void SystemList()
         {
             Operate(
@@ -124,6 +127,7 @@ namespace Benchmarks.Core.Lists
                 getCount: (list) => list.Count);
         }
 
+        /*
         [Benchmark]
         public void SystemListBinarySearch()
         {
@@ -147,7 +151,7 @@ namespace Benchmarks.Core.Lists
                 getCount: (list) => list.Count);
         }
 
-        //[Benchmark]
+        [Benchmark]
         public void SystemSortedList()
         {
             Operate(
@@ -168,166 +172,92 @@ namespace Benchmarks.Core.Lists
                 findElement: (list, value) => list.GetValueOrDefault(value),
                 getCount: (list) => list.Count);
         }
-
-        //[Benchmark(Baseline = true)]
+     */
+        [Benchmark]
         public void MySinglyLinkedList()
         {
-            IntComparator intComparator = new();
+            IntMatcher matcher = new();
             Operate(
-                createList: () => new MySinglyLinkedList(),
-                addElement: (list, value) => { list.Insert(value); },
-                removeElement: (list, value) =>
-                {
-                    intComparator.Key = value;
-                    list.Remove(intComparator);
-                },
-                findElement: (list, value) =>
-                {
-                    intComparator.Key = value;
-                    return list.Find(intComparator, out int v) ? v : default;
-                },
-                getCount: (list) => list.Count);
+                createList: () => new MySinglyLinkedList(matcher),
+                addElement: (list, key) => { list.InsertLast(key); },
+                removeElement: (list, key) => { list.Remove(key); },
+                findElement: (list, key) => list.Find(key, out int value) ? value : default,
+                getCount: list => list.Count);
+        }
+        /*
+        [Benchmark]
+        public void MyFrequentLinkedList()
+        {
+            IntMatcher matcher = new();
+            Operate(
+                createList: () => new FrequentLinkedList<int, int>(matcher),
+                addElement: (list, key) => { list.InsertLast(key); },
+                removeElement: (list, key) => { list.Remove(key); },
+                findElement: (list, key) => list.Find(key, out int value) ? value : default,
+                getCount: list => list.Count);
         }
 
         [Benchmark]
         public void MyDoublyLinkedList()
         {
-            IntComparator intComparator = new();
+            IntMatcher matcher = new();
             Operate(
-                createList: () => new MyDoublyLinkedList(),
-                addElement: (list, value) => { list.Insert(value); },
-                removeElement: (list, value) =>
-                {
-                    intComparator.Key = value;
-                    list.Remove(intComparator);
-                },
-                findElement: (list, value) =>
-                {
-                    intComparator.Key = value;
-                    return list.Find(intComparator, out int v) ? v : default;
-                },
-                getCount: (list) => list.Count);
-        }
-
-        [Benchmark]
-        public void MyChunkLinkedListX16()
-        {
-            IntComparator intComparator = new();
-            Operate(
-                createList: () => new MyChunkLinkedList(16),
-                addElement: (list, value) => { list.Insert(value); },
-                removeElement: (list, value) =>
-                {
-                    intComparator.Key = value;
-                    list.Remove(intComparator);
-                },
-                findElement: (list, value) =>
-                {
-                    intComparator.Key = value;
-                    return list.Find(intComparator, out int v) ? v : default;
-                },
-                getCount: (list) => list.Count);
+                createList: () => new DoublyLinkedList<int, int>(matcher),
+                addElement: (list, key) => { list.InsertLast(key); },
+                removeElement: (list, key) => { list.Remove(key); },
+                findElement: (list, key) => list.Find(key, out int value) ? value : default,
+                getCount: list => list.Count);
         }
 
         [Benchmark]
         public void MyChunkLinkedListX32()
         {
-            IntComparator intComparator = new();
+            IntMatcher matcher = new();
             Operate(
-               createList: () => new MyChunkLinkedList(32),
-               addElement: (list, value) => { list.Insert(value); },
-               removeElement: (list, value) =>
-               {
-                   intComparator.Key = value;
-                   list.Remove(intComparator);
-               },
-               findElement: (list, value) =>
-               {
-                   intComparator.Key = value;
-                   return list.Find(intComparator, out int v) ? v : default;
-               },
-               getCount: (list) => list.Count);
-        }
-
-        [Benchmark]
-        public void MyChunkLinkedListX64()
-        {
-            IntComparator intComparator = new();
-            Operate(
-               createList: () => new MyChunkLinkedList(64),
-               addElement: (list, value) => { list.Insert(value); },
-               removeElement: (list, value) =>
-               {
-                   intComparator.Key = value;
-                   list.Remove(intComparator);
-               },
-               findElement: (list, value) =>
-               {
-                   intComparator.Key = value;
-                   return list.Find(intComparator, out int v) ? v : default;
-               },
-               getCount: (list) => list.Count);
+                createList: () => new ChunkLinkedList<int, int>(size: 32, matcher),
+                addElement: (list, key) => { list.Insert(key); },
+                removeElement: (list, key) => { list.Remove(key); },
+                findElement: (list, key) => list.Find(key, out int value) ? value : default,
+                getCount: list => list.Count);
         }
 
         [Benchmark]
         public void MyChunkLinkedListX128()
         {
-            IntComparator intComparator = new();
+            IntMatcher matcher = new();
             Operate(
-               createList: () => new MyChunkLinkedList(128),
-               addElement: (list, value) => { list.Insert(value); },
-               removeElement: (list, value) =>
-               {
-                   intComparator.Key = value;
-                   list.Remove(intComparator);
-               },
-               findElement: (list, value) =>
-               {
-                   intComparator.Key = value;
-                   return list.Find(intComparator, out int v) ? v : default;
-               },
-               getCount: (list) => list.Count);
+                createList: () => new ChunkLinkedList<int, int>(size: 128, matcher),
+                addElement: (list, key) => { list.Insert(key); },
+                removeElement: (list, key) => { list.Remove(key); },
+                findElement: (list, key) => list.Find(key, out int value) ? value : default,
+                getCount: list => list.Count);
         }
+        
+        [Benchmark]
+        public void MyChunkLinkedListX512()
+        {
+            IntMatcher matcher = new();
+            Operate(
+                createList: () => new ChunkLinkedList<int, int>(size: 512, matcher),
+                addElement: (list, key) => { list.Insert(key); },
+                removeElement: (list, key) => { list.Remove(key); },
+                findElement: (list, key) => list.Find(key, out int value) ? value : default,
+                getCount: list => list.Count);
+        }
+        */
 
         [Benchmark]
-        public void MyChunkLinkedListX256()
+        public void MyList()
         {
-            IntComparator intComparator = new();
+            IntMatcher matcher = new();
             Operate(
-               createList: () => new MyChunkLinkedList(256),
-               addElement: (list, value) => { list.Insert(value); },
-               removeElement: (list, value) =>
-               {
-                   intComparator.Key = value;
-                   list.Remove(intComparator);
-               },
-               findElement: (list, value) =>
-               {
-                   intComparator.Key = value;
-                   return list.Find(intComparator, out int v) ? v : default;
-               },
-               getCount: (list) => list.Count);
+                createList: () => new MyList(matcher),
+                addElement: (list, key) => { list.InsertLast(key); },
+                removeElement: (list, key) => { list.Remove(key); },
+                findElement: (list, key) => list.Find(key, out int value) ? value : default,
+                getCount: list => list.Count);
         }
 
-        [Benchmark]
-        public void MyFrequentLinkedList()
-        {
-            IntComparator intComparator = new();
-            Operate(
-               createList: () => new MyFrequentLinkedList(),
-               addElement: (list, value) => { list.Insert(value); },
-               removeElement: (list, value) =>
-               {
-                   intComparator.Key = value;
-                   list.Remove(intComparator);
-               },
-               findElement: (list, value) =>
-               {
-                   intComparator.Key = value;
-                   return list.Find(intComparator, out int v) ? v : default;
-               },
-               getCount: (list) => list.Count);
-        }
     }
 }
 
