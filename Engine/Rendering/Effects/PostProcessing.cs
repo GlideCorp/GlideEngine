@@ -17,7 +17,7 @@ namespace Engine.Rendering.Effects
         static FrameBuffer[] FrameBuffers { get; set; }
 
         public static Stack<ScreenEffect> EffectsStack { get; private set; }
-
+        
         static PostProcessing()
         {
             Vector2D<int> frameBufferSize = Application.FramebufferSize;

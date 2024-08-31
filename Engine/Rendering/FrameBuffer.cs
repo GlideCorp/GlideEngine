@@ -36,34 +36,34 @@ namespace Engine.Rendering
 
             GL Gl = Application.Context;
 
-            FrameBufferID = Gl.GenFramebuffer();
-            Bind();
+            FrameBufferID = Gl.CreateFramebuffer();
+            //Bind();
 
             if(multiSample)
             {
-                Color = new Texture2DMultisample(Width, Height, textureParameters);
-                Gl.FramebufferTexture2D(GLEnum.Framebuffer, GLEnum.ColorAttachment0, GLEnum.Texture2DMultisample, Color.TextureID, 0);
+                Color = new Texture2DMultisample(Width, Height, textureParameters, 4, SizedInternalFormat.Rgb32f);
+                Gl.NamedFramebufferTexture(FrameBufferID, GLEnum.ColorAttachment0, Color.TextureID, 0);
             }
             else
             {
-                Color = new Texture2D(Width, Height, textureParameters);
-                Color.SetData(new Span<byte>([]), TextureFormat.RGB);
-                Gl.FramebufferTexture2D(GLEnum.Framebuffer, GLEnum.ColorAttachment0, GLEnum.Texture2D, Color.TextureID, 0);
+                Color = new Texture2D(Width, Height, textureParameters, SizedInternalFormat.Rgb32f);
+                //Color.SetData(new Span<byte>([]));
+                Gl.NamedFramebufferTexture(FrameBufferID, GLEnum.ColorAttachment0, Color.TextureID, 0);
             }
 
             if (multiSample)
             {
-                Depth = new Texture2DMultisample(Width, Height, textureParameters, 4, InternalFormat.DepthComponent24);
-                Gl.FramebufferTexture2D(GLEnum.Framebuffer, GLEnum.DepthAttachment, GLEnum.Texture2DMultisample, Depth.TextureID, 0);
+                Depth = new Texture2DMultisample(Width, Height, textureParameters, 4, SizedInternalFormat.DepthComponent24);
+                Gl.NamedFramebufferTexture(FrameBufferID, GLEnum.DepthAttachment, Depth.TextureID, 0);
             }
             else
             {
-                Depth = new Texture2D(Width, Height, textureParameters);
-                Depth.SetData(null, TextureFormat.DEPTH, PixelFormat.DepthComponent, PixelType.Float);
-                Gl.FramebufferTexture2D(GLEnum.Framebuffer, GLEnum.DepthAttachment, GLEnum.Texture2D, Depth.TextureID, 0);
+                Depth = new Texture2D(Width, Height, textureParameters, SizedInternalFormat.DepthComponent24);
+                //Depth.SetData(new Span<byte>([]), PixelFormat.DepthComponent, PixelType.Float);
+                Gl.NamedFramebufferTexture(FrameBufferID, GLEnum.DepthAttachment, Depth.TextureID, 0);
             }
 
-            GLEnum status = Gl.CheckFramebufferStatus(GLEnum.Framebuffer);
+            GLEnum status = Gl.CheckNamedFramebufferStatus(FrameBufferID, GLEnum.Framebuffer);
             CheckStatus(status);
         }
 

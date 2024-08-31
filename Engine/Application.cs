@@ -141,6 +141,7 @@ namespace Engine
             ContextPrivate = WindowPrivate.CreateOpenGL();
             ContextPrivate.Enable(EnableCap.Multisample);
             ContextPrivate.Enable(EnableCap.DepthTest);
+            ContextPrivate.Enable(EnableCap.CullFace);
 
             InputPrivate = WindowPrivate.CreateInput();
             Input.Keyboard = InputPrivate.Keyboards[0];

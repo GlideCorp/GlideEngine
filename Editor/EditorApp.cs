@@ -25,6 +25,7 @@ namespace Editor
         Transform transform;
         Camera camera;
         Mesh mTest;
+        Texture2D testTexture;
         BasicMaterial objMaterial;
 
         Vector2D<float> oldMousePos;
@@ -59,17 +60,18 @@ namespace Editor
                 Shininess = 2
             };
 
-            mTest = ModelLoader.Load("resources\\models\\shapes.glb");
-
-            PostProcessing.Push(new SimpleFogEffect());
+            mTest = ModelLoader.Load("resources\\models\\fox.glb");
 
             oldMousePos = Vector2D<float>.Zero;
 
+            FileStream stream = File.OpenRead("resources\\test.png");
+            testTexture = Texture2D.FromStream(stream);
             //Fine robe di testing------------------------------------------------------------------
 
             WindowManager.Register(new SceneInspector(transform));
-            WindowManager.Register(new TextureMemoryViewer());
-            WindowManager.Register(new InputTester());
+            //WindowManager.Register(new TextureMemoryViewer());
+            //WindowManager.Register(new InputTester());
+            WindowManager.Register(new PerformanceInspector());
             WindowManager.LoadWindowsState();
         }
 

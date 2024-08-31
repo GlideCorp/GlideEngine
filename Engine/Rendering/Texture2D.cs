@@ -1,6 +1,7 @@
 ﻿using Core.Logs;
 using Silk.NET.OpenGL;
 using StbImageSharp;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -8,7 +9,7 @@ namespace Engine.Rendering
 {
     public class Texture2D : Texture
     {
-        public Texture2D(int width, int heigth, TextureParameters textureParameters)
+        public Texture2D(int width, int heigth, TextureParameters textureParameters, SizedInternalFormat internalFormat = SizedInternalFormat.Rgba16)
         {
             if(width <= 0 || heigth <= 0)
             {
@@ -26,10 +27,11 @@ namespace Engine.Rendering
 
             GL Gl = Application.Context;
 
-            TextureID = Gl.GenTexture();
-            Bind();
-            
+            TextureID = Gl.CreateTextures(GLEnum.Texture2D, 1); 
+            //Bind();
+
             Params.Apply(TextureID);
+            Gl.TextureStorage2D(TextureID, 1, internalFormat, (uint)Width, (uint)Height);
         }
 
         public Texture2D(int width, int heigth) : this(width, heigth, TextureParameters.Default) { }
@@ -48,8 +50,9 @@ namespace Engine.Rendering
             }
 
             CurrentUnit = textureUnit;
-            Application.Context.ActiveTexture((GLEnum)((uint)GLEnum.Texture0 + CurrentUnit));
-            Application.Context.BindTexture(TextureTarget.Texture2D, TextureID);
+            Application.Context.BindTextureUnit(CurrentUnit, TextureID);
+            //Application.Context.ActiveTexture((GLEnum)((uint)GLEnum.Texture0 + CurrentUnit));
+            //Application.Context.BindTexture(TextureTarget.Texture2D, TextureID);
         }
 
         public static Texture2D FromStream(Stream stream)
@@ -57,12 +60,12 @@ namespace Engine.Rendering
             return FromStream(stream, TextureParameters.Default);
         }
 
-        public static Texture2D FromStream(Stream stream, TextureFormat format)
+        public static Texture2D FromStream(Stream stream, PixelFormat format = PixelFormat.Rgba)
         {
             return FromStream(stream, TextureParameters.Default, format);
         }
 
-        public static Texture2D FromStream(Stream stream, TextureParameters textureParameters, TextureFormat format = TextureFormat.RGB)
+        public static Texture2D FromStream(Stream stream, TextureParameters textureParameters, PixelFormat format = PixelFormat.Rgba)
         {
             ImageResult imageData = ImageResult.FromStream(stream);
 
