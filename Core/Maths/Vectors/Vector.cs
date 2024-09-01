@@ -213,7 +213,7 @@ namespace Core.Maths.Vectors
             ReadOnlySpan<T> leftSpan = Values.AsSpan();
             ReadOnlySpan<T> rightSpan = other.Values.AsSpan();
 
-            for (int i = 0; i < size - remaining; i += numberOfOperations) { result += leftSpan[i] * rightSpan[i]; }
+            for (int i = 0; i < size; i++) { result += leftSpan[i] * rightSpan[i]; }
 
             return result;
         }
