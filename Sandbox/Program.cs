@@ -1,7 +1,9 @@
 
 using Core.Collections;
-using Core.Collections.Lists;
 using Core.Maths.Matrices;
+
+
+using MyCachedList = Core.Collections.Lists.CachedList<int, int>;
 
 const int Length = 5000;
 
@@ -54,18 +56,18 @@ void Operate<TList>(
 
 static void DoNothing(int value) { }
 
-void MyChunkLinkedListX32()
+void MyCachedListX512()
 {
     IntMatcher matcher = new();
     Operate(
-        createList: () => new ChunkLinkedList<int, int>(size: 32, matcher),
-        addElement: (list, key) => { list.Insert(key); },
+        createList: () => new MyCachedList(size: 512, matcher),
+        addElement: (list, key) => { list.InsertLast(key); },
         removeElement: (list, key) => { list.Remove(key); },
         findElement: (list, key) => list.Find(key, out int value) ? value : default,
         getCount: list => list.Count);
 }
 
-MyChunkLinkedListX32();
+MyCachedListX512();
 
 class IntMatcher : IMatcher<int, int>
 {
