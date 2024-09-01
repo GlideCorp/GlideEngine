@@ -73,6 +73,11 @@ class IntMatcher : IMatcher<int, int>
 
     public bool Match(int value)
     {
+        Matrix4x4<float> asd = new Matrix4x4<float>();
+        Matrix4x4<float> asd2 = new Matrix4x4<float>();
+
+        Matrix4x4<float> res = asd + asd2;
+
         return Key == value;
     }
 
