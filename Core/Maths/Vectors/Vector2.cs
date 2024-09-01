@@ -3,14 +3,192 @@ using System.Numerics;
 
 namespace Core.Maths.Vectors
 {
-    public class Vector2 : RootedVector2<float> { }
-    public class Vector2Double : RootedVector2<double> { }
-    public class Vector2Int : Vector2<int> { }
-    public class Vector2Byte : Vector2<byte> { }
+    public class Vector2() : RootedVector2<float>()
+    {
+        public Vector2(float value) : this()
+        {
+            X = value;
+            Y = value;
+        }
 
-    public class RootedVector2<T> : Vector2<T>
+        public Vector2(float x, float y) : this()
+        {
+            X = x;
+            Y = y;
+        }
+    }
+
+    public class Vector2Double() : RootedVector2<double>()
+    {
+        public Vector2Double(double value) : this()
+        {
+            X = value;
+            Y = value;
+        }
+
+        public Vector2Double(double x, double y) : this()
+        {
+            X = x;
+            Y = y;
+        }
+    }
+
+    public class Vector2Int() : Vector2<int>()
+    {
+        public Vector2Int(int value) : this()
+        {
+            X = value;
+            Y = value;
+        }
+
+        public Vector2Int(int x, int y) : this()
+        {
+            X = x;
+            Y = y;
+        }
+    }
+
+    public class Vector2Byte() : Vector2<byte>()
+    {
+        public Vector2Byte(byte value) : this()
+        {
+            X = value;
+            Y = value;
+        }
+
+        public Vector2Byte(byte x, byte y) : this()
+        {
+            X = x;
+            Y = y;
+        }
+    }
+
+    public class RootedVector2<T>() : Vector<T>(size: 2)
         where T : INumber<T>, IRootFunctions<T>
     {
+        public static RootedVector2<T> Zero => new(value: T.Zero);
+        public static RootedVector2<T> One => new(value: T.One);
+
+        public static RootedVector2<T> UnitX => new(x: T.One, y: T.Zero);
+        public static RootedVector2<T> UnitY => new(x: T.Zero, y: T.One);
+
+        public T X
+        {
+            get => Values[0];
+            set => Values[0] = value;
+        }
+
+        public T Y
+        {
+            get => Values[1];
+            set => Values[1] = value;
+        }
+
+        public RootedVector2(T value) : this()
+        {
+            X = value;
+            Y = value;
+        }
+
+        public RootedVector2(T x, T y) : this()
+        {
+            X = x;
+            Y = y;
+        }
+
+        public static RootedVector2<T> operator +(RootedVector2<T> left, RootedVector2<T> right)
+        {
+            if (left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
+
+            RootedVector2<T> result = new()
+            {
+                X = left.X + right.X,
+                Y = left.Y + right.Y
+            };
+
+            return result;
+        }
+
+        public static Vector2<T> operator -(RootedVector2<T> left, RootedVector2<T> right)
+        {
+            if (left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
+
+            Vector2<T> result = new()
+            {
+                X = left.X - right.X,
+                Y = left.Y - right.Y
+            };
+
+            return result;
+        }
+
+        public static RootedVector2<T> operator *(RootedVector2<T> vector, T scalar)
+        {
+            return new()
+            {
+                X = scalar * vector.X,
+                Y = scalar * vector.Y
+            };
+        }
+
+        public static RootedVector2<T> operator *(T scalar, RootedVector2<T> vector) { return vector * scalar; }
+
+        public static RootedVector2<T> operator /(RootedVector2<T> vector, T scalar)
+        {
+            return new()
+            {
+                X = vector.X / scalar,
+                Y = vector.Y / scalar
+            };
+        }
+
+        public static RootedVector2<T> operator /(T scalar, RootedVector2<T> vector)
+        {
+            return new()
+            {
+                X = scalar / vector.X,
+                Y = scalar / vector.Y
+            };
+        }
+
+        public static bool operator ==(RootedVector2<T>? left, RootedVector2<T>? right)
+        {
+            if (left is null || right is null ||
+                left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
+
+            return left.X == right.X &&
+                   left.Y == right.Y;
+        }
+
+        public static bool operator !=(RootedVector2<T>? left, RootedVector2<T>? right)
+        {
+            if (left is null || right is null ||
+                left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
+
+            return left.X != right.X &&
+                   left.Y != right.Y;
+        }
+
+        public static bool operator >(RootedVector2<T> left, RootedVector2<T> right) { throw new InvalidOperationException(); }
+        public static bool operator >=(RootedVector2<T> left, RootedVector2<T> right) { throw new InvalidOperationException(); }
+        public static bool operator <(RootedVector2<T> left, RootedVector2<T> right) { throw new InvalidOperationException(); }
+        public static bool operator <=(RootedVector2<T> left, RootedVector2<T> right) { throw new InvalidOperationException(); }
+
+        public static RootedVector2<T> operator -(RootedVector2<T> value)
+        {
+            return new()
+            {
+                X = -value.X,
+                Y = -value.Y
+            };
+        }
+
+        public T Dot(RootedVector2<T> other)
+        {
+            return X * other.X +
+                   Y * other.Y;
+        }
+
         public T Magnitude()
         {
             T magnitudeSquared = Dot(this);
@@ -28,6 +206,24 @@ namespace Core.Maths.Vectors
                     [1] = Values[1] / magnitude
                 }
             };
+        }
+
+        protected bool Equals(RootedVector2<T> other)
+        {
+            return Values.Equals(other.Values);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) { return false; }
+            if (ReferenceEquals(this, obj)) { return true; }
+            if (obj.GetType() != GetType()) { return false; }
+            return Equals((RootVector3<T>)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Values.GetHashCode();
         }
     }
 

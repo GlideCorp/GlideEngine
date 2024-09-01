@@ -1,7 +1,5 @@
 
 using BenchmarkDotNet.Running;
-using Benchmarks.Core.Maths;
+using Benchmarks.Core.Lists;
 
-//BenchmarkRunner.Run<RealWorldScenario>();
-BenchmarkRunner.Run<Vectors>();
-//BenchmarkRunner.Run<Vectors3>();
+BenchmarkRunner.Run<RealWorldScenario>();
