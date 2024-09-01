@@ -243,10 +243,47 @@ namespace Core.Maths.Matrices
             return result;
         }
 
-        public static Matrix4x4<T> Rotate()
+        public static Matrix4x4<T> Rotate(Quaternion quaternion)
         {
             Matrix4x4<T> result = Identity;
-            Logger.Error("Imbecille implementalo quando hai quaternion :)");
+            /*
+            
+            TODO: Spostare in class Matrix4x4 : Matrix4x4<float>
+
+            // Precalculate coordinate products
+            float x = quaternion.X * 2.0F;
+            float y = quaternion.Y * 2.0F;
+            float z = quaternion.Z * 2.0F;
+            float xx = quaternion.X * x;
+            float yy = quaternion.Y * y;
+            float zz = quaternion.Z * z;
+            float xy = quaternion.X * y;
+            float xz = quaternion.X * z;
+            float yz = quaternion.Y * z;
+            float wx = quaternion.W * x;
+            float wy = quaternion.W * y;
+            float wz = quaternion.W * z;
+
+            result.Values[0, 0] = 1.0f - (yy + zz);
+            result.Values[1, 0] = (xy + wz);
+            result.Values[2, 0] = (xz + wy);
+            result.Values[3, 0] = 0.0f;
+
+            result.Values[0, 1] = (xy - wz);
+            result.Values[1, 1] = 1.0f - (xx + zz);
+            result.Values[2, 1] = (yz + wx);
+            result.Values[3, 1] = 0.0f;
+
+            result.Values[0, 2] = (xz + wy);
+            result.Values[1, 2] = (yz - wx);
+            result.Values[2, 2] = 1.0f - (xx + yy);
+            result.Values[3, 2] = 0.0F;
+
+            result.Values[0, 3] = 0.0f;
+            result.Values[1, 3] = 0.0f;
+            result.Values[2, 3] = 0.0f;
+            result.Values[3, 3] = 1.0f;
+            */
             return result;
             
         }

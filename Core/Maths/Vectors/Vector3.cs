@@ -71,7 +71,7 @@ namespace Core.Maths.Vectors
         }
     }
 
-    public class RootVector3<T>() : Vector<T>(size: 3)
+    public class RootVector3<T>() : Vector3<T>()
         where T : INumber<T>, IRootFunctions<T>
     {
         public static RootVector3<T> Zero => new(value: T.Zero);
@@ -127,11 +127,11 @@ namespace Core.Maths.Vectors
             return result;
         }
 
-        public static Vector3<T> operator -(RootVector3<T> left, RootVector3<T> right)
+        public static RootVector3<T> operator -(RootVector3<T> left, RootVector3<T> right)
         {
             if (left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
 
-            Vector3<T> result = new()
+            RootVector3<T> result = new()
             {
                 X = left.X - right.X,
                 Y = left.Y - right.Y,
