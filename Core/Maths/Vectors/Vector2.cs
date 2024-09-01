@@ -112,6 +112,19 @@ namespace Core.Maths.Vectors
             };
         }
 
+        public override Vector2 Normalize()
+        {
+            float magnitude = Magnitude();
+            return new()
+            {
+                Values =
+                {
+                    [0] = Values[0] / magnitude,
+                    [1] = Values[1] / magnitude
+                }
+            };
+        }
+
         protected bool Equals(Vector2 other)
         {
             return Values.Equals(other.Values);
@@ -237,6 +250,19 @@ namespace Core.Maths.Vectors
             {
                 X = -value.X,
                 Y = -value.Y
+            };
+        }
+
+        public override Vector2Double Normalize()
+        {
+            double magnitude = Magnitude();
+            return new()
+            {
+                Values =
+                {
+                    [0] = Values[0] / magnitude,
+                    [1] = Values[1] / magnitude
+                }
             };
         }
 

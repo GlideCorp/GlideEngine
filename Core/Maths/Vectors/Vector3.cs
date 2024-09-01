@@ -123,6 +123,30 @@ namespace Core.Maths.Vectors
             };
         }
 
+        public override Vector3 Normalize()
+        {
+            float magnitude = Magnitude();
+            return new()
+            {
+                Values =
+                {
+                    [0] = Values[0] / magnitude,
+                    [1] = Values[1] / magnitude,
+                    [2] = Values[2] / magnitude
+                }
+            };
+        }
+
+        public Vector3 CrossProduct(Vector3 other)
+        {
+            return new()
+            {
+                X = Y * other.Z - Z * other.Y,
+                Y = Z * other.X - X * other.Z,
+                Z = X * other.Y - Y * other.X
+            };
+        }
+
         protected bool Equals(Vector3 other)
         {
             return Values.Equals(other.Values);
@@ -259,6 +283,30 @@ namespace Core.Maths.Vectors
                 X = -value.X,
                 Y = -value.Y,
                 Z = -value.Z
+            };
+        }
+
+        public override Vector3Double Normalize()
+        {
+            double magnitude = Magnitude();
+            return new()
+            {
+                Values =
+                {
+                    [0] = Values[0] / magnitude,
+                    [1] = Values[1] / magnitude,
+                    [2] = Values[2] / magnitude
+                }
+            };
+        }
+
+        public Vector3Double CrossProduct(Vector3Double other)
+        {
+            return new()
+            {
+                X = Y * other.Z - Z * other.Y,
+                Y = Z * other.X - X * other.Z,
+                Z = X * other.Y - Y * other.X
             };
         }
 
@@ -725,7 +773,7 @@ namespace Core.Maths.Vectors
                    Z * other.Z;
         }
 
-        public Vector3<T> CrossProduct(RootVector3<T> other)
+        public RootVector3<T> CrossProduct(RootVector3<T> other)
         {
             return new()
             {
