@@ -53,7 +53,17 @@ namespace Core.Maths
 
         public static Quaternion LookRotation(Vector3 forward, Vector3 upwards)
         {
-            throw new NotImplementedException();
+            //Controlla correttezza, in teoria funziona ma se stai leggendo questo e stai avendo problemi controlla
+            //https://math.stackexchange.com/questions/60511/quaternion-for-an-object-that-to-point-in-a-direction
+            Vector3 v = Vector3.UnitX;
+            Vector3 w = forward;
+
+            v = (v - (v.Dot(upwards) * upwards)).Normalize();
+            w = (w - (w.Dot(upwards) * upwards)).Normalize();
+
+            Vector3 a = v.CrossProduct(w);
+            float theta = MathF.Acos(v.Dot(w));
+            return AxisAngle(a, theta);
         }
 
         public static Quaternion AxisAngle(Vector3 axis, float angle)
@@ -65,9 +75,23 @@ namespace Core.Maths
 
             return new Quaternion(result, cosa);
         }
+
         public static Quaternion Euler(Vector3 eulerAngles)
         {
-            throw new NotImplementedException();
+            float cy = MathF.Cos(eulerAngles.Z * 0.5f);
+            float sy = MathF.Sin(eulerAngles.Z * 0.5f);
+            float cp = MathF.Cos(eulerAngles.Y * 0.5f);
+            float sp = MathF.Sin(eulerAngles.Y * 0.5f);
+            float cr = MathF.Cos(eulerAngles.X * 0.5f);
+            float sr = MathF.Sin(eulerAngles.X * 0.5f);
+
+            return new Quaternion
+            (
+                x: (sr * cp * cy - cr * sp * sy),
+                y: (cr * sp * cy + sr * cp * sy),
+                z: (cr * cp * sy - sr * sp * cy),
+                w: (cr * cp * cy + sr * sp * sy)
+            );
         }
     }
 }
