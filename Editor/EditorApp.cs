@@ -62,12 +62,12 @@ namespace Editor
             };
 
             mTest = ModelLoader.Load("resources\\models\\fox.glb");
-            //mTest = ModelLoader.Load("resources\\models\\XYZDragon.glb");
 
             oldMousePos = Vector2D<float>.Zero;
 
             FileStream stream = File.OpenRead("resources\\test.png");
             testTexture = Texture2D.FromStream(stream);
+
             //Fine robe di testing------------------------------------------------------------------
 
             WindowManager.Register(new SceneInspector(transform));

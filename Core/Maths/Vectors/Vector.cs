@@ -110,7 +110,26 @@ namespace Core.Maths.Vectors
             return result;
         }
 
-        public static Vector<T> operator /(T scalar, Vector<T> vector) { return vector / scalar; }
+        public static Vector<T> operator /(T scalar, Vector<T> vector)
+        {
+            int size = vector.Values.Length;
+            int numberOfOperations = System.Numerics.Vector<T>.Count;
+            int remaining = size % numberOfOperations;
+            Vector<T> result = new(size);
+
+            Span<T> resultSpan = result.Values.AsSpan();
+            ReadOnlySpan<T> leftSpan = vector.Values.AsSpan();
+
+            for (int i = 0; i < size - remaining; i += numberOfOperations)
+            {
+                var v1 = new System.Numerics.Vector<T>(leftSpan.Slice(i, numberOfOperations));
+                (v1 / scalar).CopyTo(resultSpan.Slice(i, numberOfOperations));
+            }
+
+            for (int i = size - remaining; i < size; i++) { result.Values[i] = scalar / vector.Values[i]; }
+
+            return result;
+        }
 
         public static bool operator ==(Vector<T>? left, Vector<T>? right)
         {
@@ -140,57 +159,10 @@ namespace Core.Maths.Vectors
             return result;
         }
 
-        public static bool operator >(Vector<T> left, Vector<T> right)
-        {
-            if (left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
-
-            bool result = false;
-            ReadOnlySpan<T> leftSpan = left.Values.AsSpan();
-            ReadOnlySpan<T> rightSpan = right.Values.AsSpan();
-
-            for (int i = 0; !result && i < left.Values.Length; i++) { result = leftSpan[i] > rightSpan[i]; }
-
-            return result;
-        }
-
-        public static bool operator >=(Vector<T> left, Vector<T> right)
-        {
-            if (left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
-
-            bool result = false;
-            ReadOnlySpan<T> leftSpan = left.Values.AsSpan();
-            ReadOnlySpan<T> rightSpan = right.Values.AsSpan();
-
-            for (int i = 0; !result && i < left.Values.Length; i++) { result = leftSpan[i] >= rightSpan[i]; }
-
-            return result;
-        }
-
-        public static bool operator <(Vector<T> left, Vector<T> right)
-        {
-            if (left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
-
-            bool result = false;
-            ReadOnlySpan<T> leftSpan = left.Values.AsSpan();
-            ReadOnlySpan<T> rightSpan = right.Values.AsSpan();
-
-            for (int i = 0; !result && i < left.Values.Length; i++) { result = leftSpan[i] < rightSpan[i]; }
-
-            return result;
-        }
-
-        public static bool operator <=(Vector<T> left, Vector<T> right)
-        {
-            if (left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
-
-            bool result = false;
-            ReadOnlySpan<T> leftSpan = left.Values.AsSpan();
-            ReadOnlySpan<T> rightSpan = right.Values.AsSpan();
-
-            for (int i = 0; !result && i < left.Values.Length; i++) { result = leftSpan[i] <= rightSpan[i]; }
-
-            return result;
-        }
+        public static bool operator >(Vector<T> left, Vector<T> right) { throw new InvalidOperationException(); }
+        public static bool operator >=(Vector<T> left, Vector<T> right) { throw new InvalidOperationException(); }
+        public static bool operator <(Vector<T> left, Vector<T> right) { throw new InvalidOperationException(); }
+        public static bool operator <=(Vector<T> left, Vector<T> right) { throw new InvalidOperationException(); }
 
         public static Vector<T> operator -(Vector<T> value)
         {
@@ -206,8 +178,6 @@ namespace Core.Maths.Vectors
             if (Values.Length != other.Values.Length) { throw new InvalidOperationException(); }
 
             int size = Values.Length;
-            int numberOfOperations = System.Numerics.Vector<T>.Count;
-            int remaining = size % numberOfOperations;
             T result = default!;
 
             ReadOnlySpan<T> leftSpan = Values.AsSpan();
