@@ -3,12 +3,175 @@ using System.Numerics;
 
 namespace Core.Maths.Vectors
 {
-    public class RootedVector<T>(params T[] values) : Vector<T>(values)
+    public class RootedVector<T>(params T[] values) : Vector<T>(values),
+        IAdditionOperators<RootedVector<T>, RootedVector<T>, RootedVector<T>>,
+        ISubtractionOperators<RootedVector<T>, RootedVector<T>, RootedVector<T>>,
+        IMultiplyOperators<RootedVector<T>, T, RootedVector<T>>,
+        IDivisionOperators<RootedVector<T>, T, RootedVector<T>>,
+        IComparisonOperators<RootedVector<T>, RootedVector<T>, bool>,
+        IUnaryNegationOperators<RootedVector<T>, RootedVector<T>>
         where T : INumber<T>, IRootFunctions<T>
     {
-        public RootedVector(int size) : this() { }
+        public RootedVector(int size) : this(size == 0 ? [] : new T[size]) { }
 
-        public T Magnitude()
+        public static RootedVector<T> operator +(RootedVector<T> left, RootedVector<T> right)
+        {
+            if (left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
+
+            int size = left.Values.Length;
+            int numberOfOperations = System.Numerics.Vector<T>.Count;
+            int remaining = size % numberOfOperations;
+            RootedVector<T> result = new(size);
+
+            Span<T> resultSpan = result.Values.AsSpan();
+            ReadOnlySpan<T> leftSpan = left.Values.AsSpan();
+            ReadOnlySpan<T> rightSpan = right.Values.AsSpan();
+
+            for (int i = 0; i < size - remaining; i += numberOfOperations)
+            {
+                var v1 = new System.Numerics.Vector<T>(leftSpan.Slice(i, numberOfOperations));
+                var v2 = new System.Numerics.Vector<T>(rightSpan.Slice(i, numberOfOperations));
+                (v1 + v2).CopyTo(resultSpan.Slice(i, numberOfOperations));
+            }
+
+            for (int i = size - remaining; i < size; i++) { result.Values[i] = left.Values[i] + right.Values[i]; }
+
+            return result;
+        }
+
+        public static RootedVector<T> operator -(RootedVector<T> left, RootedVector<T> right)
+        {
+            if (left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
+
+            int size = left.Values.Length;
+            int numberOfOperations = System.Numerics.Vector<T>.Count;
+            int remaining = size % numberOfOperations;
+            RootedVector<T> result = new(size);
+
+            Span<T> resultSpan = result.Values.AsSpan();
+            ReadOnlySpan<T> leftSpan = left.Values.AsSpan();
+            ReadOnlySpan<T> rightSpan = right.Values.AsSpan();
+
+            for (int i = 0; i < size - remaining; i += numberOfOperations)
+            {
+                var v1 = new System.Numerics.Vector<T>(leftSpan.Slice(i, numberOfOperations));
+                var v2 = new System.Numerics.Vector<T>(rightSpan.Slice(i, numberOfOperations));
+                (v1 - v2).CopyTo(resultSpan.Slice(i, numberOfOperations));
+            }
+
+            for (int i = size - remaining; i < size; i++) { result.Values[i] = left.Values[i] - right.Values[i]; }
+
+            return result;
+        }
+
+        public static RootedVector<T> operator *(RootedVector<T> vector, T scalar)
+        {
+            int size = vector.Values.Length;
+            int numberOfOperations = System.Numerics.Vector<T>.Count;
+            int remaining = size % numberOfOperations;
+            RootedVector<T> result = new(size);
+
+            Span<T> resultSpan = result.Values.AsSpan();
+            ReadOnlySpan<T> leftSpan = vector.Values.AsSpan();
+
+            for (int i = 0; i < size - remaining; i += numberOfOperations)
+            {
+                var v1 = new System.Numerics.Vector<T>(leftSpan.Slice(i, numberOfOperations));
+                (v1 * scalar).CopyTo(resultSpan.Slice(i, numberOfOperations));
+            }
+
+            for (int i = size - remaining; i < size; i++) { result.Values[i] = vector.Values[i] * scalar; }
+
+            return result;
+        }
+
+        public static RootedVector<T> operator *(T scalar, RootedVector<T> vector) { return vector * scalar; }
+
+        public static RootedVector<T> operator /(RootedVector<T> vector, T scalar)
+        {
+            int size = vector.Values.Length;
+            int numberOfOperations = System.Numerics.Vector<T>.Count;
+            int remaining = size % numberOfOperations;
+            RootedVector<T> result = new(size);
+
+            Span<T> resultSpan = result.Values.AsSpan();
+            ReadOnlySpan<T> leftSpan = vector.Values.AsSpan();
+
+            for (int i = 0; i < size - remaining; i += numberOfOperations)
+            {
+                var v1 = new System.Numerics.Vector<T>(leftSpan.Slice(i, numberOfOperations));
+                (v1 / scalar).CopyTo(resultSpan.Slice(i, numberOfOperations));
+            }
+
+            for (int i = size - remaining; i < size; i++) { result.Values[i] = vector.Values[i] / scalar; }
+
+            return result;
+        }
+
+        public static RootedVector<T> operator /(T scalar, RootedVector<T> vector)
+        {
+            int size = vector.Values.Length;
+            int numberOfOperations = System.Numerics.Vector<T>.Count;
+            int remaining = size % numberOfOperations;
+            RootedVector<T> result = new(size);
+
+            Span<T> resultSpan = result.Values.AsSpan();
+            ReadOnlySpan<T> leftSpan = vector.Values.AsSpan();
+
+            for (int i = 0; i < size - remaining; i += numberOfOperations)
+            {
+                var v1 = new System.Numerics.Vector<T>(leftSpan.Slice(i, numberOfOperations));
+                (v1 / scalar).CopyTo(resultSpan.Slice(i, numberOfOperations));
+            }
+
+            for (int i = size - remaining; i < size; i++) { result.Values[i] = scalar / vector.Values[i]; }
+
+            return result;
+        }
+
+        public static bool operator ==(RootedVector<T>? left, RootedVector<T>? right)
+        {
+            if (left is null || right is null ||
+                left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
+
+            bool result = false;
+            ReadOnlySpan<T> leftSpan = left.Values.AsSpan();
+            ReadOnlySpan<T> rightSpan = right.Values.AsSpan();
+
+            for (int i = 0; !result && i < left.Values.Length; i++) { result = leftSpan[i] == rightSpan[i]; }
+
+            return result;
+        }
+
+        public static bool operator !=(RootedVector<T>? left, RootedVector<T>? right)
+        {
+            if (left is null || right is null ||
+                left.Values.Length != right.Values.Length) { throw new InvalidOperationException(); }
+
+            bool result = false;
+            ReadOnlySpan<T> leftSpan = left.Values.AsSpan();
+            ReadOnlySpan<T> rightSpan = right.Values.AsSpan();
+
+            for (int i = 0; !result && i < left.Values.Length; i++) { result = leftSpan[i] != rightSpan[i]; }
+
+            return result;
+        }
+
+        public static bool operator >(RootedVector<T> left, RootedVector<T> right) { throw new InvalidOperationException(); }
+        public static bool operator >=(RootedVector<T> left, RootedVector<T> right) { throw new InvalidOperationException(); }
+        public static bool operator <(RootedVector<T> left, RootedVector<T> right) { throw new InvalidOperationException(); }
+        public static bool operator <=(RootedVector<T> left, RootedVector<T> right) { throw new InvalidOperationException(); }
+
+        public static RootedVector<T> operator -(RootedVector<T> value)
+        {
+            RootedVector<T> result = new(value.Values.Length);
+            ReadOnlySpan<T> valueSpan = value.Values.AsSpan();
+
+            for (int i = 0; i < valueSpan.Length; i++) { result.Values[i] = -valueSpan[i]; }
+            return result;
+        }
+
+        public virtual T Magnitude()
         {
             T magnitudeSquared = Dot(this);
             return T.Sqrt(magnitudeSquared);
@@ -23,6 +186,24 @@ namespace Core.Maths.Vectors
             for (int i = 0; i < size; i++) { result.Values[i] = Values[i] / magnitude; }
 
             return result;
+        }
+
+        protected bool Equals(RootedVector<T> other)
+        {
+            return Values.Equals(other.Values);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) { return false; }
+            if (ReferenceEquals(this, obj)) { return true; }
+            if (obj.GetType() != GetType()) { return false; }
+            return Equals((RootedVector<T>)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Values.GetHashCode();
         }
     }
 
