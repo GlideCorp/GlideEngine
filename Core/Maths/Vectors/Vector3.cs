@@ -3,6 +3,11 @@ using System.Numerics;
 
 namespace Core.Maths.Vectors
 {
+    public class Vector3 : RootVector3<float> { }
+    public class Vector3Double : RootVector3<double> { }
+    public class Vector3Int : Vector3<int> { }
+    public class Vector3Byte : Vector3<byte> { }
+
     public class RootVector3<T> : Vector3<T>
         where T : INumber<T>, IRootFunctions<T>
     {
