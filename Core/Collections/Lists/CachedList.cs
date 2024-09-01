@@ -6,8 +6,8 @@ namespace Core.Collections.Lists
     public class CachedList<TKey, TValue>(int size, IMatcher<TKey, TValue> defaultMatcher) : List<TKey, TValue>(defaultMatcher)
     {
         protected TValue[] Cache { get; set; } = new TValue[size];
-        protected int NextCachedIndex { get; set; } = 0;
-        //protected int InverseCachedIndex { get; set; } = 0;
+        protected int NextCacheIndex { get; set; } = 0;
+        protected int InverseCacheIndex { get; set; } = 0;
         protected bool Looped { get; set; } = false;
 
         public new bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
@@ -20,18 +20,23 @@ namespace Core.Collections.Lists
         {
             if (Count == 0) { goto ReturnDefault; }
 
-            Span<TValue> span = Cache.AsSpan(0, !Looped ? NextCachedIndex : Cache.Length);
+            Span<TValue> span = Cache.AsSpan(0, !Looped ? NextCacheIndex : Cache.Length);
 
-            foreach (TValue val in span)
+            for (int i = 0; i < span.Length; i++)
             {
-                if (!matcher.Match(val)) { continue; }
+                if (!matcher.Match(span[i])) { continue; }
 
-                //Cache[NextCachedIndex] = val;
-                //InverseCachedIndex = NextCachedIndex;
-                //NextCachedIndex = (NextCachedIndex + 1) % Cache.Length;
-                //Looped |= InverseCachedIndex > NextCachedIndex;
+                value = span[i]!;
 
-                value = val!;
+                if (InverseCacheIndex == (NextCacheIndex - 1) % Cache.Length ||
+                    ((NextCacheIndex > i || i >= InverseCacheIndex) &&
+                     (InverseCacheIndex >= NextCacheIndex || NextCacheIndex > i) &&
+                     (i >= InverseCacheIndex || i >= NextCacheIndex))) { return true; }
+
+                span[i] = span[InverseCacheIndex];
+                span[InverseCacheIndex] = value;
+                InverseCacheIndex = (NextCacheIndex + 1) % Cache.Length;
+
                 return true;
             }
 
@@ -49,10 +54,10 @@ ReturnDefault:
             {
                 if (!matcher.Match(val)) { continue; }
 
-                Cache[NextCachedIndex] = val;
-                //InverseCachedIndex = NextCachedIndex;
-                NextCachedIndex = (NextCachedIndex + 1) % Cache.Length;
-                Looped |= NextCachedIndex == 0;
+                Cache[NextCacheIndex] = val;
+                InverseCacheIndex = (NextCacheIndex - 1) % Cache.Length;
+                NextCacheIndex = (NextCacheIndex + 1) % Cache.Length;
+                Looped |= NextCacheIndex == 0;
 
                 value = val!;
                 return true;
