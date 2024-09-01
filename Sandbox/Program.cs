@@ -1,8 +1,6 @@
 
 using Core.Collections;
 using Core.Maths.Matrices;
-using Core.Maths.Vectors;
-
 using MyCachedList = Core.Collections.Lists.CachedList<int, int>;
 
 const int Length = 5000;
@@ -75,37 +73,8 @@ class IntMatcher : IMatcher<int, int>
 
     public bool Match(int value)
     {
-        Matrix4x4<float> asd = new Matrix4x4<float>();
-        Matrix4x4<float> asd2 = new Matrix4x4<float>();
-
-        Matrix4x4<float> res = asd + asd2;
-
         return Key == value;
     }
 
 
 }
-/*
-void SLLBase()
-{
-    Operate(
-        createList: () => new SLLBase<int>(),
-        addElement: (list, value) => { list.Insert(value); },
-        removeElement: (list, value) => { list.Remove(value); },
-        findElement: (list, value) => list.Find(value) ? value : default,
-        getCount: list => list.Count);
-}
-
-void SLLCircular()
-{
-    Operate(
-        createList: () => new SLLCircular<int>(),
-        addElement: (list, value) => { list.Insert(value); },
-        removeElement: (list, value) => { list.Remove(value); },
-        findElement: (list, value) => list.Find(value) ? value : default,
-        getCount: list => list.Count);
-}
-
-//SLLBase();
-SLLCircular();
-*/
