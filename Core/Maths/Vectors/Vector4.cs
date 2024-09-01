@@ -3,13 +3,31 @@ using System.Numerics;
 
 namespace Core.Maths.Vectors
 {
-    public class Vector4<T>() :
-        IAdditionOperators<Vector4<T>, Vector4<T>, Vector4<T>>,
-        ISubtractionOperators<Vector4<T>, Vector4<T>, Vector4<T>>,
-        IMultiplyOperators<Vector4<T>, T, Vector4<T>>,
-        IDivisionOperators<Vector4<T>, T, Vector4<T>>,
-        IComparisonOperators<Vector4<T>, Vector4<T>, bool>,
-        IUnaryNegationOperators<Vector4<T>, Vector4<T>>
+    public class RootVector4<T> : Vector4<T>
+        where T : INumber<T>, IRootFunctions<T>
+    {
+        public T Magnitude()
+        {
+            T magnitudeSquared = Dot(this);
+            return T.Sqrt(magnitudeSquared);
+        }
+
+        public RootVector4<T> Normalize()
+        {
+            T magnitude = Magnitude();
+            return new()
+            {
+                Values =
+                {
+                    [0] = Values[0] / magnitude,
+                    [1] = Values[1] / magnitude,
+                    [2] = Values[2] / magnitude
+                }
+            };
+        }
+    }
+
+    public class Vector4<T>() : Vector<T>(size: 4)
         where T : INumber<T>
     {
         public static Vector4<T> Zero => new(value: T.Zero);
@@ -43,8 +61,6 @@ namespace Core.Maths.Vectors
             get => Values[3];
             set => Values[3] = value;
         }
-
-        public T[] Values { get; set; } = new T[4];
 
         public Vector4(T value) : this()
         {
@@ -173,7 +189,7 @@ namespace Core.Maths.Vectors
                    W * other.W;
         }
 
-        protected bool Equals(Vector3<T> other)
+        protected bool Equals(Vector4<T> other)
         {
             throw new NotImplementedException();
         }
@@ -183,7 +199,7 @@ namespace Core.Maths.Vectors
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((Vector3<T>)obj);
+            return Equals((Vector4<T>)obj);
         }
 
         public override int GetHashCode()

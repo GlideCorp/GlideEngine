@@ -3,13 +3,32 @@ using System.Numerics;
 
 namespace Core.Maths.Vectors
 {
-    public class Vector3<T>() :
-        IAdditionOperators<Vector3<T>, Vector3<T>, Vector3<T>>,
-        ISubtractionOperators<Vector3<T>, Vector3<T>, Vector3<T>>,
-        IMultiplyOperators<Vector3<T>, T, Vector3<T>>,
-        IDivisionOperators<Vector3<T>, T, Vector3<T>>,
-        IComparisonOperators<Vector3<T>, Vector3<T>, bool>,
-        IUnaryNegationOperators<Vector3<T>, Vector3<T>>
+    public class RootVector3<T> : Vector3<T>
+        where T : INumber<T>, IRootFunctions<T>
+    {
+        public T Magnitude()
+        {
+            T magnitudeSquared = Dot(this);
+            return T.Sqrt(magnitudeSquared);
+        }
+
+        public RootVector3<T> Normalize()
+        {
+            T magnitude = Magnitude();
+            return new()
+            {
+                Values =
+                {
+                    [0] = Values[0] / magnitude,
+                    [1] = Values[1] / magnitude,
+                    [2] = Values[2] / magnitude
+                }
+            };
+        }
+    }
+
+
+    public class Vector3<T>() : Vector<T>(size: 3)
         where T : INumber<T>
     {
         public static Vector3<T> Zero => new(value: T.Zero);
@@ -36,8 +55,6 @@ namespace Core.Maths.Vectors
             get => Values[2];
             set => Values[2] = value;
         }
-
-        public T[] Values { get; set; } = new T[3];
 
         public Vector3(T value) : this()
         {
@@ -165,22 +182,22 @@ namespace Core.Maths.Vectors
             };
         }
 
-        protected bool Equals(Vector3<T> other)
+        protected bool Equals(Vector4<T> other)
         {
-            throw new NotImplementedException();
+            return Values.Equals(other.Values);
         }
 
         public override bool Equals(object? obj)
         {
-            if (obj is null) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
+            if (obj is null) { return false; }
+            if (ReferenceEquals(this, obj)) { return true; }
+            if (obj.GetType() != GetType()) { return false; }
             return Equals((Vector3<T>)obj);
         }
 
         public override int GetHashCode()
         {
-            throw new NotImplementedException();
+            return Values.GetHashCode();
         }
     }
 }

@@ -1,11 +1,8 @@
-﻿using Core.Logs;
+﻿
+using Core.Logs;
 using Core.Maths.Vectors;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.Intrinsics;
 
 namespace Core.Maths.Matrices
 {
@@ -19,7 +16,6 @@ namespace Core.Maths.Matrices
         IUnaryNegationOperators<Matrix4x4<T>, Matrix4x4<T>>
         where T : INumber<T>
     {
-
         public static Matrix4x4<T> Identity => new(
             new(T.One, T.Zero, T.Zero, T.Zero),
             new(T.Zero, T.One, T.Zero, T.Zero),
@@ -58,108 +54,112 @@ namespace Core.Maths.Matrices
 
         public static Matrix4x4<T> operator +(Matrix4x4<T> left, Matrix4x4<T> right)
         {
-            Matrix4x4<T> result = new();
-
-            result.Values[0, 0] = left.Values[0, 0] + right.Values[0, 0];
-            result.Values[0, 1] = left.Values[0, 1] + right.Values[0, 1];
-            result.Values[0, 2] = left.Values[0, 2] + right.Values[0, 2];
-            result.Values[0, 3] = left.Values[0, 3] + right.Values[0, 3];
-
-            result.Values[1, 0] = left.Values[1, 0] + right.Values[1, 0];
-            result.Values[1, 1] = left.Values[1, 1] + right.Values[1, 1];
-            result.Values[1, 2] = left.Values[1, 2] + right.Values[1, 2];
-            result.Values[1, 3] = left.Values[1, 3] + right.Values[1, 3];
-
-            result.Values[2, 0] = left.Values[2, 0] + right.Values[2, 0];
-            result.Values[2, 1] = left.Values[2, 1] + right.Values[2, 1];
-            result.Values[2, 2] = left.Values[2, 2] + right.Values[2, 2];
-            result.Values[2, 3] = left.Values[2, 3] + right.Values[2, 3];
-
-            result.Values[3, 0] = left.Values[3, 0] + right.Values[3, 0];
-            result.Values[3, 1] = left.Values[3, 1] + right.Values[3, 1];
-            result.Values[3, 2] = left.Values[3, 2] + right.Values[3, 2];
-            result.Values[3, 3] = left.Values[3, 3] + right.Values[3, 3];
+            Matrix4x4<T> result = new()
+            {
+                Values =
+                {
+                    [0, 0] = left.Values[0, 0] + right.Values[0, 0],
+                    [0, 1] = left.Values[0, 1] + right.Values[0, 1],
+                    [0, 2] = left.Values[0, 2] + right.Values[0, 2],
+                    [0, 3] = left.Values[0, 3] + right.Values[0, 3],
+                    [1, 0] = left.Values[1, 0] + right.Values[1, 0],
+                    [1, 1] = left.Values[1, 1] + right.Values[1, 1],
+                    [1, 2] = left.Values[1, 2] + right.Values[1, 2],
+                    [1, 3] = left.Values[1, 3] + right.Values[1, 3],
+                    [2, 0] = left.Values[2, 0] + right.Values[2, 0],
+                    [2, 1] = left.Values[2, 1] + right.Values[2, 1],
+                    [2, 2] = left.Values[2, 2] + right.Values[2, 2],
+                    [2, 3] = left.Values[2, 3] + right.Values[2, 3],
+                    [3, 0] = left.Values[3, 0] + right.Values[3, 0],
+                    [3, 1] = left.Values[3, 1] + right.Values[3, 1],
+                    [3, 2] = left.Values[3, 2] + right.Values[3, 2],
+                    [3, 3] = left.Values[3, 3] + right.Values[3, 3]
+                }
+            };
 
             return result;
         }
 
         public static Matrix4x4<T> operator -(Matrix4x4<T> left, Matrix4x4<T> right)
         {
-            Matrix4x4<T> result = new();
-
-            result.Values[0, 0] = left.Values[0, 0] - right.Values[0, 0];
-            result.Values[0, 1] = left.Values[0, 1] - right.Values[0, 1];
-            result.Values[0, 2] = left.Values[0, 2] - right.Values[0, 2];
-            result.Values[0, 3] = left.Values[0, 3] - right.Values[0, 3];
-
-            result.Values[1, 0] = left.Values[1, 0] - right.Values[1, 0];
-            result.Values[1, 1] = left.Values[1, 1] - right.Values[1, 1];
-            result.Values[1, 2] = left.Values[1, 2] - right.Values[1, 2];
-            result.Values[1, 3] = left.Values[1, 3] - right.Values[1, 3];
-
-            result.Values[2, 0] = left.Values[2, 0] - right.Values[2, 0];
-            result.Values[2, 1] = left.Values[2, 1] - right.Values[2, 1];
-            result.Values[2, 2] = left.Values[2, 2] - right.Values[2, 2];
-            result.Values[2, 3] = left.Values[2, 3] - right.Values[2, 3];
-
-            result.Values[3, 0] = left.Values[3, 0] - right.Values[3, 0];
-            result.Values[3, 1] = left.Values[3, 1] - right.Values[3, 1];
-            result.Values[3, 2] = left.Values[3, 2] - right.Values[3, 2];
-            result.Values[3, 3] = left.Values[3, 3] - right.Values[3, 3];
+            Matrix4x4<T> result = new()
+            {
+                Values =
+                {
+                    [0, 0] = left.Values[0, 0] - right.Values[0, 0],
+                    [0, 1] = left.Values[0, 1] - right.Values[0, 1],
+                    [0, 2] = left.Values[0, 2] - right.Values[0, 2],
+                    [0, 3] = left.Values[0, 3] - right.Values[0, 3],
+                    [1, 0] = left.Values[1, 0] - right.Values[1, 0],
+                    [1, 1] = left.Values[1, 1] - right.Values[1, 1],
+                    [1, 2] = left.Values[1, 2] - right.Values[1, 2],
+                    [1, 3] = left.Values[1, 3] - right.Values[1, 3],
+                    [2, 0] = left.Values[2, 0] - right.Values[2, 0],
+                    [2, 1] = left.Values[2, 1] - right.Values[2, 1],
+                    [2, 2] = left.Values[2, 2] - right.Values[2, 2],
+                    [2, 3] = left.Values[2, 3] - right.Values[2, 3],
+                    [3, 0] = left.Values[3, 0] - right.Values[3, 0],
+                    [3, 1] = left.Values[3, 1] - right.Values[3, 1],
+                    [3, 2] = left.Values[3, 2] - right.Values[3, 2],
+                    [3, 3] = left.Values[3, 3] - right.Values[3, 3]
+                }
+            };
 
             return result;
         }
 
         public static Matrix4x4<T> operator -(Matrix4x4<T> matrix)
         {
-            Matrix4x4<T> result = new();
-
-            result.Values[0, 0] = -matrix.Values[0, 0];
-            result.Values[0, 1] = -matrix.Values[0, 1];
-            result.Values[0, 2] = -matrix.Values[0, 2];
-            result.Values[0, 3] = -matrix.Values[0, 3];
-
-            result.Values[1, 0] = -matrix.Values[1, 0];
-            result.Values[1, 1] = -matrix.Values[1, 1];
-            result.Values[1, 2] = -matrix.Values[1, 2];
-            result.Values[1, 3] = -matrix.Values[1, 3];
-
-            result.Values[2, 0] = -matrix.Values[2, 0];
-            result.Values[2, 1] = -matrix.Values[2, 1];
-            result.Values[2, 2] = -matrix.Values[2, 2];
-            result.Values[2, 3] = -matrix.Values[2, 3];
-
-            result.Values[3, 0] = -matrix.Values[3, 0];
-            result.Values[3, 1] = -matrix.Values[3, 1];
-            result.Values[3, 2] = -matrix.Values[3, 2];
-            result.Values[3, 3] = -matrix.Values[3, 3];
+            Matrix4x4<T> result = new()
+            {
+                Values =
+                {
+                    [0, 0] = -matrix.Values[0, 0],
+                    [0, 1] = -matrix.Values[0, 1],
+                    [0, 2] = -matrix.Values[0, 2],
+                    [0, 3] = -matrix.Values[0, 3],
+                    [1, 0] = -matrix.Values[1, 0],
+                    [1, 1] = -matrix.Values[1, 1],
+                    [1, 2] = -matrix.Values[1, 2],
+                    [1, 3] = -matrix.Values[1, 3],
+                    [2, 0] = -matrix.Values[2, 0],
+                    [2, 1] = -matrix.Values[2, 1],
+                    [2, 2] = -matrix.Values[2, 2],
+                    [2, 3] = -matrix.Values[2, 3],
+                    [3, 0] = -matrix.Values[3, 0],
+                    [3, 1] = -matrix.Values[3, 1],
+                    [3, 2] = -matrix.Values[3, 2],
+                    [3, 3] = -matrix.Values[3, 3]
+                }
+            };
 
             return result;
         }
 
         public static Matrix4x4<T> operator *(Matrix4x4<T> left, T right)
         {
-            Matrix4x4<T> result = new();
-
-            result.Values[0, 0] *= right;
-            result.Values[0, 1] *= right;
-            result.Values[0, 2] *= right;
-            result.Values[0, 3] *= right;
-
-            result.Values[1, 0] *= right;
-            result.Values[1, 1] *= right;
-            result.Values[1, 2] *= right;
-            result.Values[1, 3] *= right;
-
-            result.Values[2, 0] *= right;
-            result.Values[2, 1] *= right;
-            result.Values[2, 2] *= right;
-            result.Values[2, 3] *= right;
-
-            result.Values[3, 0] *= right;
-            result.Values[3, 1] *= right;
-            result.Values[3, 2] *= right;
-            result.Values[3, 3] *= right;
+            Matrix4x4<T> result = new()
+            {
+                Values =
+                {
+                    [0, 0] = left.Values[0, 0] * right,
+                    [0, 1] = left.Values[0, 1] * right,
+                    [0, 2] = left.Values[0, 2] * right,
+                    [0, 3] = left.Values[0, 3] * right,
+                    [1, 0] = left.Values[1, 0] * right,
+                    [1, 1] = left.Values[1, 1] * right,
+                    [1, 2] = left.Values[1, 2] * right,
+                    [1, 3] = left.Values[1, 3] * right,
+                    [2, 0] = left.Values[2, 0] * right,
+                    [2, 1] = left.Values[2, 1] * right,
+                    [2, 2] = left.Values[2, 2] * right,
+                    [2, 3] = left.Values[2, 3] * right,
+                    [3, 0] = left.Values[3, 0] * right,
+                    [3, 1] = left.Values[3, 1] * right,
+                    [3, 2] = left.Values[3, 2] * right,
+                    [3, 3] = left.Values[3, 3] * right
+                }
+            };
 
             return result;
         }
@@ -167,81 +167,75 @@ namespace Core.Maths.Matrices
 
         public static Vector4<T> operator *(Matrix4x4<T> left, Vector4<T> right)
         {
-            Vector4<T> result = new();
-
-            result.Values[0] = right.Values[0] * left.Values[0, 0] + right.Values[1] * left.Values[0, 1] + right.Values[2] * left.Values[0, 2] + right.Values[3] * left.Values[0, 3];
-            result.Values[1] = right.Values[1] * left.Values[1, 0] + right.Values[1] * left.Values[1, 1] + right.Values[2] * left.Values[1, 2] + right.Values[3] * left.Values[1, 3];
-            result.Values[2] = right.Values[2] * left.Values[2, 0] + right.Values[1] * left.Values[2, 1] + right.Values[2] * left.Values[2, 2] + right.Values[3] * left.Values[2, 3];
-            result.Values[3] = right.Values[3] * left.Values[3, 0] + right.Values[1] * left.Values[3, 1] + right.Values[2] * left.Values[3, 2] + right.Values[3] * left.Values[3, 3];
+            Vector4<T> result = new()
+            {
+                Values =
+                {
+                    [0] = right.Values[0] * left.Values[0, 0] + right.Values[1] * left.Values[0, 1] + right.Values[2] * left.Values[0, 2] + right.Values[3] * left.Values[0, 3],
+                    [1] = right.Values[1] * left.Values[1, 0] + right.Values[1] * left.Values[1, 1] + right.Values[2] * left.Values[1, 2] + right.Values[3] * left.Values[1, 3],
+                    [2] = right.Values[2] * left.Values[2, 0] + right.Values[1] * left.Values[2, 1] + right.Values[2] * left.Values[2, 2] + right.Values[3] * left.Values[2, 3],
+                    [3] = right.Values[3] * left.Values[3, 0] + right.Values[1] * left.Values[3, 1] + right.Values[2] * left.Values[3, 2] + right.Values[3] * left.Values[3, 3]
+                }
+            };
 
             return result;
         }
         public static Matrix4x4<T> operator *(Matrix4x4<T> left, Matrix4x4<T> right)
         {
-            Matrix4x4<T> result = new();
-
-            result.Values[0, 0] = left.Values[0, 0] * right.Values[0, 0] + left.Values[0, 1] * right.Values[1, 0] + left.Values[0, 2] * right.Values[2, 0] + left.Values[0, 3] * right.Values[3, 0];
-            result.Values[0, 1] = left.Values[0, 0] * right.Values[0, 1] + left.Values[0, 1] * right.Values[1, 1] + left.Values[0, 2] * right.Values[2, 1] + left.Values[0, 3] * right.Values[3, 1];
-            result.Values[0, 2] = left.Values[0, 0] * right.Values[0, 2] + left.Values[0, 1] * right.Values[1, 2] + left.Values[0, 2] * right.Values[2, 2] + left.Values[0, 3] * right.Values[3, 2];
-            result.Values[0, 3] = left.Values[0, 0] * right.Values[0, 3] + left.Values[0, 1] * right.Values[1, 3] + left.Values[0, 2] * right.Values[2, 3] + left.Values[0, 3] * right.Values[3, 3];
-
-            result.Values[1, 0] = left.Values[1, 0] * right.Values[0, 0] + left.Values[1, 1] * right.Values[1, 0] + left.Values[1, 2] * right.Values[2, 0] + left.Values[1, 3] * right.Values[3, 0];
-            result.Values[1, 1] = left.Values[1, 0] * right.Values[0, 1] + left.Values[1, 1] * right.Values[1, 1] + left.Values[1, 2] * right.Values[2, 1] + left.Values[1, 3] * right.Values[3, 1];
-            result.Values[1, 2] = left.Values[1, 0] * right.Values[0, 2] + left.Values[1, 1] * right.Values[1, 2] + left.Values[1, 2] * right.Values[2, 2] + left.Values[1, 3] * right.Values[3, 2];
-            result.Values[1, 3] = left.Values[1, 0] * right.Values[0, 3] + left.Values[1, 1] * right.Values[1, 3] + left.Values[1, 2] * right.Values[2, 3] + left.Values[1, 3] * right.Values[3, 3];
-
-            result.Values[2, 0] = left.Values[2, 0] * right.Values[0, 0] + left.Values[2, 1] * right.Values[1, 0] + left.Values[2, 2] * right.Values[2, 0] + left.Values[2, 3] * right.Values[3, 0];
-            result.Values[2, 1] = left.Values[2, 0] * right.Values[0, 1] + left.Values[2, 1] * right.Values[1, 1] + left.Values[2, 2] * right.Values[2, 1] + left.Values[2, 3] * right.Values[3, 1];
-            result.Values[2, 2] = left.Values[2, 0] * right.Values[0, 2] + left.Values[2, 1] * right.Values[1, 2] + left.Values[2, 2] * right.Values[2, 2] + left.Values[2, 3] * right.Values[3, 2];
-            result.Values[2, 3] = left.Values[2, 0] * right.Values[0, 3] + left.Values[2, 1] * right.Values[1, 3] + left.Values[2, 2] * right.Values[2, 3] + left.Values[2, 3] * right.Values[3, 3];
-
-            result.Values[3, 0] = left.Values[3, 0] * right.Values[0, 0] + left.Values[3, 1] * right.Values[1, 0] + left.Values[3, 2] * right.Values[2, 0] + left.Values[3, 3] * right.Values[3, 0];
-            result.Values[3, 1] = left.Values[3, 0] * right.Values[0, 1] + left.Values[3, 1] * right.Values[1, 1] + left.Values[3, 2] * right.Values[2, 1] + left.Values[3, 3] * right.Values[3, 1];
-            result.Values[3, 2] = left.Values[3, 0] * right.Values[0, 2] + left.Values[3, 1] * right.Values[1, 2] + left.Values[3, 2] * right.Values[2, 2] + left.Values[3, 3] * right.Values[3, 2];
-            result.Values[3, 3] = left.Values[3, 0] * right.Values[0, 3] + left.Values[3, 1] * right.Values[1, 3] + left.Values[3, 2] * right.Values[2, 3] + left.Values[3, 3] * right.Values[3, 3];
+            Matrix4x4<T> result = new()
+            {
+                Values =
+                {
+                    [0, 0] = left.Values[0, 0] * right.Values[0, 0] + left.Values[0, 1] * right.Values[1, 0] + left.Values[0, 2] * right.Values[2, 0] + left.Values[0, 3] * right.Values[3, 0],
+                    [0, 1] = left.Values[0, 0] * right.Values[0, 1] + left.Values[0, 1] * right.Values[1, 1] + left.Values[0, 2] * right.Values[2, 1] + left.Values[0, 3] * right.Values[3, 1],
+                    [0, 2] = left.Values[0, 0] * right.Values[0, 2] + left.Values[0, 1] * right.Values[1, 2] + left.Values[0, 2] * right.Values[2, 2] + left.Values[0, 3] * right.Values[3, 2],
+                    [0, 3] = left.Values[0, 0] * right.Values[0, 3] + left.Values[0, 1] * right.Values[1, 3] + left.Values[0, 2] * right.Values[2, 3] + left.Values[0, 3] * right.Values[3, 3],
+                    [1, 0] = left.Values[1, 0] * right.Values[0, 0] + left.Values[1, 1] * right.Values[1, 0] + left.Values[1, 2] * right.Values[2, 0] + left.Values[1, 3] * right.Values[3, 0],
+                    [1, 1] = left.Values[1, 0] * right.Values[0, 1] + left.Values[1, 1] * right.Values[1, 1] + left.Values[1, 2] * right.Values[2, 1] + left.Values[1, 3] * right.Values[3, 1],
+                    [1, 2] = left.Values[1, 0] * right.Values[0, 2] + left.Values[1, 1] * right.Values[1, 2] + left.Values[1, 2] * right.Values[2, 2] + left.Values[1, 3] * right.Values[3, 2],
+                    [1, 3] = left.Values[1, 0] * right.Values[0, 3] + left.Values[1, 1] * right.Values[1, 3] + left.Values[1, 2] * right.Values[2, 3] + left.Values[1, 3] * right.Values[3, 3],
+                    [2, 0] = left.Values[2, 0] * right.Values[0, 0] + left.Values[2, 1] * right.Values[1, 0] + left.Values[2, 2] * right.Values[2, 0] + left.Values[2, 3] * right.Values[3, 0],
+                    [2, 1] = left.Values[2, 0] * right.Values[0, 1] + left.Values[2, 1] * right.Values[1, 1] + left.Values[2, 2] * right.Values[2, 1] + left.Values[2, 3] * right.Values[3, 1],
+                    [2, 2] = left.Values[2, 0] * right.Values[0, 2] + left.Values[2, 1] * right.Values[1, 2] + left.Values[2, 2] * right.Values[2, 2] + left.Values[2, 3] * right.Values[3, 2],
+                    [2, 3] = left.Values[2, 0] * right.Values[0, 3] + left.Values[2, 1] * right.Values[1, 3] + left.Values[2, 2] * right.Values[2, 3] + left.Values[2, 3] * right.Values[3, 3],
+                    [3, 0] = left.Values[3, 0] * right.Values[0, 0] + left.Values[3, 1] * right.Values[1, 0] + left.Values[3, 2] * right.Values[2, 0] + left.Values[3, 3] * right.Values[3, 0],
+                    [3, 1] = left.Values[3, 0] * right.Values[0, 1] + left.Values[3, 1] * right.Values[1, 1] + left.Values[3, 2] * right.Values[2, 1] + left.Values[3, 3] * right.Values[3, 1],
+                    [3, 2] = left.Values[3, 0] * right.Values[0, 2] + left.Values[3, 1] * right.Values[1, 2] + left.Values[3, 2] * right.Values[2, 2] + left.Values[3, 3] * right.Values[3, 2],
+                    [3, 3] = left.Values[3, 0] * right.Values[0, 3] + left.Values[3, 1] * right.Values[1, 3] + left.Values[3, 2] * right.Values[2, 3] + left.Values[3, 3] * right.Values[3, 3]
+                }
+            };
 
             return result;
         }
 
-        public static bool operator ==(Matrix4x4<T> left, Matrix4x4<T> right)
+        public static bool operator ==(Matrix4x4<T>? left, Matrix4x4<T>? right)
         {
+            if (left is null || right is null) { return false; }
+
             return left.GetColumn(0) == right.GetColumn(0) &&
                    left.GetColumn(1) == right.GetColumn(1) &&
                    left.GetColumn(2) == right.GetColumn(2) &&
                    left.GetColumn(3) == right.GetColumn(3);
         }
 
-        public static bool operator !=(Matrix4x4<T> left, Matrix4x4<T> right)
+        public static bool operator !=(Matrix4x4<T>? left, Matrix4x4<T>? right)
         {
+            if (left is null || right is null) { return false; }
+
             return left.GetColumn(0) != right.GetColumn(0) ||
                    left.GetColumn(1) != right.GetColumn(1) ||
                    left.GetColumn(2) != right.GetColumn(2) ||
                    left.GetColumn(3) != right.GetColumn(3);
         }
 
-        public static bool operator >(Matrix4x4<T> left, Matrix4x4<T> right)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static bool operator >=(Matrix4x4<T> left, Matrix4x4<T> right)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static bool operator <(Matrix4x4<T> left, Matrix4x4<T> right)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static bool operator <=(Matrix4x4<T> left, Matrix4x4<T> right)
-        {
-            throw new NotImplementedException();
-        }
+        public static bool operator >(Matrix4x4<T> left, Matrix4x4<T> right) { throw new NotImplementedException(); }
+        public static bool operator >=(Matrix4x4<T> left, Matrix4x4<T> right) { throw new NotImplementedException(); }
+        public static bool operator <(Matrix4x4<T> left, Matrix4x4<T> right) { throw new NotImplementedException(); }
+        public static bool operator <=(Matrix4x4<T> left, Matrix4x4<T> right) { throw new NotImplementedException(); }
 
         public static Matrix4x4<T> Translate(Vector3<T> vector)
         {
-            Matrix4x4<T> result = Matrix4x4<T>.Identity;
+            Matrix4x4<T> result = Identity;
             result.Values[0, 3] = vector.X;
             result.Values[1, 3] = vector.Y;
             result.Values[2, 3] = vector.Z;
@@ -249,53 +243,60 @@ namespace Core.Maths.Matrices
             return result;
         }
 
-        public static Matrix4x4<T> Rotate(Vector3<T> vector)
+        public static Matrix4x4<T> Rotate()
         {
-            Matrix4x4<T> result = Matrix4x4<T>.Identity;
-            result.Values[0, 3] = vector.X;
-            result.Values[1, 3] = vector.Y;
-            result.Values[2, 3] = vector.Z;
-            result.Values[3, 3] = T.One;
+            Matrix4x4<T> result = Identity;
+            Logger.Error("Imbecille implementalo quando hai quaternion :)");
             return result;
+            
         }
 
-        public static Matrix4x4<T> Scale()
+        public static Matrix4x4<T> Scale(Vector3<T> vector)
         {
-            Matrix4x4<T> result = Matrix4x4<T>.Identity;
-            Logger.Info("Imbecille implementalo quando hai quaternion :)");
+            Matrix4x4<T> result = new()
+            {
+                Values =
+                {
+                    [0, 0] = vector.X,
+                    [1, 1] = vector.Y,
+                    [2, 2] = vector.Z,
+                    [3, 3] = T.One
+                }
+            };
             return result;
         }
 
         public Matrix4x4<T> Transpose()
         {
-            Matrix4x4<T> result = new(); 
-            
-            result.Values[0, 0] = Values[0, 0];
-            result.Values[0, 1] = Values[1, 0];
-            result.Values[0, 2] = Values[2, 0];
-            result.Values[0, 3] = Values[3, 0];
-
-            result.Values[1, 0] = Values[0, 1];
-            result.Values[1, 1] = Values[1, 1];
-            result.Values[1, 2] = Values[2, 1];
-            result.Values[1, 3] = Values[3, 1];
-
-            result.Values[2, 0] = Values[0, 2];
-            result.Values[2, 1] = Values[1, 2];
-            result.Values[2, 2] = Values[2, 2];
-            result.Values[2, 3] = Values[3, 2];
-
-            result.Values[3, 0] = Values[0, 3];
-            result.Values[3, 1] = Values[1, 3];
-            result.Values[3, 2] = Values[2, 3];
-            result.Values[3, 3] = Values[3, 3];
+            Matrix4x4<T> result = new()
+            {
+                Values =
+                {
+                    [0, 0] = Values[0, 0],
+                    [0, 1] = Values[1, 0],
+                    [0, 2] = Values[2, 0],
+                    [0, 3] = Values[3, 0],
+                    [1, 0] = Values[0, 1],
+                    [1, 1] = Values[1, 1],
+                    [1, 2] = Values[2, 1],
+                    [1, 3] = Values[3, 1],
+                    [2, 0] = Values[0, 2],
+                    [2, 1] = Values[1, 2],
+                    [2, 2] = Values[2, 2],
+                    [2, 3] = Values[3, 2],
+                    [3, 0] = Values[0, 3],
+                    [3, 1] = Values[1, 3],
+                    [3, 2] = Values[2, 3],
+                    [3, 3] = Values[3, 3]
+                }
+            };
 
             return result;
         }
 
         public Vector4<T> GetColumn(int index)
         {
-            return new Vector4<T>()
+            return new Vector4<T>
             {
                 X = Values[0, index],
                 Y = Values[1, index],
@@ -305,13 +306,31 @@ namespace Core.Maths.Matrices
         }
         public Vector4<T> GetRow(int index)
         {
-            return new Vector4<T>()
+            return new Vector4<T>
             {
                 X = Values[index, 0],
                 Y = Values[index, 1],
                 Z = Values[index, 2],
                 W = Values[index, 3]
             };
+        }
+
+        protected bool Equals(Matrix4x4<T> other)
+        {
+            return Values.Equals(other.Values);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals((Matrix4x4<T>)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Values.GetHashCode();
         }
     }
 }

@@ -3,6 +3,29 @@ using System.Numerics;
 
 namespace Core.Maths.Vectors
 {
+    public class RootedVector<T>(params T[] values) : Vector<T>(values)
+        where T : INumber<T>, IRootFunctions<T>
+    {
+        public RootedVector(int size) : this() { }
+
+        public T Magnitude()
+        {
+            T magnitudeSquared = Dot(this);
+            return T.Sqrt(magnitudeSquared);
+        }
+
+        public virtual RootedVector<T> Normalize()
+        {
+            int size = Values.Length;
+            T magnitude = Magnitude();
+            RootedVector<T> result = new(size);
+
+            for (int i = 0; i < size; i++) { result.Values[i] = Values[i] / magnitude; }
+
+            return result;
+        }
+    }
+
     public class Vector<T>(params T[] values) :
         IAdditionOperators<Vector<T>, Vector<T>, Vector<T>>,
         ISubtractionOperators<Vector<T>, Vector<T>, Vector<T>>,
@@ -187,7 +210,7 @@ namespace Core.Maths.Vectors
 
             return result;
         }
-
+        
         protected bool Equals(Vector<T> other)
         {
             return Values.Equals(other.Values);
