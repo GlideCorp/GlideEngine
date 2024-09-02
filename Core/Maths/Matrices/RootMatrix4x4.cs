@@ -6,30 +6,25 @@ using System.Runtime.Intrinsics;
 
 namespace Core.Maths.Matrices
 {
-    public class Matrix4x4<T> :
-        IAdditionOperators<Matrix4x4<T>, Matrix4x4<T>, Matrix4x4<T>>,
-        ISubtractionOperators<Matrix4x4<T>, Matrix4x4<T>, Matrix4x4<T>>,
-        IMultiplyOperators<Matrix4x4<T>, T, Matrix4x4<T>>,
-        IMultiplyOperators<Matrix4x4<T>, Matrix4x4<T>, Matrix4x4<T>>,
-        IMultiplyOperators<Matrix4x4<T>, Vector4<T>, Vector4<T>>,
-        IComparisonOperators<Matrix4x4<T>, Matrix4x4<T>, bool>,
-        IUnaryNegationOperators<Matrix4x4<T>, Matrix4x4<T>>
+    public class Matrix4x4() : RootMatrix4x4<float>()
+    {
+        public Matrix4x4(Vector4 column0, Vector4 column1, Vector4 column2, Vector4 column3)
+        {
+
+        }
+    }
+
+    public class RootMatrix4x4<T>() : Matrix<T>(4, 4)
         where T : INumber<T>
     {
-        public static Matrix4x4<T> Identity => new(
+        public static RootMatrix4x4<T> Identity => new(
             new(T.One, T.Zero, T.Zero, T.Zero),
             new(T.Zero, T.One, T.Zero, T.Zero),
             new(T.Zero, T.Zero, T.One, T.Zero),
             new(T.Zero, T.Zero, T.Zero, T.One)
         );
 
-        public T[,] Values { get; set; } = new T[4, 4];
-
-        public Matrix4x4()
-        {
-        }
-
-        public Matrix4x4(Vector4<T> column0, Vector4<T> column1, Vector4<T> column2, Vector4<T> column3)
+        public RootMatrix4x4(Vector4<T> column0, Vector4<T> column1, Vector4<T> column2, Vector4<T> column3) : this()
         {
             Values[0, 0] = column0.X;
             Values[0, 1] = column1.X;
@@ -52,9 +47,9 @@ namespace Core.Maths.Matrices
             Values[3, 3] = column3.W;
         }
 
-        public static Matrix4x4<T> operator +(Matrix4x4<T> left, Matrix4x4<T> right)
+        public static RootMatrix4x4<T> operator +(RootMatrix4x4<T> left, RootMatrix4x4<T> right)
         {
-            Matrix4x4<T> result = new()
+            RootMatrix4x4<T> result = new()
             {
                 Values =
                 {
@@ -80,9 +75,9 @@ namespace Core.Maths.Matrices
             return result;
         }
 
-        public static Matrix4x4<T> operator -(Matrix4x4<T> left, Matrix4x4<T> right)
+        public static RootMatrix4x4<T> operator -(RootMatrix4x4<T> left, RootMatrix4x4<T> right)
         {
-            Matrix4x4<T> result = new()
+            RootMatrix4x4<T> result = new()
             {
                 Values =
                 {
@@ -108,9 +103,9 @@ namespace Core.Maths.Matrices
             return result;
         }
 
-        public static Matrix4x4<T> operator -(Matrix4x4<T> matrix)
+        public static RootMatrix4x4<T> operator -(RootMatrix4x4<T> matrix)
         {
-            Matrix4x4<T> result = new()
+            RootMatrix4x4<T> result = new()
             {
                 Values =
                 {
@@ -136,9 +131,9 @@ namespace Core.Maths.Matrices
             return result;
         }
 
-        public static Matrix4x4<T> operator *(Matrix4x4<T> left, T right)
+        public static RootMatrix4x4<T> operator *(RootMatrix4x4<T> left, T right)
         {
-            Matrix4x4<T> result = new()
+            RootMatrix4x4<T> result = new()
             {
                 Values =
                 {
@@ -163,9 +158,9 @@ namespace Core.Maths.Matrices
 
             return result;
         }
-        public static Matrix4x4<T> operator *(T left, Matrix4x4<T> right) => right * left;
+        public static RootMatrix4x4<T> operator *(T left, RootMatrix4x4<T> right) => right * left;
 
-        public static Vector4<T> operator *(Matrix4x4<T> left, Vector4<T> right)
+        public static Vector4<T> operator *(RootMatrix4x4<T> left, Vector4<T> right)
         {
             Vector4<T> result = new()
             {
@@ -180,9 +175,9 @@ namespace Core.Maths.Matrices
 
             return result;
         }
-        public static Matrix4x4<T> operator *(Matrix4x4<T> left, Matrix4x4<T> right)
+        public static RootMatrix4x4<T> operator *(RootMatrix4x4<T> left, RootMatrix4x4<T> right)
         {
-            Matrix4x4<T> result = new()
+            RootMatrix4x4<T> result = new()
             {
                 Values =
                 {
@@ -208,7 +203,7 @@ namespace Core.Maths.Matrices
             return result;
         }
 
-        public static bool operator ==(Matrix4x4<T>? left, Matrix4x4<T>? right)
+        public static bool operator ==(RootMatrix4x4<T>? left, RootMatrix4x4<T>? right)
         {
             if (left is null || right is null) { return false; }
 
@@ -218,7 +213,7 @@ namespace Core.Maths.Matrices
                    left.GetColumn(3) == right.GetColumn(3);
         }
 
-        public static bool operator !=(Matrix4x4<T>? left, Matrix4x4<T>? right)
+        public static bool operator !=(RootMatrix4x4<T>? left, RootMatrix4x4<T>? right)
         {
             if (left is null || right is null) { return false; }
 
@@ -228,14 +223,14 @@ namespace Core.Maths.Matrices
                    left.GetColumn(3) != right.GetColumn(3);
         }
 
-        public static bool operator >(Matrix4x4<T> left, Matrix4x4<T> right) { throw new NotImplementedException(); }
-        public static bool operator >=(Matrix4x4<T> left, Matrix4x4<T> right) { throw new NotImplementedException(); }
-        public static bool operator <(Matrix4x4<T> left, Matrix4x4<T> right) { throw new NotImplementedException(); }
-        public static bool operator <=(Matrix4x4<T> left, Matrix4x4<T> right) { throw new NotImplementedException(); }
+        public static bool operator >(RootMatrix4x4<T> left, RootMatrix4x4<T> right) { throw new NotImplementedException(); }
+        public static bool operator >=(RootMatrix4x4<T> left, RootMatrix4x4<T> right) { throw new NotImplementedException(); }
+        public static bool operator <(RootMatrix4x4<T> left, RootMatrix4x4<T> right) { throw new NotImplementedException(); }
+        public static bool operator <=(RootMatrix4x4<T> left, RootMatrix4x4<T> right) { throw new NotImplementedException(); }
 
-        public static Matrix4x4<T> Translate(Vector3<T> vector)
+        public static RootMatrix4x4<T> Translate(Vector3<T> vector)
         {
-            Matrix4x4<T> result = Identity;
+            RootMatrix4x4<T> result = Identity;
             result.Values[0, 3] = vector.X;
             result.Values[1, 3] = vector.Y;
             result.Values[2, 3] = vector.Z;
@@ -243,13 +238,10 @@ namespace Core.Maths.Matrices
             return result;
         }
 
-        public static Matrix4x4<T> Rotate(Quaternion quaternion)
+        public static RootMatrix4x4<float> Rotate(Quaternion quaternion)
         {
-            Matrix4x4<T> result = Identity;
-            /*
+            RootMatrix4x4<float> result = RootMatrix4x4<float>.Identity;
             
-            TODO: Spostare in class Matrix4x4 : Matrix4x4<float>
-
             // Precalculate coordinate products
             float x = quaternion.X * 2.0F;
             float y = quaternion.Y * 2.0F;
@@ -283,14 +275,13 @@ namespace Core.Maths.Matrices
             result.Values[1, 3] = 0.0f;
             result.Values[2, 3] = 0.0f;
             result.Values[3, 3] = 1.0f;
-            */
-            return result;
             
+            return result;
         }
 
-        public static Matrix4x4<T> Scale(Vector3<T> vector)
+        public static RootMatrix4x4<T> Scale(Vector3<T> vector)
         {
-            Matrix4x4<T> result = new()
+            RootMatrix4x4<T> result = new()
             {
                 Values =
                 {
@@ -303,9 +294,9 @@ namespace Core.Maths.Matrices
             return result;
         }
 
-        public Matrix4x4<T> Transpose()
+        public RootMatrix4x4<T> Transpose()
         {
-            Matrix4x4<T> result = new()
+            RootMatrix4x4<T> result = new()
             {
                 Values =
                 {
@@ -352,7 +343,7 @@ namespace Core.Maths.Matrices
             };
         }
 
-        protected bool Equals(Matrix4x4<T> other)
+        protected bool Equals(RootMatrix4x4<T> other)
         {
             return Values.Equals(other.Values);
         }
@@ -362,7 +353,7 @@ namespace Core.Maths.Matrices
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != GetType()) return false;
-            return Equals((Matrix4x4<T>)obj);
+            return Equals((RootMatrix4x4<T>)obj);
         }
 
         public override int GetHashCode()
