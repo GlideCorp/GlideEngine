@@ -1,12 +1,11 @@
 ﻿using Core.Extensions;
 using Core.Logs;
+using Core.Maths.Matrices;
+using Core.Maths.Vectors;
 using Engine.Utilities;
-using Silk.NET.Core.Native;
-using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System.Drawing;
-using System.Numerics;
-using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Engine.Rendering
 {
@@ -98,28 +97,29 @@ namespace Engine.Rendering
             Application.Context.Uniform1(GetLocation(uniformName), value);
         }
 
-        public void SetVector2(string uniformName, Vector2D<float> vector)
+        public void SetVector2(string uniformName, Vector2Float vector)
         {
-            Application.Context.Uniform2(GetLocation(uniformName), vector.ToSystem());
+            Application.Context.Uniform2(GetLocation(uniformName), vector.X, vector.Y);
         }
 
-        public void SetVector3(string uniformName, Vector3D<float> vector)
+        public void SetVector3(string uniformName, Vector3Float vector)
         {
-            Application.Context.Uniform3(GetLocation(uniformName), vector.ToSystem());
+            Application.Context.Uniform3(GetLocation(uniformName), vector.X, vector.Y, vector.Z);
         }
 
-        public void SetVector4(string uniformName, Vector4D<float> vector)
+        public void SetVector4(string uniformName, Vector4Float vector)
         {
-            Application.Context.Uniform4(GetLocation(uniformName), vector.ToSystem());
+            Application.Context.Uniform4(GetLocation(uniformName), vector.X, vector.Y, vector.Z, vector.W);
         }
 
         public void SetColor(string uniformName, Color color)
         {
-            Application.Context.Uniform3(GetLocation(uniformName), color.ToVec3());
+            Application.Context.Uniform3(GetLocation(uniformName), color.R/255.0f, color.G/255.0f, color.B/255.0f);
         }
 
-        public unsafe void SetMatrix4(string uniformName, Matrix4X4<float> matrix)
+        public unsafe void SetMatrix4(string uniformName, Matrix4x4 matrix)
         {
+            //se ti vuoi divertire metti a true il false :)
             Application.Context.UniformMatrix4(GetLocation(uniformName), 1, false, (float*)&matrix);
         }
 

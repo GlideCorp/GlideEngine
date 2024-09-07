@@ -1,10 +1,4 @@
-﻿using Silk.NET.OpenGL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Engine.Rendering.Effects
 {
     public abstract class ScreenEffect

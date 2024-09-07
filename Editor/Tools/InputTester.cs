@@ -1,22 +1,17 @@
 ﻿using Core.Logs;
+using Core.Maths.Vectors;
 using Engine.Utilities;
 using ImGuiNET;
-using Silk.NET.Maths;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Editor.Tools
 {
     public class InputTester : Tool
     {
-        Vector2D<float> previousMousePosition;
+        Vector2Float previousMousePosition;
 
         public InputTester() : base("Input Tester")
         {
-            previousMousePosition = Vector2D<float>.Zero;
+            previousMousePosition = Vector2Float.Zero;
         }
 
         protected override void ToolGui()

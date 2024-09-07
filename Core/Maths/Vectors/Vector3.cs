@@ -1,9 +1,10 @@
-﻿
-using System;
+﻿using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Core.Maths.Vectors
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector3Float(float x, float y, float z):
         IAdditionOperators<Vector3Float, Vector3Float, Vector3Float>,
         ISubtractionOperators<Vector3Float, Vector3Float, Vector3Float>,
@@ -162,7 +163,8 @@ namespace Core.Maths.Vectors
             return HashCode.Combine(X, Y, Z);
         }
     }
-    
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector3Double(double x, double y, double z) :
         IAdditionOperators<Vector3Double, Vector3Double, Vector3Double>,
         ISubtractionOperators<Vector3Double, Vector3Double, Vector3Double>,
@@ -323,6 +325,7 @@ namespace Core.Maths.Vectors
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector3Int(int x, int y, int z) :
         IAdditionOperators<Vector3Int, Vector3Int, Vector3Int>,
         ISubtractionOperators<Vector3Int, Vector3Int, Vector3Int>,
@@ -473,7 +476,8 @@ namespace Core.Maths.Vectors
             return HashCode.Combine(X, Y, Z);
         }
     }
-    
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector3Byte(byte x, byte y, byte z) :
         IAdditionOperators<Vector3Byte, Vector3Byte, Vector3Byte>,
         ISubtractionOperators<Vector3Byte, Vector3Byte, Vector3Byte>,

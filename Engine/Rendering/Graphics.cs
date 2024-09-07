@@ -1,9 +1,8 @@
-﻿using Engine.Rendering.Effects;
+﻿using Core.Maths.Vectors;
+using Engine.Rendering.Effects;
 using Engine.Utilities;
-using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System.Drawing;
-using System.Numerics;
 
 namespace Engine.Rendering
 {
@@ -83,27 +82,27 @@ namespace Engine.Rendering
         public static void CopyFrameBuffer(FrameBuffer source, FrameBuffer destination, ClearBufferMask copyMask)
         {
             CopyFrameBuffer(source.FrameBufferID, destination.FrameBufferID,
-                            new Vector2D<int>(0, 0), new Vector2D<int>(source.Width, source.Height),
-                            new Vector2D<int>(0, 0), new Vector2D<int>(destination.Width, destination.Height),
+                            new Vector2Int(0, 0), new Vector2Int(source.Width, source.Height),
+                            new Vector2Int(0, 0), new Vector2Int(destination.Width, destination.Height),
                             copyMask);
         }
 
         public static void CopyFrameBuffer(uint source, FrameBuffer destination, ClearBufferMask copyMask)
         {
             CopyFrameBuffer(source, destination.FrameBufferID,
-                            new Vector2D<int>(0, 0), new Vector2D<int>(destination.Width, destination.Height),
-                            new Vector2D<int>(0, 0), new Vector2D<int>(destination.Width, destination.Height),
+                            new Vector2Int(0, 0), new Vector2Int(destination.Width, destination.Height),
+                            new Vector2Int(0, 0), new Vector2Int(destination.Width, destination.Height),
                             copyMask);
         }
 
         public static void CopyFrameBuffer(FrameBuffer source, uint destination, ClearBufferMask copyMask)
         {
             CopyFrameBuffer(source.FrameBufferID, destination,
-                            new Vector2D<int>(0, 0), new Vector2D<int>(source.Width, source.Height),
-                            new Vector2D<int>(0, 0), new Vector2D<int>(source.Width, source.Height),
+                            new Vector2Int(0, 0), new Vector2Int(source.Width, source.Height),
+                            new Vector2Int(0, 0), new Vector2Int(source.Width, source.Height),
                             copyMask);
         }
-        public static void CopyFrameBuffer(uint source, uint destination, Vector2D<int>source0, Vector2D<int> source1, Vector2D<int> dest0, Vector2D<int> dest1, ClearBufferMask copyMask)
+        public static void CopyFrameBuffer(uint source, uint destination, Vector2Int source0, Vector2Int source1, Vector2Int dest0, Vector2Int dest1, ClearBufferMask copyMask)
         {
             //Application.Context.BindFramebuffer(FramebufferTarget.ReadFramebuffer, source);
             //Application.Context.BindFramebuffer(FramebufferTarget.DrawFramebuffer, destination);

@@ -1,18 +1,20 @@
 ﻿using Core.Extensions;
-using Silk.NET.Maths;
+using Core.Maths;
+using Core.Maths.Vectors;
+using Core.Maths.Matrices;
 
 namespace Engine.Entities.Components
 {
     public class Camera : Component
     {
-        private Vector3D<float> m_Position;
-        private Vector3D<float> m_Direction;
+        private Vector3Float m_Position;
+        private Vector3Float m_Direction;
         private float m_Fov;
 
-        private Matrix4X4<float> m_Projection;
-        private Matrix4X4<float> m_View;
+        private Matrix4x4 m_Projection;
+        private Matrix4x4 m_View;
 
-        public Vector3D<float> Position 
+        public Vector3Float Position 
         { 
             get => m_Position; 
             set
@@ -22,7 +24,7 @@ namespace Engine.Entities.Components
             }
         }
 
-        public Vector3D<float> Direction
+        public Vector3Float Direction
         {
             get => m_Direction;
             set
@@ -42,7 +44,7 @@ namespace Engine.Entities.Components
             }
         }
 
-        public Matrix4X4<float> Projection
+        public Matrix4x4 Projection
         {
             get
             {
@@ -51,15 +53,15 @@ namespace Engine.Entities.Components
                     return m_Projection;
                 }
 
-                Vector2D<int> size = Application.FramebufferSize;
-                m_Projection = Matrix4X4.CreatePerspectiveFieldOfView(Fov * MathHelper.Deg2Rad, (float)size.X/size.Y, 0.1f, 100.0f);
+                Vector2Int size = Application.FramebufferSize;
+                m_Projection = Matrix4x4.Perspective(Fov * MathHelper.Deg2Rad, (float)size.X/size.Y, 0.1f, 100.0f);
 
                 IsProjDirty = false;
                 return m_Projection;
             }
         }
 
-        public Matrix4X4<float> View
+        public Matrix4x4 View
         {
             get
             {
@@ -68,7 +70,7 @@ namespace Engine.Entities.Components
                     return m_View;
                 }
 
-                m_View = Matrix4X4.CreateLookAt(Position, Position + Direction, Vector3D<float>.UnitY);
+                m_View = Matrix4x4.LookAt(Position, Position + Direction, Vector3Float.UnitY);
 
                 IsViewDirty = false;
                 return m_View;
@@ -80,8 +82,8 @@ namespace Engine.Entities.Components
 
         public Camera() : base("camera")
         {
-            Position = Vector3D<float>.Zero;
-            Direction = Vector3D<float>.UnitZ;
+            Position = Vector3Float.Zero;
+            Direction = Vector3Float.UnitZ;
             Fov = 60;
 
             IsViewDirty = true;
@@ -93,9 +95,9 @@ namespace Engine.Entities.Components
             IsViewDirty = IsProjDirty = true;
         }
 
-        public void LookAt(Vector3D<float> point)
+        public void LookAt(Vector3Float point)
         {
-            Direction = Vector3D.Normalize(point - Position);
+            Direction = (point - Position).Normalize();
         }
     }
 }

@@ -1,5 +1,6 @@
-﻿using Silk.NET.Maths;
-using Silk.NET.OpenGL;
+﻿using Silk.NET.OpenGL;
+using Core.Maths.Vectors;
+using Core.Maths.Matrices;
 
 namespace Engine.Rendering
 {
@@ -26,13 +27,13 @@ namespace Engine.Rendering
             Application.Context.BindBuffer(BufferTargetARB.UniformBuffer, 0);
         }
 
-        internal void SetMatrix4(int offset, Matrix4X4<float> matrix)
+        internal void SetMatrix4(int offset, Matrix4x4 matrix)
         {
-            Application.Context.NamedBufferSubData<Matrix4X4<float>>(BufferID, offset, 16*4, ref matrix);
+            Application.Context.NamedBufferSubData(BufferID, offset, 16*4, ref matrix);
         }
-        internal void SetVec4(int offset, Vector4D<float> vector)
+        internal void SetVec4(int offset, Vector4Float vector)
         {
-            Application.Context.NamedBufferSubData<Vector4D<float>>(BufferID, offset, 16 , ref vector);
+            Application.Context.NamedBufferSubData(BufferID, offset, 16 , ref vector);
         }
     }
 }

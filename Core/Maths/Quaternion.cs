@@ -1,11 +1,6 @@
-﻿using Core.Maths.Vectors;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
+﻿using System;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+using Core.Maths.Vectors;
 
 namespace Core.Maths
 {
@@ -118,7 +113,7 @@ namespace Core.Maths
             return new Quaternion(result, cosa);
         }
 
-        public static Quaternion Euler(Vector3 eulerAngles)
+        public static Quaternion FromEuler(Vector3 eulerAngles)
         {
             float cy = MathF.Cos(eulerAngles.Z * 0.5f);
             float sy = MathF.Sin(eulerAngles.Z * 0.5f);
@@ -134,6 +129,29 @@ namespace Core.Maths
                 z: (cr * cp * sy - sr * sp * cy),
                 w: (cr * cp * cy + sr * sp * sy)
             );
+        }
+        
+        public Vector3Float ToEuler()
+        {
+            Vector3Float angles = new();
+
+            // roll / X
+            double sinr_cosp = 2 * (W * X + Y * Z);
+            double cosr_cosp = 1 - 2 * (X * X + Y * Y);
+            angles.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+
+            // pitch / y
+            double sinp = 2 * (W * Y - Z * X);
+            sinp = (sinp > 1.0) ? 1.0 : sinp;
+            sinp = (sinp < -1.0) ? -1.0 : sinp;
+            angles.Y = (float)Math.Asin(sinp);
+
+            // yaw / Z
+            double siny_cosp = 2 * (W * Z + X * Y);
+            double cosy_cosp = 1 - 2 * (Y * Y + Z * Z);
+            angles.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+
+            return angles;
         }
         #endregion
 

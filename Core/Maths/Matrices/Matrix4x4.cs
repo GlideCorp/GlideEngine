@@ -1,12 +1,11 @@
-﻿
-using System;
-using Core.Logs;
+﻿using System;
 using Core.Maths.Vectors;
 using System.Numerics;
-using System.Runtime.Intrinsics;
+using System.Runtime.InteropServices;
 
 namespace Core.Maths.Matrices
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct Matrix4x4(Vector4Float column0, Vector4Float column1, Vector4Float column2, Vector4Float column3) :
         IAdditionOperators<Matrix4x4, Matrix4x4, Matrix4x4>,
         ISubtractionOperators<Matrix4x4, Matrix4x4, Matrix4x4>,
@@ -69,7 +68,7 @@ namespace Core.Maths.Matrices
             */
         }
 
-        public static Matrix4x4 Translate(Vector3 vector)
+        public static Matrix4x4 Translate(Vector3Float vector)
         {
             Matrix4x4 result = Identity;
             result.M03 = vector.X;
@@ -132,7 +131,7 @@ namespace Core.Maths.Matrices
             return result;
         }
 
-        public static Matrix4x4 Projection(float fov, float ratio, float near, float far)
+        public static Matrix4x4 Perspective(float fov, float ratio, float near, float far)
         {
             if (fov <= 0.0f || fov >= Math.PI)
                 throw new ArgumentOutOfRangeException();
@@ -156,9 +155,9 @@ namespace Core.Maths.Matrices
                 M11 = yScale,
 
                 M22 = far / (near - far),
-                M23 = -1.0f,
+                M32 = -1.0f,
 
-                M32 = near * far / (near - far)
+                M23 = near * far / (near - far)
             };
         }
 
@@ -171,20 +170,20 @@ namespace Core.Maths.Matrices
             return new()
             {
                 M00 = xAxis.X,
-                M01 = yAxis.X,
-                M02 = zAxis.X,
+                M10 = yAxis.X,
+                M20 = zAxis.X,
 
-                M10 = xAxis.Y,
+                M01 = xAxis.Y,
                 M11 = yAxis.Y,
-                M12 = zAxis.Y,
+                M21 = zAxis.Y,
 
-                M20 = xAxis.Z,
-                M21 = yAxis.Z,
+                M02 = xAxis.Z,
+                M12 = yAxis.Z,
                 M22 = zAxis.Z,
 
-                M30 = -xAxis.Dot(position),
-                M31 = -yAxis.Dot(position),
-                M32 = -zAxis.Dot(position),
+                M03 = -xAxis.Dot(position),
+                M13 = -yAxis.Dot(position),
+                M23 = -zAxis.Dot(position),
                 M33 = 1.0f
             };
         }

@@ -1,7 +1,8 @@
-﻿using Silk.NET.Maths;
-using Engine.Rendering.Effects;
+﻿using Engine.Rendering.Effects;
 using Engine.Entities.Components;
 using Core.Logs;
+using Core.Maths.Vectors;
+using Core.Maths.Matrices;
 
 
 namespace Engine.Rendering
@@ -11,22 +12,22 @@ namespace Engine.Rendering
         public static FrameBuffer? FrameBuffer { get; private set; }
 
         static UniformBuffer GlobalUniformBuffer;
-        static Matrix4X4<float> ViewMatrix;
-        static Matrix4X4<float> ProjectionMatrix;
+        static Matrix4x4 ViewMatrix;
+        static Matrix4x4 ProjectionMatrix;
 
         //                              Questa tripla orribile è temporanea, una volta stabilito un entity component system cambierà
-        static Dictionary<Shader, List<(Mesh, Material, Matrix4X4<float>)>> DrawCalls;
+        static Dictionary<Shader, List<(Mesh, Material, Matrix4x4)>> DrawCalls;
 
         public static void Startup()
         {
-            Vector2D<int> frameBufferSize = Application.FramebufferSize;
+            Vector2Int frameBufferSize = Application.FramebufferSize;
             FrameBuffer = new FrameBuffer(frameBufferSize.X, frameBufferSize.Y, true);
 
             GlobalUniformBuffer = new UniformBuffer((16 * 4 * 2) + 16, 0); //2 di 4 Vector4D
         }
 
         public static void Begin(Camera camera) => Begin(camera.View, camera.Projection);
-        public static void Begin(Matrix4X4<float> view, Matrix4X4<float> projection)
+        public static void Begin(Matrix4x4 view, Matrix4x4 projection)
         {
             if(FrameBuffer == null)
             {
@@ -39,7 +40,7 @@ namespace Engine.Rendering
             DrawCalls.Clear();
         }
 
-        public static void Draw(Mesh mesh, Matrix4X4<float> transform, Material material)
+        public static void Draw(Mesh mesh, Matrix4x4 transform, Material material)
         {
             if(DrawCalls.TryGetValue(material.Shader, out var drawCalls))
             {
@@ -64,19 +65,19 @@ namespace Engine.Rendering
             GlobalUniformBuffer.SetMatrix4(0, ViewMatrix);
             GlobalUniformBuffer.SetMatrix4(16*4, ProjectionMatrix);
 
-            Vector4D<float> camPos = ViewMatrix[3];
-            GlobalUniformBuffer.SetVec4(16*4*2, new Vector4D<float>(camPos.X, camPos.Y, camPos.Z, 1));
+            Vector4Float camPos = ViewMatrix.GetRow(3);
+            GlobalUniformBuffer.SetVec4(16*4*2, camPos);
 
             //Sta cosa al momento non ha senso ma ok!
-            foreach ((Shader shad, List<(Mesh, Material, Matrix4X4<float>)> objs) in DrawCalls)
+            foreach ((Shader shad, List<(Mesh, Material, Matrix4x4)> objs) in DrawCalls)
             {
                 shad.Use();
 
-                shad.SetVector3("uLigthPos", new Vector3D<float>(2, 2, 1));
-                shad.SetVector3("uLigthColor", new Vector3D<float>(1, 1, 1));
-                shad.SetVector3("uAmbientColor", new Vector3D<float>(0.79f, 0.94f, 0.97f));
+                shad.SetVector3("uLigthPos", new Vector3Float(2, 2, 1));
+                shad.SetVector3("uLigthColor", new Vector3Float(1, 1, 1));
+                shad.SetVector3("uAmbientColor", new Vector3Float(0.79f, 0.94f, 0.97f));
 
-                foreach ((Mesh mesh, Material material, Matrix4X4<float> transform) in objs)
+                foreach ((Mesh mesh, Material material, Matrix4x4 transform) in objs)
                 {
                     shad.SetMatrix4("uModel", transform);
                     material.ApplyProperties();
@@ -87,11 +88,11 @@ namespace Engine.Rendering
             PostProcessing.Execute();
             FrameBuffer.Unbind();
 
-            ViewMatrix = Matrix4X4<float>.Identity;
-            ProjectionMatrix = Matrix4X4<float>.Identity;
+            ViewMatrix = Matrix4x4.Identity;
+            ProjectionMatrix = Matrix4x4.Identity;
         }
 
-        internal static void ResizeMainBuffer(Vector2D<int> size)
+        internal static void ResizeMainBuffer(Vector2Int size)
         {
             FrameBuffer?.Dispose();
             FrameBuffer = new FrameBuffer(size.X, size.Y, true);
@@ -100,7 +101,7 @@ namespace Engine.Rendering
 
         static Renderer()
         {
-            DrawCalls = new Dictionary<Shader, List<(Mesh, Material, Matrix4X4<float>)>>();
+            DrawCalls = new Dictionary<Shader, List<(Mesh, Material, Matrix4x4)>>();
         }
     }
 }

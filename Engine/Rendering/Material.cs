@@ -1,11 +1,4 @@
 ﻿using Engine.Utilities;
-using Silk.NET.Maths;
-using Silk.NET.OpenGL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine.Rendering
 {

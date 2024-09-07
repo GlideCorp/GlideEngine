@@ -1,9 +1,6 @@
 ﻿using Core.Logs;
 using Silk.NET.OpenGL;
 using StbImageSharp;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
 
 namespace Engine.Rendering
 {

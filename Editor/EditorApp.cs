@@ -5,15 +5,14 @@ using Engine;
 using Engine.Rendering;
 using ImGuiNET;
 using Silk.NET.OpenGL;
-using Silk.NET.Maths;
-using Shader = Engine.Rendering.Shader;
 using Engine.Entities.Components;
 using Engine.Utilities;
 using System.Drawing;
 using Core.Extensions;
-using Engine.Rendering.Effects;
 using System.Numerics;
 using Editor.resources.materials;
+using Core.Maths.Vectors;
+using Silk.NET.Maths;
 
 namespace Editor
 {
@@ -28,8 +27,8 @@ namespace Editor
         Texture2D testTexture;
         BasicMaterial objMaterial;
 
-        Vector2D<float> oldMousePos;
-        Vector2D<float> startMousePos;
+        Vector2Float oldMousePos;
+        Vector2Float startMousePos;
 
         public override void Startup()
         {
@@ -51,9 +50,9 @@ namespace Editor
             //transform.Scale(new Vector3D<float>(0.25f));
             camera = new()
             {
-                Position = new Vector3D<float>(-2, 2, -3)
+                Position = new Vector3Float(-2, 2, -3)
             };
-            camera.LookAt(Vector3D<float>.Zero);
+            camera.LookAt(Vector3Float.Zero);
 
             objMaterial = new BasicMaterial
             {
@@ -63,7 +62,7 @@ namespace Editor
 
             mTest = ModelLoader.Load("resources\\models\\cube.glb");
 
-            oldMousePos = Vector2D<float>.Zero;
+            oldMousePos = Vector2Float.Zero;
 
             FileStream stream = File.OpenRead("resources\\test.png");
             testTexture = Texture2D.FromStream(stream);
@@ -82,7 +81,7 @@ namespace Editor
 
             if(ImGui.GetIO().WantCaptureMouse) { return; }
 
-            Vector2D<float> mouseDelta = Input.MousePosition() - oldMousePos;
+            Vector2Float mouseDelta = Input.MousePosition() - oldMousePos;
             float scrollDelta = Input.MouseScroll();
 
             if(Input.MouseDown(0))
@@ -91,20 +90,20 @@ namespace Editor
                 float alpha = mouseDelta.X * Time.DeltaTime * 8;
                 float beta = -mouseDelta.Y * Time.DeltaTime * 8;
 
-                Vector3D<float> newPosition = camera.Position.RotateAround(Vector3D<float>.Zero, alpha, beta);
-                Vector3D<float> originToCamera = Vector3D.Normalize(Vector3D.Subtract(newPosition, Vector3D<float>.Zero));
-                float closenessToAxis = Vector3D.Dot(originToCamera, Vector3D<float>.Zero);
+                Vector3Float newPosition = camera.Position.RotateAround(Vector3Float.Zero, alpha, beta);
+                Vector3Float originToCamera = (newPosition - Vector3Float.Zero).Normalize();
+                float closenessToAxis = originToCamera.Dot(Vector3Float.Zero);
                 if (closenessToAxis >= 0.99 || closenessToAxis <= -0.99)
                 {
                     return;
                 }
                 camera.Position = newPosition;
-                camera.LookAt(Vector3D<float>.Zero);
+                camera.LookAt(Vector3Float.Zero);
                 oldMousePos = Input.MousePosition();
             }
             else if (scrollDelta != 0)
             {
-                camera.Position = (Vector3D.Add(camera.Position, Vector3D.Multiply(camera.Direction, scrollDelta)));
+                camera.Position = camera.Position + (camera.Direction * scrollDelta);
             }
             oldMousePos = Input.MousePosition();
         }

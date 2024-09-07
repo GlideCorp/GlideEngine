@@ -1,12 +1,5 @@
-﻿using Core.Logs;
-using Engine.Utilities;
-using Silk.NET.Maths;
-using Silk.NET.OpenGL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Silk.NET.OpenGL;
+using Core.Maths.Vectors;
 
 namespace Engine.Rendering.Effects
 {
@@ -20,7 +13,7 @@ namespace Engine.Rendering.Effects
         
         static PostProcessing()
         {
-            Vector2D<int> frameBufferSize = Application.FramebufferSize;
+            Vector2Int frameBufferSize = Application.FramebufferSize;
 
             FrameBuffers = new FrameBuffer[2];
             FrameBuffers[0] = new FrameBuffer(frameBufferSize.X, frameBufferSize.Y);
@@ -70,7 +63,7 @@ namespace Engine.Rendering.Effects
             */
         }
 
-        internal static void ResizeBuffers(Vector2D<int> newSize)
+        internal static void ResizeBuffers(Vector2Int newSize)
         {
             FrameBuffers[0].Dispose();
             FrameBuffers[1].Dispose();

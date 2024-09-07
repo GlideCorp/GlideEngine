@@ -1,7 +1,6 @@
-﻿
-using Core.Logs;
+﻿using Core.Logs;
+using Core.Maths.Vectors;
 using Engine.Rendering;
-using Engine.Rendering.Effects;
 using Engine.Utilities;
 using Silk.NET.Input;
 using Silk.NET.Maths;
@@ -68,11 +67,20 @@ namespace Engine
             }
         }
 
-        public static Vector2D<int> FramebufferSize { get { return Instance.WindowPrivate.FramebufferSize; } }
+        public static Vector2Int FramebufferSize 
+        { 
+            get 
+            {
+                Vector2D<int> size = Instance.WindowPrivate.FramebufferSize;
+                return new(size.X, size.Y); 
+            } 
+        }
 
         private IWindow WindowPrivate { get; init; }
         private GL? ContextPrivate { get; set; }
         private IInputContext? InputPrivate { get; set; }
+
+        private DebugProc DebugMessageDelegate { get; set; }
 
         public Application()
         {
@@ -88,8 +96,10 @@ namespace Engine
             WindowPrivate.FramebufferResize += OnFramebufferResize;
             ContextPrivate = null;
 
+            DebugMessageDelegate = GlLogMessageCallback;
             _instance = this;
         }
+
 
         // TODO: rewrite WindowOptions to be serializable
         private static WindowOptions LoadWindowOptions()
@@ -142,6 +152,7 @@ namespace Engine
             ContextPrivate.Enable(EnableCap.Multisample);
             ContextPrivate.Enable(EnableCap.DepthTest);
             ContextPrivate.Enable(EnableCap.CullFace);
+            ContextPrivate.DebugMessageCallback(DebugMessageDelegate, in IntPtr.Zero);
 
             InputPrivate = WindowPrivate.CreateInput();
             Input.Keyboard = InputPrivate.Keyboards[0];
@@ -170,7 +181,28 @@ namespace Engine
         {
             ContextPrivate?.Viewport(newSize);
 
-            Renderer.ResizeMainBuffer(newSize);
+            Renderer.ResizeMainBuffer(new Vector2Int(newSize.X, newSize.Y));
+        }
+
+        private void GlLogMessageCallback(GLEnum source, GLEnum type, int id, GLEnum severity, int length, nint message, nint userParam)
+        {
+            switch (severity)
+            {
+                case GLEnum.DebugSeverityLow:
+                    Logger.Info($"API Low Severity: {type}, {message}");
+                    break;
+
+                case GLEnum.DebugSeverityMedium:
+                    Logger.Warning($"API Medium Severity: {type}, {message}");
+                    break;
+
+                case GLEnum.DebugSeverityHigh:
+                    Logger.Warning($"API High Severity: {type}, {message}");
+                    break;
+
+                default:
+                    return;
+            }
         }
     }
 }

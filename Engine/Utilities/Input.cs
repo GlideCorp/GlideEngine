@@ -1,11 +1,6 @@
 ﻿using Core.Logs;
+using Core.Maths.Vectors;
 using Silk.NET.Input;
-using Silk.NET.Maths;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine.Utilities
 {
@@ -198,15 +193,15 @@ namespace Engine.Utilities
             return Mouse.ScrollWheels[0].Y;
         }
 
-        public static Vector2D<float> MousePosition()
+        public static Vector2Float MousePosition()
         {
             if (Mouse is null)
             {
                 Logger.Warning("Input Mouse is absent.");
-                return Vector2D<float>.Zero;
+                return Vector2Float.Zero;
             }
 
-            return new Vector2D<float>(Mouse.Position.X, Mouse.Position.Y);
+            return new Vector2Float(Mouse.Position.X, Mouse.Position.Y);
         }
     }
 }

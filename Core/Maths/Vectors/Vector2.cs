@@ -1,9 +1,10 @@
-﻿
-using System;
+﻿using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Core.Maths.Vectors
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector2Float(float x, float y) :
         IAdditionOperators<Vector2Float, Vector2Float, Vector2Float>,
         ISubtractionOperators<Vector2Float, Vector2Float, Vector2Float>,
@@ -141,6 +142,7 @@ namespace Core.Maths.Vectors
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector2Double(double x, double y) :
         IAdditionOperators<Vector2Double, Vector2Double, Vector2Double>,
         ISubtractionOperators<Vector2Double, Vector2Double, Vector2Double>,
@@ -277,6 +279,7 @@ namespace Core.Maths.Vectors
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector2Int(int x, int y) :
         IAdditionOperators<Vector2Int, Vector2Int, Vector2Int>,
         ISubtractionOperators<Vector2Int, Vector2Int, Vector2Int>,
@@ -403,6 +406,7 @@ namespace Core.Maths.Vectors
         }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector2Byte(byte x, byte y) :
         IAdditionOperators<Vector2Byte, Vector2Byte, Vector2Byte>,
         ISubtractionOperators<Vector2Byte, Vector2Byte, Vector2Byte>,

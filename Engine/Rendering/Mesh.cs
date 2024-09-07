@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 
 namespace Engine.Rendering
 {
-
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Vertex()
     {
