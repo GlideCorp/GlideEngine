@@ -11,7 +11,7 @@ namespace Core.Collections.Nodes
         public bool IsValueSet = false;
 
         public TreeNode<TKey, TValue>? Parent = parent;
-        //public ChunkLinkedList<TKey, TreeNode<TKey, TValue>> Children = new(size);
+        //public LinkedChunkList<TKey, TreeNode<TKey, TValue>> Children = new(size);
     }
 }
 */

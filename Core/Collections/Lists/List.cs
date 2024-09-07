@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections.Lists
@@ -8,10 +9,10 @@ namespace Core.Collections.Lists
         public IMatcher<TKey, TValue> DefaultMatcher { get; init; } = defaultMatcher;
 
         protected TValue[] Array { get; set; } = [];
-        public int Count { get; private set; } = 0;
+        public int Count { get; protected set; } = 0;
 
-        private int IncreaseSize() { return Math.Max(Array.Length * 2, 2); }
-        private int DecreaseSize() { return Array.Length / 2; }
+        protected int IncreaseSize() { return Math.Max(Array.Length * 2, 2); }
+        protected int DecreaseSize() { return Array.Length / 2; }
 
         public void InsertFirst(TValue value)
         {
@@ -63,7 +64,7 @@ namespace Core.Collections.Lists
                 Count--;
                 if (Count == 0) { Array = []; return; }
 
-                if (Count == Array.Length / 4)
+                if (Count <= Array.Length / 4)
                 {
                     int newSize = DecreaseSize();
 
@@ -75,7 +76,7 @@ namespace Core.Collections.Lists
                 else
                 {
                     System.Array.Copy(Array, sourceIndex: i + 1, Array, destinationIndex: i, length: Count - i);
-                    Array[Count] = default!;
+                    span[Count] = default!;
                 }
 
                 return;
@@ -101,7 +102,7 @@ namespace Core.Collections.Lists
                 return true;
             }
 
-            ReturnDefault:
+ReturnDefault:
             value = default;
             return false;
         }

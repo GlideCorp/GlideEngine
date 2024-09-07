@@ -1,15 +1,15 @@
 ﻿
 namespace Core.Collections.Nodes
 {
-    public class ChunkLinkedNode<TValue>
+    public class LinkedChunkNode<TValue>
     {
         public TValue[] Values { get; set; }
         public int NextItemIndex { get; set; }
 
-        public ChunkLinkedNode<TValue>? Previous;
-        public ChunkLinkedNode<TValue>? Next;
+        public LinkedChunkNode<TValue>? Previous { get; set; }
+        public LinkedChunkNode<TValue>? Next { get; set; }
 
-        public ChunkLinkedNode(int size, TValue value)
+        public LinkedChunkNode(int size, TValue value)
         {
             Values = new TValue[size];
             Values[0] = value;
@@ -19,7 +19,7 @@ namespace Core.Collections.Nodes
             Next = null;
         }
 
-        public ChunkLinkedNode(int size, TValue value, ChunkLinkedNode<TValue>? previous, ChunkLinkedNode<TValue>? next)
+        public LinkedChunkNode(int size, TValue value, LinkedChunkNode<TValue>? previous, LinkedChunkNode<TValue>? next)
         {
             Values = new TValue[size];
             Values[0] = value;

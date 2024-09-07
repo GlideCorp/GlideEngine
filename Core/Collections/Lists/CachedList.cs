@@ -1,13 +1,14 @@
 ﻿
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections.Lists
 {
-    public class CachedList<TKey, TValue>(int size, IMatcher<TKey, TValue> defaultMatcher) : List<TKey, TValue>(defaultMatcher)
+    public class CachedList<TKey, TValue>(int cacheSize, IMatcher<TKey, TValue> defaultMatcher) : List<TKey, TValue>(defaultMatcher)
     {
-        protected TValue[] Cache { get; set; } = new TValue[size];
+        protected TValue[] Cache { get; set; } = new TValue[cacheSize];
         protected int NextCacheIndex { get; set; } = 0;
-        protected int InverseCacheIndex { get; set; } = 0;
+        protected int InverseCacheIndex { get; set; } = cacheSize - 1;
         protected bool Looped { get; set; } = false;
 
         public new bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
@@ -21,7 +22,6 @@ namespace Core.Collections.Lists
             if (Count == 0) { goto ReturnDefault; }
 
             Span<TValue> span = Cache.AsSpan(0, !Looped ? NextCacheIndex : Cache.Length);
-
             for (int i = 0; i < span.Length; i++)
             {
                 if (!matcher.Match(span[i])) { continue; }
@@ -35,7 +35,7 @@ namespace Core.Collections.Lists
 
                 span[i] = span[InverseCacheIndex];
                 span[InverseCacheIndex] = value;
-                InverseCacheIndex = (NextCacheIndex + 1) % Cache.Length;
+                InverseCacheIndex = Maths.Utilities.Module(InverseCacheIndex - 1, Cache.Length);
 
                 return true;
             }
@@ -55,8 +55,8 @@ ReturnDefault:
                 if (!matcher.Match(val)) { continue; }
 
                 Cache[NextCacheIndex] = val;
-                InverseCacheIndex = (NextCacheIndex - 1) % Cache.Length;
-                NextCacheIndex = (NextCacheIndex + 1) % Cache.Length;
+                InverseCacheIndex = Maths.Utilities.Module(NextCacheIndex - 1, Cache.Length);
+                NextCacheIndex = Maths.Utilities.Module(NextCacheIndex + 1, Cache.Length);
                 Looped |= NextCacheIndex == 0;
 
                 value = val!;
