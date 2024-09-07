@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Core.Maths.Vectors
 {
-    public class Vector2Float(float x, float y) : RootedVector2<float>(x, y),
+    public struct Vector2Float(float x, float y) :
         IAdditionOperators<Vector2Float, Vector2Float, Vector2Float>,
         ISubtractionOperators<Vector2Float, Vector2Float, Vector2Float>,
         IMultiplyOperators<Vector2Float, float, Vector2Float>,
@@ -12,15 +12,19 @@ namespace Core.Maths.Vectors
         IComparisonOperators<Vector2Float, Vector2Float, bool>,
         IUnaryNegationOperators<Vector2Float, Vector2Float>
     {
-        public new static Vector2Float Zero => new(value: 0);
-        public new static Vector2Float One => new(value: 0);
+        public static Vector2Float Zero => new(value: 0);
+        public static Vector2Float One => new(value: 0);
 
-        public new static Vector2Float UnitX => new(x: 1, y: 0);
-        public new static Vector2Float UnitY => new(x: 0, y: 1);
+        public static Vector2Float UnitX => new(x: 1, y: 0);
+        public static Vector2Float UnitY => new(x: 0, y: 1);
+
+        public float X { get; set; } = x;
+        public float Y { get; set; } = y;
 
         public Vector2Float() : this(x: 0, y: 0) { }
         public Vector2Float(float value) : this(x: value, y: value) { }
 
+        #region Arithmetic Operations
         public static Vector2Float operator +(Vector2Float left, Vector2Float right)
         {
             return new()
@@ -68,27 +72,6 @@ namespace Core.Maths.Vectors
             };
         }
 
-        public static bool operator ==(Vector2Float? left, Vector2Float? right)
-        {
-            if (left is null || right is null) { throw new InvalidOperationException(); }
-
-            return left.X == right.X &&
-                   left.Y == right.Y;
-        }
-
-        public static bool operator !=(Vector2Float? left, Vector2Float? right)
-        {
-            if (left is null || right is null) { throw new InvalidOperationException(); }
-
-            return left.X != right.X &&
-                   left.Y != right.Y;
-        }
-
-        public static bool operator >(Vector2Float left, Vector2Float right) { throw new InvalidOperationException(); }
-        public static bool operator >=(Vector2Float left, Vector2Float right) { throw new InvalidOperationException(); }
-        public static bool operator <(Vector2Float left, Vector2Float right) { throw new InvalidOperationException(); }
-        public static bool operator <=(Vector2Float left, Vector2Float right) { throw new InvalidOperationException(); }
-
         public static Vector2Float operator -(Vector2Float value)
         {
             return new()
@@ -98,7 +81,38 @@ namespace Core.Maths.Vectors
             };
         }
 
-        public override Vector2Float Normalize()
+        public static bool operator ==(Vector2Float left, Vector2Float right)
+        {
+            return left.X == right.X &&
+                   left.Y == right.Y;
+        }
+
+        public static bool operator !=(Vector2Float left, Vector2Float right)
+        {
+            return left.X != right.X &&
+                   left.Y != right.Y;
+        }
+
+        public static bool operator >(Vector2Float left, Vector2Float right) { throw new InvalidOperationException(); }
+        public static bool operator >=(Vector2Float left, Vector2Float right) { throw new InvalidOperationException(); }
+        public static bool operator <(Vector2Float left, Vector2Float right) { throw new InvalidOperationException(); }
+        public static bool operator <=(Vector2Float left, Vector2Float right) { throw new InvalidOperationException(); }
+        #endregion
+
+        #region Vector Operations
+        public float Magnitude()
+        {
+            float magnitudeSquared = Dot(this);
+            return MathF.Sqrt(magnitudeSquared);
+        }
+
+        public float Dot(Vector2Float other)
+        {
+            return X * other.X +
+                   Y * other.Y;
+        }
+
+        public Vector2Float Normalize()
         {
             float magnitude = Magnitude();
             return new()
@@ -107,8 +121,9 @@ namespace Core.Maths.Vectors
                 Y = Y / magnitude
             };
         }
+        #endregion
 
-        protected bool Equals(Vector2Float other)
+        private bool Equals(Vector2Float other)
         {
             return X.Equals(other.X) && Y.Equals(other.Y);
         }
@@ -116,7 +131,6 @@ namespace Core.Maths.Vectors
         public override bool Equals(object? obj)
         {
             if (obj is null) { return false; }
-            if (ReferenceEquals(this, obj)) { return true; }
             if (obj.GetType() != GetType()) { return false; }
             return Equals((Vector2Float)obj);
         }
@@ -127,7 +141,7 @@ namespace Core.Maths.Vectors
         }
     }
 
-    public class Vector2Double(double x, double y) : RootedVector2<double>(x, y),
+    public struct Vector2Double(double x, double y) :
         IAdditionOperators<Vector2Double, Vector2Double, Vector2Double>,
         ISubtractionOperators<Vector2Double, Vector2Double, Vector2Double>,
         IMultiplyOperators<Vector2Double, double, Vector2Double>,
@@ -135,15 +149,19 @@ namespace Core.Maths.Vectors
         IComparisonOperators<Vector2Double, Vector2Double, bool>,
         IUnaryNegationOperators<Vector2Double, Vector2Double>
     {
-        public new static Vector2Double Zero => new(value: 0);
-        public new static Vector2Double One => new(value: 0);
+        public static Vector2Double Zero => new(value: 0);
+        public static Vector2Double One => new(value: 0);
+               
+        public static Vector2Double UnitX => new(x: 1, y: 0);
+        public static Vector2Double UnitY => new(x: 0, y: 1);
 
-        public new static Vector2Double UnitX => new(x: 1, y: 0);
-        public new static Vector2Double UnitY => new(x: 0, y: 1);
+        public double X { get; set; } = x;
+        public double Y { get; set; } = y;
 
         public Vector2Double() : this(x: 0, y: 0) { }
         public Vector2Double(double value) : this(x: value, y: value) { }
 
+        #region Arithmetic Operations
         public static Vector2Double operator +(Vector2Double left, Vector2Double right)
         {
             return new()
@@ -191,27 +209,6 @@ namespace Core.Maths.Vectors
             };
         }
 
-        public static bool operator ==(Vector2Double? left, Vector2Double? right)
-        {
-            if (left is null || right is null) { throw new InvalidOperationException(); }
-
-            return left.X == right.X &&
-                   left.Y == right.Y;
-        }
-
-        public static bool operator !=(Vector2Double? left, Vector2Double? right)
-        {
-            if (left is null || right is null) { throw new InvalidOperationException(); }
-
-            return left.X != right.X &&
-                   left.Y != right.Y;
-        }
-
-        public static bool operator >(Vector2Double left, Vector2Double right) { throw new InvalidOperationException(); }
-        public static bool operator >=(Vector2Double left, Vector2Double right) { throw new InvalidOperationException(); }
-        public static bool operator <(Vector2Double left, Vector2Double right) { throw new InvalidOperationException(); }
-        public static bool operator <=(Vector2Double left, Vector2Double right) { throw new InvalidOperationException(); }
-
         public static Vector2Double operator -(Vector2Double value)
         {
             return new()
@@ -221,7 +218,37 @@ namespace Core.Maths.Vectors
             };
         }
 
-        public override Vector2Double Normalize()
+        public static bool operator ==(Vector2Double left, Vector2Double right)
+        {
+            return left.X == right.X &&
+                   left.Y == right.Y;
+        }
+
+        public static bool operator !=(Vector2Double left, Vector2Double right)
+        {
+            return left.X != right.X &&
+                   left.Y != right.Y;
+        }
+
+        public static bool operator >(Vector2Double left, Vector2Double right) { throw new InvalidOperationException(); }
+        public static bool operator >=(Vector2Double left, Vector2Double right) { throw new InvalidOperationException(); }
+        public static bool operator <(Vector2Double left, Vector2Double right) { throw new InvalidOperationException(); }
+        public static bool operator <=(Vector2Double left, Vector2Double right) { throw new InvalidOperationException(); }
+        #endregion
+
+        #region Vector Operations
+        public double Magnitude()
+        {
+            double magnitudeSquared = Dot(this);
+            return Math.Sqrt(magnitudeSquared);
+        }
+
+        public double Dot(Vector2Double other)
+        {
+            return X * other.X +
+                   Y * other.Y;
+        }
+        public Vector2Double Normalize()
         {
             double magnitude = Magnitude();
             return new()
@@ -230,8 +257,9 @@ namespace Core.Maths.Vectors
                 Y = Y / magnitude
             };
         }
+        #endregion
 
-        protected bool Equals(Vector2Double other)
+        private bool Equals(Vector2Double other)
         {
             return X.Equals(other.X) && Y.Equals(other.Y);
         }
@@ -239,7 +267,6 @@ namespace Core.Maths.Vectors
         public override bool Equals(object? obj)
         {
             if (obj is null) { return false; }
-            if (ReferenceEquals(this, obj)) { return true; }
             if (obj.GetType() != GetType()) { return false; }
             return Equals((Vector2Double)obj);
         }
@@ -250,7 +277,7 @@ namespace Core.Maths.Vectors
         }
     }
 
-    public class Vector2Int(int x, int y) : Vector2<int>(x, y),
+    public struct Vector2Int(int x, int y) :
         IAdditionOperators<Vector2Int, Vector2Int, Vector2Int>,
         ISubtractionOperators<Vector2Int, Vector2Int, Vector2Int>,
         IMultiplyOperators<Vector2Int, int, Vector2Int>,
@@ -258,15 +285,19 @@ namespace Core.Maths.Vectors
         IComparisonOperators<Vector2Int, Vector2Int, bool>,
         IUnaryNegationOperators<Vector2Int, Vector2Int>
     {
-        public new static Vector2Int Zero => new(value: 0);
-        public new static Vector2Int One => new(value: 0);
+        public static Vector2Int Zero => new(value: 0);
+        public static Vector2Int One => new(value: 0);
+               
+        public static Vector2Int UnitX => new(x: 1, y: 0);
+        public static Vector2Int UnitY => new(x: 0, y: 1);
 
-        public new static Vector2Int UnitX => new(x: 1, y: 0);
-        public new static Vector2Int UnitY => new(x: 0, y: 1);
+        public int X { get; set; } = x;
+        public int Y { get; set; } = y;
 
         public Vector2Int() : this(x: 0, y: 0) { }
         public Vector2Int(int value) : this(x: value, y: value) { }
 
+        #region Arithmetic Operations
         public static Vector2Int operator +(Vector2Int left, Vector2Int right)
         {
             return new()
@@ -313,28 +344,6 @@ namespace Core.Maths.Vectors
                 Y = scalar / vector.Y
             };
         }
-
-        public static bool operator ==(Vector2Int? left, Vector2Int? right)
-        {
-            if (left is null || right is null) { throw new InvalidOperationException(); }
-
-            return left.X == right.X &&
-                   left.Y == right.Y;
-        }
-
-        public static bool operator !=(Vector2Int? left, Vector2Int? right)
-        {
-            if (left is null || right is null) { throw new InvalidOperationException(); }
-
-            return left.X != right.X &&
-                   left.Y != right.Y;
-        }
-
-        public static bool operator >(Vector2Int left, Vector2Int right) { throw new InvalidOperationException(); }
-        public static bool operator >=(Vector2Int left, Vector2Int right) { throw new InvalidOperationException(); }
-        public static bool operator <(Vector2Int left, Vector2Int right) { throw new InvalidOperationException(); }
-        public static bool operator <=(Vector2Int left, Vector2Int right) { throw new InvalidOperationException(); }
-
         public static Vector2Int operator -(Vector2Int value)
         {
             return new()
@@ -344,7 +353,39 @@ namespace Core.Maths.Vectors
             };
         }
 
-        protected bool Equals(Vector2Int other)
+        public static bool operator ==(Vector2Int left, Vector2Int right)
+        {
+            return left.X == right.X &&
+                   left.Y == right.Y;
+        }
+
+        public static bool operator !=(Vector2Int left, Vector2Int right)
+        {
+            return left.X != right.X &&
+                   left.Y != right.Y;
+        }
+
+        public static bool operator >(Vector2Int left, Vector2Int right) { throw new InvalidOperationException(); }
+        public static bool operator >=(Vector2Int left, Vector2Int right) { throw new InvalidOperationException(); }
+        public static bool operator <(Vector2Int left, Vector2Int right) { throw new InvalidOperationException(); }
+        public static bool operator <=(Vector2Int left, Vector2Int right) { throw new InvalidOperationException(); }
+        #endregion
+
+        #region Vector Operations
+        public float Magnitude()
+        {
+            float magnitudeSquared = Dot(this);
+            return MathF.Sqrt(magnitudeSquared);
+        }
+
+        public int Dot(Vector2Int other)
+        {
+            return X * other.X +
+                   Y * other.Y;
+        }
+        #endregion
+
+        private bool Equals(Vector2Int other)
         {
             return X.Equals(other.X) && Y.Equals(other.Y);
         }
@@ -352,7 +393,6 @@ namespace Core.Maths.Vectors
         public override bool Equals(object? obj)
         {
             if (obj is null) { return false; }
-            if (ReferenceEquals(this, obj)) { return true; }
             if (obj.GetType() != GetType()) { return false; }
             return Equals((Vector2Int)obj);
         }
@@ -363,7 +403,7 @@ namespace Core.Maths.Vectors
         }
     }
 
-    public class Vector2Byte(byte x, byte y) : Vector2<byte>(x, y),
+    public struct Vector2Byte(byte x, byte y) :
         IAdditionOperators<Vector2Byte, Vector2Byte, Vector2Byte>,
         ISubtractionOperators<Vector2Byte, Vector2Byte, Vector2Byte>,
         IMultiplyOperators<Vector2Byte, byte, Vector2Byte>,
@@ -371,15 +411,19 @@ namespace Core.Maths.Vectors
         IComparisonOperators<Vector2Byte, Vector2Byte, bool>,
         IUnaryNegationOperators<Vector2Byte, Vector2Byte>
     {
-        public new static Vector2Byte Zero => new(value: 0);
-        public new static Vector2Byte One => new(value: 0);
+        public static Vector2Byte Zero => new(value: 0);
+        public static Vector2Byte One => new(value: 0);
 
-        public new static Vector2Byte UnitX => new(x: 1, y: 0);
-        public new static Vector2Byte UnitY => new(x: 0, y: 1);
+        public static Vector2Byte UnitX => new(x: 1, y: 0);
+        public static Vector2Byte UnitY => new(x: 0, y: 1);
+
+        public byte X { get; set; } = x;
+        public byte Y { get; set; } = y;
 
         public Vector2Byte() : this(x: 0, y: 0) { }
         public Vector2Byte(byte value) : this(x: value, y: value) { }
 
+        #region Arithmetic Operations
         public static Vector2Byte operator +(Vector2Byte left, Vector2Byte right)
         {
             return new()
@@ -426,28 +470,6 @@ namespace Core.Maths.Vectors
                 Y = (byte)(scalar / vector.Y)
             };
         }
-
-        public static bool operator ==(Vector2Byte? left, Vector2Byte? right)
-        {
-            if (left is null || right is null) { throw new InvalidOperationException(); }
-
-            return left.X == right.X &&
-                   left.Y == right.Y;
-        }
-
-        public static bool operator !=(Vector2Byte? left, Vector2Byte? right)
-        {
-            if (left is null || right is null) { throw new InvalidOperationException(); }
-
-            return left.X != right.X &&
-                   left.Y != right.Y;
-        }
-
-        public static bool operator >(Vector2Byte left, Vector2Byte right) { throw new InvalidOperationException(); }
-        public static bool operator >=(Vector2Byte left, Vector2Byte right) { throw new InvalidOperationException(); }
-        public static bool operator <(Vector2Byte left, Vector2Byte right) { throw new InvalidOperationException(); }
-        public static bool operator <=(Vector2Byte left, Vector2Byte right) { throw new InvalidOperationException(); }
-
         public static Vector2Byte operator -(Vector2Byte value)
         {
             return new()
@@ -457,7 +479,39 @@ namespace Core.Maths.Vectors
             };
         }
 
-        protected bool Equals(Vector2Byte other)
+        public static bool operator ==(Vector2Byte left, Vector2Byte right)
+        {
+            return left.X == right.X &&
+                   left.Y == right.Y;
+        }
+
+        public static bool operator !=(Vector2Byte left, Vector2Byte right)
+        {
+            return left.X != right.X &&
+                   left.Y != right.Y;
+        }
+
+        public static bool operator >(Vector2Byte left, Vector2Byte right) { throw new InvalidOperationException(); }
+        public static bool operator >=(Vector2Byte left, Vector2Byte right) { throw new InvalidOperationException(); }
+        public static bool operator <(Vector2Byte left, Vector2Byte right) { throw new InvalidOperationException(); }
+        public static bool operator <=(Vector2Byte left, Vector2Byte right) { throw new InvalidOperationException(); }
+        #endregion
+
+        #region Vector Operations
+        public float Magnitude()
+        {
+            float magnitudeSquared = Dot(this);
+            return MathF.Sqrt(magnitudeSquared);
+        }
+
+        public byte Dot(Vector2Byte other)
+        {
+            return (byte)(X * other.X +
+                            Y * other.Y);
+        }
+        #endregion
+
+        private bool Equals(Vector2Byte other)
         {
             return X.Equals(other.X) && Y.Equals(other.Y);
         }
@@ -465,7 +519,6 @@ namespace Core.Maths.Vectors
         public override bool Equals(object? obj)
         {
             if (obj is null) { return false; }
-            if (ReferenceEquals(this, obj)) { return true; }
             if (obj.GetType() != GetType()) { return false; }
             return Equals((Vector2Byte)obj);
         }
@@ -475,7 +528,8 @@ namespace Core.Maths.Vectors
             return HashCode.Combine(X, Y);
         }
     }
-
+    
+    /*
     public class RootedVector2<T>(T x, T y) :
         IAdditionOperators<RootedVector2<T>, RootedVector2<T>, RootedVector2<T>>,
         ISubtractionOperators<RootedVector2<T>, RootedVector2<T>, RootedVector2<T>>,
@@ -737,4 +791,5 @@ namespace Core.Maths.Vectors
             return HashCode.Combine(X, Y);
         }
     }
+    */
 }

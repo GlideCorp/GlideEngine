@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Core.Maths.Vectors
 {
-    public class Vector4Float(float x, float y, float z, float w) : RootedVector4<float>,
+    public struct Vector4Float(float x, float y, float z, float w) :
         IAdditionOperators<Vector4Float, Vector4Float, Vector4Float>,
         ISubtractionOperators<Vector4Float, Vector4Float, Vector4Float>,
         IMultiplyOperators<Vector4Float, float, Vector4Float>,
@@ -25,11 +25,11 @@ namespace Core.Maths.Vectors
         public float Z { get; set; } = z;
         public float W { get; set; } = w;
 
-
         public Vector4Float() : this(0, 0, 0, 0) { }
         public Vector4Float(float value) : this(value, value, value, value) { }
-        public Vector4Float(Vector3 xyz, float w) : this(xyz.X, xyz.Y, xyz.Z, w) { }
+        public Vector4Float(Vector3Float xyz, float w) : this(xyz.X, xyz.Y, xyz.Z, w) { }
 
+        #region Arithmetic Operations
         public static Vector4Float operator +(Vector4Float left, Vector4Float right)
         {
             Vector4Float result = new()
@@ -90,32 +90,6 @@ namespace Core.Maths.Vectors
                 W = scalar / vector.W
             };
         }
-
-        public static bool operator ==(Vector4Float? left, Vector4Float? right)
-        {
-            if (left is null || right is null) { throw new InvalidOperationException(); }
-
-            return left.X == right.X &&
-                   left.Y == right.Y &&
-                   left.Z == right.Z &&
-                   left.W == right.W;
-        }
-
-        public static bool operator !=(Vector4Float? left, Vector4Float? right)
-        {
-            if (left is null || right is null) { throw new InvalidOperationException(); }
-
-            return left.X != right.X &&
-                   left.Y != right.Y &&
-                   left.Z != right.Z &&
-                   left.W != right.W;
-        }
-
-        public static bool operator >(Vector4Float left, Vector4Float right) { throw new InvalidOperationException(); }
-        public static bool operator >=(Vector4Float left, Vector4Float right) { throw new InvalidOperationException(); }
-        public static bool operator <(Vector4Float left, Vector4Float right) { throw new InvalidOperationException(); }
-        public static bool operator <=(Vector4Float left, Vector4Float right) { throw new InvalidOperationException(); }
-
         public static Vector4Float operator -(Vector4Float value)
         {
             return new()
@@ -127,6 +101,29 @@ namespace Core.Maths.Vectors
             };
         }
 
+        public static bool operator ==(Vector4Float left, Vector4Float right)
+        {
+            return left.X == right.X &&
+                   left.Y == right.Y &&
+                   left.Z == right.Z &&
+                   left.W == right.W;
+        }
+
+        public static bool operator !=(Vector4Float left, Vector4Float right)
+        {
+            return left.X != right.X &&
+                   left.Y != right.Y &&
+                   left.Z != right.Z &&
+                   left.W != right.W;
+        }
+
+        public static bool operator >(Vector4Float left, Vector4Float right) { throw new InvalidOperationException(); }
+        public static bool operator >=(Vector4Float left, Vector4Float right) { throw new InvalidOperationException(); }
+        public static bool operator <(Vector4Float left, Vector4Float right) { throw new InvalidOperationException(); }
+        public static bool operator <=(Vector4Float left, Vector4Float right) { throw new InvalidOperationException(); }
+        #endregion
+
+        #region Vector Operations
         public float Dot(Vector4Float other)
         {
             return X * other.X +
@@ -135,13 +132,13 @@ namespace Core.Maths.Vectors
                    W * other.W;
         }
 
-        public new float Magnitude()
+        public float Magnitude()
         {
             float magnitudeSquared = Dot(this);
-            return float.Sqrt(magnitudeSquared);
+            return MathF.Sqrt(magnitudeSquared);
         }
 
-        public new Vector4Float Normalize()
+        public Vector4Float Normalize()
         {
             float magnitude = Magnitude();
             return new()
@@ -152,7 +149,9 @@ namespace Core.Maths.Vectors
                W = W/magnitude
             };
         }
-        protected bool Equals(Vector4Float other)
+        #endregion
+
+        private bool Equals(Vector4Float other)
         {
             return X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z) && W.Equals(other.W);
         }
@@ -160,7 +159,6 @@ namespace Core.Maths.Vectors
         public override bool Equals(object? obj)
         {
             if (obj is null) { return false; }
-            if (ReferenceEquals(this, obj)) { return true; }
             if (obj.GetType() != GetType()) { return false; }
             return Equals((Vector4Float)obj);
         }
@@ -171,63 +169,479 @@ namespace Core.Maths.Vectors
         }
     }
 
-    public class Vector4Double() : RootedVector4<double>()
+    public struct Vector4Double(double x, double y, double z, double w) :
+        IAdditionOperators<Vector4Double, Vector4Double, Vector4Double>,
+        ISubtractionOperators<Vector4Double, Vector4Double, Vector4Double>,
+        IMultiplyOperators<Vector4Double, double, Vector4Double>,
+        IDivisionOperators<Vector4Double, double, Vector4Double>,
+        IComparisonOperators<Vector4Double, Vector4Double, bool>,
+        IUnaryNegationOperators<Vector4Double, Vector4Double>
     {
-        public Vector4Double(double value) : this()
+        public static Vector4Double Zero => new(value: 0);
+        public static Vector4Double One => new(value: 1);
+
+        public static Vector4Double UnitX => new(x: 1, y: 0, z: 0, w: 0);
+        public static Vector4Double UnitY => new(x: 0, y: 1, z: 0, w: 0);
+        public static Vector4Double UnitZ => new(x: 0, y: 0, z: 1, w: 0);
+        public static Vector4Double UnitW => new(x: 0, y: 0, z: 0, w: 1);
+
+        public double X { get; set; } = x;
+        public double Y { get; set; } = y;
+        public double Z { get; set; } = z;
+        public double W { get; set; } = w;
+
+        public Vector4Double() : this(0, 0, 0, 0) { }
+        public Vector4Double(double value) : this(value, value, value, value) { }
+        public Vector4Double(Vector3Double xyz, double w) : this(xyz.X, xyz.Y, xyz.Z, w) { }
+
+        #region Arithmetic Operations
+        public static Vector4Double operator +(Vector4Double left, Vector4Double right)
         {
-            X = value;
-            Y = value;
-            Z = value;
-            W = value;
+            Vector4Double result = new()
+            {
+                X = left.X + right.X,
+                Y = left.Y + right.Y,
+                Z = left.Z + right.Z,
+                W = left.W + right.W
+            };
+
+            return result;
         }
 
-        public Vector4Double(double x, double y, double z, double w) : this()
+        public static Vector4Double operator -(Vector4Double left, Vector4Double right)
         {
-            X = x;
-            Y = y;
-            Z = z;
-            W = w;
+            Vector4Double result = new()
+            {
+                X = left.X - right.X,
+                Y = left.Y - right.Y,
+                Z = left.Z - right.Z,
+                W = left.W - right.W
+            };
+
+            return result;
+        }
+
+        public static Vector4Double operator *(Vector4Double vector, double scalar)
+        {
+            return new()
+            {
+                X = scalar * vector.X,
+                Y = scalar * vector.Y,
+                Z = scalar * vector.Z,
+                W = scalar * vector.W
+            };
+        }
+
+        public static Vector4Double operator *(double scalar, Vector4Double vector) { return vector * scalar; }
+
+        public static Vector4Double operator /(Vector4Double vector, double scalar)
+        {
+            return new()
+            {
+                X = vector.X / scalar,
+                Y = vector.Y / scalar,
+                Z = vector.Z / scalar,
+                W = vector.W / scalar
+            };
+        }
+
+        public static Vector4Double operator /(double scalar, Vector4Double vector)
+        {
+            return new()
+            {
+                X = scalar / vector.X,
+                Y = scalar / vector.Y,
+                Z = scalar / vector.Z,
+                W = scalar / vector.W
+            };
+        }
+        public static Vector4Double operator -(Vector4Double value)
+        {
+            return new()
+            {
+                X = -value.X,
+                Y = -value.Y,
+                Z = -value.Z,
+                W = -value.W
+            };
+        }
+
+        public static bool operator ==(Vector4Double left, Vector4Double right)
+        {
+            return left.X == right.X &&
+                   left.Y == right.Y &&
+                   left.Z == right.Z &&
+                   left.W == right.W;
+        }
+
+        public static bool operator !=(Vector4Double left, Vector4Double right)
+        {
+            return left.X != right.X &&
+                   left.Y != right.Y &&
+                   left.Z != right.Z &&
+                   left.W != right.W;
+        }
+
+        public static bool operator >(Vector4Double left, Vector4Double right) { throw new InvalidOperationException(); }
+        public static bool operator >=(Vector4Double left, Vector4Double right) { throw new InvalidOperationException(); }
+        public static bool operator <(Vector4Double left, Vector4Double right) { throw new InvalidOperationException(); }
+        public static bool operator <=(Vector4Double left, Vector4Double right) { throw new InvalidOperationException(); }
+        #endregion
+
+        #region Vector Operations
+        public double Dot(Vector4Double other)
+        {
+            return X * other.X +
+                   Y * other.Y +
+                   Z * other.Z +
+                   W * other.W;
+        }
+
+        public double Magnitude()
+        {
+            double magnitudeSquared = Dot(this);
+            return Math.Sqrt(magnitudeSquared);
+        }
+
+        public Vector4Double Normalize()
+        {
+            double magnitude = Magnitude();
+            return new()
+            {
+                X = X / magnitude,
+                Y = Y / magnitude,
+                Z = Z / magnitude,
+                W = W / magnitude
+            };
+        }
+        #endregion
+
+        private bool Equals(Vector4Double other)
+        {
+            return X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z) && W.Equals(other.W);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) { return false; }
+            if (obj.GetType() != GetType()) { return false; }
+            return Equals((Vector4Double)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y, Z, W);
         }
     }
 
-    public class Vector4Int() : Vector4<int>()
+    public struct Vector4Int(int x, int y, int z, int w) :
+        IAdditionOperators<Vector4Int, Vector4Int, Vector4Int>,
+        ISubtractionOperators<Vector4Int, Vector4Int, Vector4Int>,
+        IMultiplyOperators<Vector4Int, int, Vector4Int>,
+        IDivisionOperators<Vector4Int, int, Vector4Int>,
+        IComparisonOperators<Vector4Int, Vector4Int, bool>,
+        IUnaryNegationOperators<Vector4Int, Vector4Int>
     {
-        public Vector4Int(int value) : this()
+        public static Vector4Int Zero => new(value: 0);
+        public static Vector4Int One => new(value: 1);
+
+        public static Vector4Int UnitX => new(x: 1, y: 0, z: 0, w: 0);
+        public static Vector4Int UnitY => new(x: 0, y: 1, z: 0, w: 0);
+        public static Vector4Int UnitZ => new(x: 0, y: 0, z: 1, w: 0);
+        public static Vector4Int UnitW => new(x: 0, y: 0, z: 0, w: 1);
+
+        public int X { get; set; } = x;
+        public int Y { get; set; } = y;
+        public int Z { get; set; } = z;
+        public int W { get; set; } = w;
+
+        public Vector4Int() : this(0, 0, 0, 0) { }
+        public Vector4Int(int value) : this(value, value, value, value) { }
+        public Vector4Int(Vector3Int xyz, int w) : this(xyz.X, xyz.Y, xyz.Z, w) { }
+
+        #region Arithmetic Operations
+        public static Vector4Int operator +(Vector4Int left, Vector4Int right)
         {
-            X = value;
-            Y = value;
-            Z = value;
-            W = value;
+            Vector4Int result = new()
+            {
+                X = left.X + right.X,
+                Y = left.Y + right.Y,
+                Z = left.Z + right.Z,
+                W = left.W + right.W
+            };
+
+            return result;
         }
 
-        public Vector4Int(int x, int y, int z, int w) : this()
+        public static Vector4Int operator -(Vector4Int left, Vector4Int right)
         {
-            X = x;
-            Y = y;
-            Z = z;
-            W = w;
+            Vector4Int result = new()
+            {
+                X = left.X - right.X,
+                Y = left.Y - right.Y,
+                Z = left.Z - right.Z,
+                W = left.W - right.W
+            };
+
+            return result;
+        }
+
+        public static Vector4Int operator *(Vector4Int vector, int scalar)
+        {
+            return new()
+            {
+                X = scalar * vector.X,
+                Y = scalar * vector.Y,
+                Z = scalar * vector.Z,
+                W = scalar * vector.W
+            };
+        }
+
+        public static Vector4Int operator *(int scalar, Vector4Int vector) { return vector * scalar; }
+
+        public static Vector4Int operator /(Vector4Int vector, int scalar)
+        {
+            return new()
+            {
+                X = vector.X / scalar,
+                Y = vector.Y / scalar,
+                Z = vector.Z / scalar,
+                W = vector.W / scalar
+            };
+        }
+
+        public static Vector4Int operator /(int scalar, Vector4Int vector)
+        {
+            return new()
+            {
+                X = scalar / vector.X,
+                Y = scalar / vector.Y,
+                Z = scalar / vector.Z,
+                W = scalar / vector.W
+            };
+        }
+        public static Vector4Int operator -(Vector4Int value)
+        {
+            return new()
+            {
+                X = -value.X,
+                Y = -value.Y,
+                Z = -value.Z,
+                W = -value.W
+            };
+        }
+
+        public static bool operator ==(Vector4Int left, Vector4Int right)
+        {
+            return left.X == right.X &&
+                   left.Y == right.Y &&
+                   left.Z == right.Z &&
+                   left.W == right.W;
+        }
+
+        public static bool operator !=(Vector4Int left, Vector4Int right)
+        {
+            return left.X != right.X &&
+                   left.Y != right.Y &&
+                   left.Z != right.Z &&
+                   left.W != right.W;
+        }
+
+        public static bool operator >(Vector4Int left, Vector4Int right) { throw new InvalidOperationException(); }
+        public static bool operator >=(Vector4Int left, Vector4Int right) { throw new InvalidOperationException(); }
+        public static bool operator <(Vector4Int left, Vector4Int right) { throw new InvalidOperationException(); }
+        public static bool operator <=(Vector4Int left, Vector4Int right) { throw new InvalidOperationException(); }
+        #endregion
+
+        #region Vector Operations
+        public int Dot(Vector4Int other)
+        {
+            return X * other.X +
+                   Y * other.Y +
+                   Z * other.Z +
+                   W * other.W;
+        }
+
+        public float Magnitude()
+        {
+            int magnitudeSquared = Dot(this);
+            return MathF.Sqrt(magnitudeSquared);
+        }
+        #endregion
+
+        private bool Equals(Vector4Int other)
+        {
+            return X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z) && W.Equals(other.W);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) { return false; }
+            if (obj.GetType() != GetType()) { return false; }
+            return Equals((Vector4Int)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y, Z, W);
         }
     }
 
-    public class Vector4Byte() : Vector4<byte>()
+    public struct Vector4Byte(byte x, byte y, byte z, byte w) :
+        IAdditionOperators<Vector4Byte, Vector4Byte, Vector4Byte>,
+        ISubtractionOperators<Vector4Byte, Vector4Byte, Vector4Byte>,
+        IMultiplyOperators<Vector4Byte, byte, Vector4Byte>,
+        IDivisionOperators<Vector4Byte, byte, Vector4Byte>,
+        IComparisonOperators<Vector4Byte, Vector4Byte, bool>,
+        IUnaryNegationOperators<Vector4Byte, Vector4Byte>
     {
-        public Vector4Byte(byte value) : this()
+        public static Vector4Byte Zero => new(value: 0);
+        public static Vector4Byte One => new(value: 1);
+
+        public static Vector4Byte UnitX => new(x: 1, y: 0, z: 0, w: 0);
+        public static Vector4Byte UnitY => new(x: 0, y: 1, z: 0, w: 0);
+        public static Vector4Byte UnitZ => new(x: 0, y: 0, z: 1, w: 0);
+        public static Vector4Byte UnitW => new(x: 0, y: 0, z: 0, w: 1);
+
+        //Mi sa che questi dovrebbero essere sbyte... se mai dovesse diventare un problema dai ctrl+F byte -> sbyte
+        public byte X { get; set; } = x;
+        public byte Y { get; set; } = y;
+        public byte Z { get; set; } = z;
+        public byte W { get; set; } = w;
+
+        public Vector4Byte() : this(0, 0, 0, 0) { }
+        public Vector4Byte(byte value) : this(value, value, value, value) { }
+        public Vector4Byte(Vector3Byte xyz, byte w) : this(xyz.X, xyz.Y, xyz.Z, w) { }
+
+        #region Arithmetic Operations
+        public static Vector4Byte operator +(Vector4Byte left, Vector4Byte right)
         {
-            X = value;
-            Y = value;
-            Z = value;
-            W = value;
+            Vector4Byte result = new()
+            {
+                X = (byte)(left.X + right.X),
+                Y = (byte)(left.Y + right.Y),
+                Z = (byte)(left.Z + right.Z),
+                W = (byte)(left.W + right.W)
+            };
+
+            return result;
         }
 
-        public Vector4Byte(byte x, byte y, byte z, byte w) : this()
+        public static Vector4Byte operator -(Vector4Byte left, Vector4Byte right)
         {
-            X = x;
-            Y = y;
-            Z = z;
-            W = w;
+            Vector4Byte result = new()
+            {
+                X = (byte)(left.X - right.X),
+                Y = (byte)(left.Y - right.Y),
+                Z = (byte)(left.Z - right.Z),
+                W = (byte)(left.W - right.W)
+            };
+
+            return result;
+        }
+
+        public static Vector4Byte operator *(Vector4Byte vector, byte scalar)
+        {
+            return new()
+            {
+                X = (byte)(scalar * vector.X),
+                Y = (byte)(scalar * vector.Y),
+                Z = (byte)(scalar * vector.Z),
+                W = (byte)(scalar * vector.W)
+            };
+        }
+
+        public static Vector4Byte operator *(byte scalar, Vector4Byte vector) { return vector * scalar; }
+
+        public static Vector4Byte operator /(Vector4Byte vector, byte scalar)
+        {
+            return new()
+            {
+                X = (byte)(vector.X / scalar),
+                Y = (byte)(vector.Y / scalar),
+                Z = (byte)(vector.Z / scalar),
+                W = (byte)(vector.W / scalar)
+            };
+        }
+
+        public static Vector4Byte operator /(byte scalar, Vector4Byte vector)
+        {
+            return new()
+            {
+                X = (byte)(scalar / vector.X),
+                Y = (byte)(scalar / vector.Y),
+                Z = (byte)(scalar / vector.Z),
+                W = (byte)(scalar / vector.W)
+            };
+        }
+        public static Vector4Byte operator -(Vector4Byte value)
+        {
+            return new()
+            {
+                X = (byte)(-value.X),
+                Y = (byte)(-value.Y),
+                Z = (byte)(-value.Z),
+                W = (byte)(-value.W)
+            };
+        }
+
+        public static bool operator ==(Vector4Byte left, Vector4Byte right)
+        {
+            return left.X == right.X &&
+                   left.Y == right.Y &&
+                   left.Z == right.Z &&
+                   left.W == right.W;
+        }
+
+        public static bool operator !=(Vector4Byte left, Vector4Byte right)
+        {
+            return left.X != right.X &&
+                   left.Y != right.Y &&
+                   left.Z != right.Z &&
+                   left.W != right.W;
+        }
+
+        public static bool operator >(Vector4Byte left, Vector4Byte right) { throw new InvalidOperationException(); }
+        public static bool operator >=(Vector4Byte left, Vector4Byte right) { throw new InvalidOperationException(); }
+        public static bool operator <(Vector4Byte left, Vector4Byte right) { throw new InvalidOperationException(); }
+        public static bool operator <=(Vector4Byte left, Vector4Byte right) { throw new InvalidOperationException(); }
+        #endregion
+
+        #region Arithmetic Operations
+        public byte Dot(Vector4Byte other)
+        {
+            return (byte)(X * other.X +
+                           Y * other.Y +
+                           Z * other.Z +
+                           W * other.W);
+        }
+
+        public float Magnitude()
+        {
+            byte magnitudeSquared = Dot(this);
+            return MathF.Sqrt(magnitudeSquared);
+        }
+        #endregion
+
+        private bool Equals(Vector4Byte other)
+        {
+            return X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z) && W.Equals(other.W);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is null) { return false; }
+            if (obj.GetType() != GetType()) { return false; }
+            return Equals((Vector4Byte)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y, Z, W);
         }
     }
 
+    /*
     public class RootedVector4<T>(T x, T y, T z, T w) :
         IAdditionOperators<RootedVector4<T>, RootedVector4<T>, RootedVector4<T>>,
         ISubtractionOperators<RootedVector4<T>, RootedVector4<T>, RootedVector4<T>>,
@@ -253,7 +667,7 @@ namespace Core.Maths.Vectors
 
         public RootedVector4() : this(T.Zero, T.Zero, T.Zero, T.Zero) { }
         public RootedVector4(T value) : this(value, value, value, value) { }
-        public RootedVector4(Vector3<T> xyz, T w) : this(xyz.X, xyz.Y, xyz.Z, w) { }
+        //public RootedVector4(Vector3<T> xyz, T w) : this(xyz.X, xyz.Y, xyz.Z, w) { }
 
         public static RootedVector4<T> operator +(RootedVector4<T> left, RootedVector4<T> right)
         {
@@ -421,7 +835,7 @@ namespace Core.Maths.Vectors
 
         public Vector4() : this(T.Zero, T.Zero, T.Zero, T.Zero) { }
         public Vector4(T value) : this(value, value, value, value) { }
-        public Vector4(Vector3<T> xyz, T w) : this(xyz.X, xyz.Y, xyz.Z, w) { }
+        //public Vector4(Vector3<T> xyz, T w) : this(xyz.X, xyz.Y, xyz.Z, w) { }
 
         public static Vector4<T> operator +(Vector4<T> left, Vector4<T> right)
         {
@@ -545,4 +959,5 @@ namespace Core.Maths.Vectors
             return HashCode.Combine(X, Y, Z, W);
         }
     }
+    */
 }

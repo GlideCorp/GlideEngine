@@ -1,5 +1,6 @@
 ﻿using Core.Extensions;
 using Core.Logs;
+using Core.Maths.Vectors;
 using Engine.Rendering;
 using Silk.NET.Assimp;
 using Silk.NET.Maths;
@@ -57,23 +58,26 @@ namespace Engine.Utilities
             for (int i = 0; i < mesh->MNumVertices; i++)
             {
                 Vertex v = new();
-                v.Position = mesh->MVertices[i].ToSilk();
+                Vector3 vPos = mesh->MVertices[i];
+                v.Position = new Vector3Float(vPos.X, vPos.Y, vPos.Z);
 
                 // normals
                 if (mesh->MNormals != null)
-                    v.Normal = mesh->MNormals[i].ToSilk();
+                {
+                    Vector3 vNorm = mesh->MNormals[i];
+                    v.Normal = new Vector3Float(vNorm.X, vNorm.Y, vNorm.Z);
+                }
 
                 if (mesh->MTextureCoords[0] != null)
                 {
                     Vector3 nativeUv = mesh->MTextureCoords[0][i];
-                    Vector2D<float> uv = new Vector2D<float>(nativeUv.X, nativeUv.Y);
-                    v.UV = uv;
+                    v.UV = new Vector2Float(nativeUv.X, nativeUv.Y);
                 }
                 else
-                    v.UV = Vector2D<float>.Zero;
+                    v.UV = Vector2Float.Zero;
 
-                //vertices.Add(v);
-                m.Data.InsertVertex(v);
+                vertices.Add(v);
+                //m.Data.InsertVertex(v);
                 //m.Data.InsertVertex(2.0f);
             }
 
@@ -83,13 +87,13 @@ namespace Engine.Utilities
 
                 for (uint j = 0; j < face.MNumIndices; j++)
                 {
-                    //indices.Add(face.MIndices[j]);
-                    m.Data.InsertIndex(face.MIndices[j]);
+                    indices.Add(face.MIndices[j]);
+                    //m.Data.InsertIndex(face.MIndices[j]);
                 }
             }
 
-            //m.Vertices = vertices;
-            //m.Indices = indices;
+            m.Vertices = vertices;
+            m.Indices = indices;
             m.Build();
             return m;
         }

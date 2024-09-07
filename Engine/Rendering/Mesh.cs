@@ -1,4 +1,5 @@
-﻿using Engine.Collections;
+﻿using Core.Maths.Vectors;
+using Engine.Collections;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System.Runtime.InteropServices;
@@ -9,9 +10,9 @@ namespace Engine.Rendering
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Vertex()
     {
-        public Vector3D<float> Position { get; set; }
-        public Vector3D<float> Normal { get; set; }
-        public Vector2D<float> UV { get; set; }
+        public Vector3Float Position { get; set; }
+        public Vector3Float Normal { get; set; }
+        public Vector2Float UV { get; set; }
     }
 
     //TODO: Eventually add mesh-props like:
@@ -28,8 +29,8 @@ namespace Engine.Rendering
             new VertexElement(2, VertexAttribPointerType.Float, 2)
         );
 
-        public MeshDataBuffer Data { get; set; }
-        /*
+        //public MeshDataBuffer Data { get; set; }
+        
         private List<Vertex>? _vertices;
         public List<Vertex> Vertices 
         {
@@ -50,10 +51,10 @@ namespace Engine.Rendering
                 }
             }
         }
-        */
-        public uint VerticesCount { get => (uint)Data.VertexCount; }
+        
+        public uint VerticesCount { get => (uint)Vertices.Count; }
 
-        /*
+        
         private List<uint>? _indices;
         public List<uint> Indices
         {
@@ -73,12 +74,12 @@ namespace Engine.Rendering
                     _indices = new List<uint>(value);
                 }
             }
-        }*/
-        public uint IndicesCount { get => (uint)Data.IndexCount; }
+        }
+        public uint IndicesCount { get => (uint)Indices.Count; }
 
         public Mesh()
         {
-            Data = new MeshDataBuffer();
+            //Data = new MeshDataBuffer();
         }
 
         public void Build()
@@ -97,10 +98,16 @@ namespace Engine.Rendering
                 uint VBO = Application.Context.GenBuffer();
                 Application.Context.BindBuffer(BufferTargetARB.ArrayBuffer, VBO);
 
-                fixed (void* data = Data.Vertices)
+                Span<Vertex> vertexSpan = CollectionsMarshal.AsSpan(Vertices);
+                ReadOnlySpan<Vertex> readOnlyVertexSpan = (ReadOnlySpan<Vertex>)vertexSpan;
+                //ref Vertex data = ref MemoryMarshal.AsRef<Vertex>(readOnlyVertexSpan);
+                Application.Context.BufferData(BufferTargetARB.ArrayBuffer, readOnlyVertexSpan, BufferUsageARB.StaticDraw);
+                /*
+                fixed (Vertex* data = Vertices.ToArray())
                 {
-                    Application.Context.BufferData(BufferTargetARB.ArrayBuffer, (VerticesCount * VertexLayout.Stride), data, BufferUsageARB.StaticDraw);
+                    Application.Context.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(Vertices.Count * VertexLayout.Stride), data, BufferUsageARB.StaticDraw);
                 }
+                */
 
                 /*			         Element 1						  Element 2					 */
                 /*       | {Position: vec3, Normal: vec3} | {Position: vec3, Normal: vec3} | ... */
@@ -121,7 +128,7 @@ namespace Engine.Rendering
                     uint IBO = Application.Context.GenBuffer();
                     Application.Context.BindBuffer(BufferTargetARB.ElementArrayBuffer, IBO);
 
-                    fixed (void* buf = Data.Indices)
+                    fixed (void* buf = Indices.ToArray())
                     {
                         Application.Context.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)IndicesCount * sizeof(uint), buf, BufferUsageARB.StaticDraw);
                     }

@@ -14,4 +14,8 @@
     <Optimize>True</Optimize>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Maths\Matrices\Matrix.cs" />
+  </ItemGroup>
+
 </Project>
