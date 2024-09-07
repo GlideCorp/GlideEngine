@@ -1,4 +1,5 @@
 ﻿
+using System.Buffers.Binary;
 using System.Runtime.InteropServices;
 using Core.Maths.Vectors;
 
@@ -24,14 +25,14 @@ namespace Engine.Collections
         protected bool EnsureVertexSpace(int quantity)
         {
             int newSize = Vertices.Length;
-            while (Vertices.Length < VertexCount + quantity) { newSize = Growth(newSize); }
+            while (newSize < VertexCursor + quantity) { newSize = Growth(newSize); }
 
             if (newSize == Vertices.Length) { return false; }
 
             byte[] newVertices = new byte[newSize];
 
-            Span<byte> vertexSpan = Vertices.AsSpan(0, VertexCount);
-            Span<byte> newVertexSpan = newVertices.AsSpan(0, VertexCount);
+            Span<byte> vertexSpan = Vertices.AsSpan(0, VertexCursor);
+            Span<byte> newVertexSpan = newVertices.AsSpan(0, VertexCursor);
             vertexSpan.CopyTo(newVertexSpan);
 
             Vertices = newVertices;
@@ -41,14 +42,14 @@ namespace Engine.Collections
         protected bool EnsureIndexSpace(int quantity)
         {
             int newSize = Indices.Length;
-            while (Indices.Length < IndexCount + quantity) { newSize = Growth(newSize); }
+            while (newSize < IndexCursor + quantity) { newSize = Growth(newSize); }
 
             if (newSize == Indices.Length) { return false; }
 
             byte[] newIndices = new byte[newSize];
 
-            Span<byte> indexSpan = Vertices.AsSpan(0, IndexCount);
-            Span<byte> newIndexSpan = newIndices.AsSpan(0, IndexCount);
+            Span<byte> indexSpan = Vertices.AsSpan(0, IndexCursor);
+            Span<byte> newIndexSpan = newIndices.AsSpan(0, IndexCursor);
             indexSpan.CopyTo(newIndexSpan);
 
             Indices = newIndices;
@@ -62,10 +63,8 @@ namespace Engine.Collections
 
             Span<byte> span = Vertices.AsSpan(VertexCursor, typeSize);
             MemoryMarshal.Write(span, value);
+            span.Reverse();
 
-            //BinaryPrimitives.WriteSingleBigEndian();
-            MemoryMarshal.Cast<byte, T>(Vertices.AsSpan(VertexCursor, VertexCursor + typeSize));
-            MemoryMarshal.Cast<byte, T>(Vertices.AsSpan(VertexCursor, VertexCursor + typeSize));
 
             VertexCursor += typeSize;
             VertexCount++;
@@ -77,7 +76,7 @@ namespace Engine.Collections
             int typeSize = Marshal.SizeOf<T>();
             bool resized = EnsureIndexSpace(typeSize);
 
-            MemoryMarshal.Write(Vertices.AsSpan(IndexCursor, IndexCursor + typeSize), value);
+            MemoryMarshal.Write(Vertices.AsSpan(IndexCursor, typeSize), value);
 
             IndexCursor += typeSize;
             IndexCount++;
@@ -85,10 +84,12 @@ namespace Engine.Collections
         }
 
         public bool InsertVertices<T>(Vector<T> vector)
-            where T : struct, System.Numerics.INumber<T> { return InsertVertices(vector.Values); }
+            where T : struct, System.Numerics.INumber<T>
+        { return InsertVertices(vector.Values); }
 
         public bool InsertIndices<T>(Vector<T> vector)
-            where T : struct, System.Numerics.INumber<T> { return InsertIndices(vector.Values); }
+            where T : struct, System.Numerics.INumber<T>
+        { return InsertIndices(vector.Values); }
 
         public bool InsertVertices<T>(T[] vertices) where T : struct
         {
