@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace Core.Trackables
+namespace Core.Traceable
 {
     public abstract class Trackable(TrackableDirectory directory) : IComparable<Trackable>
     {

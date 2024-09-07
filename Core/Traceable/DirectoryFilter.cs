@@ -1,5 +1,5 @@
 ﻿
-namespace Core.Trackables
+namespace Core.Traceable
 {
     public class DirectoryFilter
     {
