@@ -542,30 +542,30 @@ namespace Core.Maths.Vectors
     }
 
     public class RootedVector3<T>(T x, T y, T z) :
-        IAdditionOperators<RootVector3<T>, RootVector3<T>, RootVector3<T>>,
-        ISubtractionOperators<RootVector3<T>, RootVector3<T>, RootVector3<T>>,
-        IMultiplyOperators<RootVector3<T>, T, RootVector3<T>>,
-        IDivisionOperators<RootVector3<T>, T, RootVector3<T>>,
-        IComparisonOperators<RootVector3<T>, RootVector3<T>, bool>,
-        IUnaryNegationOperators<RootVector3<T>, RootVector3<T>>
+        IAdditionOperators<RootedVector3<T>, RootedVector3<T>, RootedVector3<T>>,
+        ISubtractionOperators<RootedVector3<T>, RootedVector3<T>, RootedVector3<T>>,
+        IMultiplyOperators<RootedVector3<T>, T, RootedVector3<T>>,
+        IDivisionOperators<RootedVector3<T>, T, RootedVector3<T>>,
+        IComparisonOperators<RootedVector3<T>, RootedVector3<T>, bool>,
+        IUnaryNegationOperators<RootedVector3<T>, RootedVector3<T>>
         where T : INumber<T>, IRootFunctions<T>
     {
-        public static RootVector3<T> Zero => new(value: T.Zero);
-        public static RootVector3<T> One => new(value: T.One);
+        public static RootedVector3<T> Zero => new(value: T.Zero);
+        public static RootedVector3<T> One => new(value: T.One);
 
-        public static RootVector3<T> UnitX => new(x: T.One, y: T.Zero, z: T.Zero);
-        public static RootVector3<T> UnitY => new(x: T.Zero, y: T.One, z: T.Zero);
-        public static RootVector3<T> UnitZ => new(x: T.Zero, y: T.Zero, z: T.One);
+        public static RootedVector3<T> UnitX => new(x: T.One, y: T.Zero, z: T.Zero);
+        public static RootedVector3<T> UnitY => new(x: T.Zero, y: T.One, z: T.Zero);
+        public static RootedVector3<T> UnitZ => new(x: T.Zero, y: T.Zero, z: T.One);
 
         public T X { get; set; } = x;
         public T Y { get; set; } = y;
         public T Z { get; set; } = z;
 
-        public RootVector3() : this(x: T.Zero, y: T.Zero, z: T.Zero) { }
-        public RootVector3(T value) : this(x: value, y: value, z: value) { }
-        public RootVector3(RootedVector2<T> xy, T z) : this(x: xy.X, y: xy.Y, z: z) { }
+        public RootedVector3() : this(x: T.Zero, y: T.Zero, z: T.Zero) { }
+        public RootedVector3(T value) : this(x: value, y: value, z: value) { }
+        public RootedVector3(RootedVector2<T> xy, T z) : this(x: xy.X, y: xy.Y, z: z) { }
 
-        public static RootVector3<T> operator +(RootVector3<T> left, RootVector3<T> right)
+        public static RootedVector3<T> operator +(RootedVector3<T> left, RootedVector3<T> right)
         {
             return new()
             {
@@ -575,7 +575,7 @@ namespace Core.Maths.Vectors
             };
         }
 
-        public static RootVector3<T> operator -(RootVector3<T> left, RootVector3<T> right)
+        public static RootedVector3<T> operator -(RootedVector3<T> left, RootedVector3<T> right)
         {
             return new()
             {
@@ -585,7 +585,7 @@ namespace Core.Maths.Vectors
             };
         }
 
-        public static RootVector3<T> operator *(RootVector3<T> vector, T scalar)
+        public static RootedVector3<T> operator *(RootedVector3<T> vector, T scalar)
         {
             return new()
             {
@@ -595,9 +595,9 @@ namespace Core.Maths.Vectors
             };
         }
 
-        public static RootVector3<T> operator *(T scalar, RootVector3<T> vector) { return vector * scalar; }
+        public static RootedVector3<T> operator *(T scalar, RootedVector3<T> vector) { return vector * scalar; }
 
-        public static RootVector3<T> operator /(RootVector3<T> vector, T scalar)
+        public static RootedVector3<T> operator /(RootedVector3<T> vector, T scalar)
         {
             return new()
             {
@@ -607,7 +607,7 @@ namespace Core.Maths.Vectors
             };
         }
 
-        public static RootVector3<T> operator /(T scalar, RootVector3<T> vector)
+        public static RootedVector3<T> operator /(T scalar, RootedVector3<T> vector)
         {
             return new()
             {
@@ -617,7 +617,7 @@ namespace Core.Maths.Vectors
             };
         }
 
-        public static bool operator ==(RootVector3<T>? left, RootVector3<T>? right)
+        public static bool operator ==(RootedVector3<T>? left, RootedVector3<T>? right)
         {
             if (left is null || right is null) { throw new InvalidOperationException(); }
 
@@ -626,7 +626,7 @@ namespace Core.Maths.Vectors
                    left.Z == right.Z;
         }
 
-        public static bool operator !=(RootVector3<T>? left, RootVector3<T>? right)
+        public static bool operator !=(RootedVector3<T>? left, RootedVector3<T>? right)
         {
             if (left is null || right is null) { throw new InvalidOperationException(); }
 
@@ -635,12 +635,12 @@ namespace Core.Maths.Vectors
                    left.Z != right.Z;
         }
 
-        public static bool operator >(RootVector3<T> left, RootVector3<T> right) { throw new InvalidOperationException(); }
-        public static bool operator >=(RootVector3<T> left, RootVector3<T> right) { throw new InvalidOperationException(); }
-        public static bool operator <(RootVector3<T> left, RootVector3<T> right) { throw new InvalidOperationException(); }
-        public static bool operator <=(RootVector3<T> left, RootVector3<T> right) { throw new InvalidOperationException(); }
+        public static bool operator >(RootedVector3<T> left, RootedVector3<T> right) { throw new InvalidOperationException(); }
+        public static bool operator >=(RootedVector3<T> left, RootedVector3<T> right) { throw new InvalidOperationException(); }
+        public static bool operator <(RootedVector3<T> left, RootedVector3<T> right) { throw new InvalidOperationException(); }
+        public static bool operator <=(RootedVector3<T> left, RootedVector3<T> right) { throw new InvalidOperationException(); }
 
-        public static RootVector3<T> operator -(RootVector3<T> value)
+        public static RootedVector3<T> operator -(RootedVector3<T> value)
         {
             return new()
             {
@@ -656,7 +656,7 @@ namespace Core.Maths.Vectors
             return T.Sqrt(magnitudeSquared);
         }
 
-        public virtual RootVector3<T> Normalize()
+        public virtual RootedVector3<T> Normalize()
         {
             T magnitude = Magnitude();
             return new()
@@ -667,14 +667,14 @@ namespace Core.Maths.Vectors
             };
         }
 
-        public virtual T Dot(RootVector3<T> other)
+        public virtual T Dot(RootedVector3<T> other)
         {
             return X * other.X +
                    Y * other.Y +
                    Z * other.Z;
         }
 
-        public virtual RootVector3<T> CrossProduct(RootVector3<T> other)
+        public virtual RootedVector3<T> CrossProduct(RootedVector3<T> other)
         {
             return new()
             {
