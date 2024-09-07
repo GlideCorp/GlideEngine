@@ -1,5 +1,6 @@
 ﻿
 using System.Runtime.InteropServices;
+using Core.Maths.Vectors;
 
 namespace Engine.Collections
 {
@@ -7,6 +8,9 @@ namespace Engine.Collections
     {
         public byte[] Vertices { get; set; } = [];
         public byte[] Indices { get; set; } = [];
+
+        protected int VertexCursor { get; set; } = 0;
+        protected int IndexCursor { get; set; } = 0;
 
         public int VertexCount { get; protected set; } = 0;
         public int IndexCount { get; protected set; } = 0;
@@ -17,7 +21,7 @@ namespace Engine.Collections
         private int Growth(int size) { return Math.Max(size * GrowthFactor, 2); }
         private int Shrink(int size) { return size / ShrinkFactor; }
 
-        protected bool EnsureVerticesSpace(int quantity)
+        protected bool EnsureVertexSpace(int quantity)
         {
             int newSize = Vertices.Length;
             while (Vertices.Length < VertexCount + quantity) { newSize = Growth(newSize); }
@@ -34,7 +38,7 @@ namespace Engine.Collections
             return true;
         }
 
-        protected bool EnsureIndicesSpace(int quantity)
+        protected bool EnsureIndexSpace(int quantity)
         {
             int newSize = Indices.Length;
             while (Indices.Length < IndexCount + quantity) { newSize = Growth(newSize); }
@@ -54,21 +58,63 @@ namespace Engine.Collections
         public bool InsertVertex<T>(T value) where T : struct
         {
             int typeSize = Marshal.SizeOf<T>();
-            bool resized = EnsureVerticesSpace(typeSize);
-            
-            MemoryMarshal.Write(Vertices, value);
-            VertexCount++;
+            bool resized = EnsureVertexSpace(typeSize);
 
+            MemoryMarshal.Write(Vertices.AsSpan(VertexCursor, VertexCursor + typeSize), value);
+
+            VertexCursor += typeSize;
+            VertexCount++;
             return resized;
         }
 
         public bool InsertIndex<T>(T value) where T : struct
         {
             int typeSize = Marshal.SizeOf<T>();
-            bool resized = EnsureIndicesSpace(typeSize);
+            bool resized = EnsureIndexSpace(typeSize);
 
-            MemoryMarshal.Write(Indices, value);
+            MemoryMarshal.Write(Vertices.AsSpan(IndexCursor, IndexCursor + typeSize), value);
+
+            IndexCursor += typeSize;
             IndexCount++;
+            return resized;
+        }
+
+        public bool InsertVertices<T>(Vector<T> vector)
+            where T : struct, System.Numerics.INumber<T>
+        { return InsertVertices(vector.Values); }
+
+        public bool InsertIndices<T>(Vector<T> vector)
+            where T : struct, System.Numerics.INumber<T>
+        { return InsertIndices(vector.Values); }
+
+        public bool InsertVertices<T>(T[] vertices) where T : struct
+        {
+            int typeSize = Marshal.SizeOf<T>();
+            bool resized = EnsureVertexSpace(typeSize * vertices.Length);
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                MemoryMarshal.Write(Vertices.AsSpan(VertexCursor, VertexCursor + typeSize), vertices[i]);
+
+                VertexCursor += typeSize;
+                VertexCount++;
+            }
+
+            return resized;
+        }
+
+        public bool InsertIndices<T>(T[] indices) where T : struct
+        {
+            int typeSize = Marshal.SizeOf<T>();
+            bool resized = EnsureIndexSpace(typeSize * indices.Length);
+
+            for (int i = 0; i < indices.Length; i++)
+            {
+                MemoryMarshal.Write(Indices.AsSpan(IndexCursor, IndexCursor + typeSize), indices[i]);
+
+                IndexCursor += typeSize;
+                IndexCount++;
+            }
 
             return resized;
         }
