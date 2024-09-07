@@ -33,8 +33,6 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
-[Bb]enchmarks/
-[Ss]andbox/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -364,4 +362,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/Benchmarks
+
+Benchmarks\
+Sandbox\
