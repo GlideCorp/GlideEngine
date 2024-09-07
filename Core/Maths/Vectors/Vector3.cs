@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace Core.Maths.Vectors
 {
-    public class Vector3Float : RootVector3<float>,
+    public class Vector3Float(float x, float y, float z) : RootedVector3<float>(x, y, z),
         IAdditionOperators<Vector3Float, Vector3Float, Vector3Float>,
         ISubtractionOperators<Vector3Float, Vector3Float, Vector3Float>,
         IMultiplyOperators<Vector3Float, float, Vector3Float>,
@@ -20,26 +20,9 @@ namespace Core.Maths.Vectors
         public new static Vector3Float UnitY => new(x: 0, y: 1, z: 0);
         public new static Vector3Float UnitZ => new(x: 0, y: 0, z: 1);
 
-        public Vector3Float()
-        {
-            X = 0;
-            Y = 0;
-            Z = 0;
-        }
-
-        public Vector3Float(float value)
-        {
-            X = value;
-            Y = value;
-            Z = value;
-        }
-
-        public Vector3Float(float x, float y, float z)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
+        public Vector3Float() : this(x: 0, y: 0, z: 0) { }
+        public Vector3Float(float value) : this(x: value, y: value, z: value) { }
+        public Vector3Float(Vector3Float xy, float z) : this(x: xy.X, y: xy.Y, z: z) { }
 
         public static Vector3Float operator +(Vector3Float left, Vector3Float right)
         {
@@ -95,7 +78,7 @@ namespace Core.Maths.Vectors
 
         public static bool operator ==(Vector3Float? left, Vector3Float? right)
         {
-            if (left is null || right is null ) { throw new InvalidOperationException(); }
+            if (left is null || right is null) { throw new InvalidOperationException(); }
 
             return left.X == right.X &&
                    left.Y == right.Y &&
@@ -104,7 +87,7 @@ namespace Core.Maths.Vectors
 
         public static bool operator !=(Vector3Float? left, Vector3Float? right)
         {
-            if (left is null || right is null ) { throw new InvalidOperationException(); }
+            if (left is null || right is null) { throw new InvalidOperationException(); }
 
             return left.X != right.X &&
                    left.Y != right.Y &&
@@ -167,7 +150,7 @@ namespace Core.Maths.Vectors
         }
     }
 
-    public class Vector3Double : RootVector3<double>,
+    public class Vector3Double(double x, double y, double z) : RootedVector3<double>(x, y, z),
         IAdditionOperators<Vector3Double, Vector3Double, Vector3Double>,
         ISubtractionOperators<Vector3Double, Vector3Double, Vector3Double>,
         IMultiplyOperators<Vector3Double, double, Vector3Double>,
@@ -181,26 +164,10 @@ namespace Core.Maths.Vectors
         public new static Vector3Double UnitX => new(x: 1, y: 0, z: 0);
         public new static Vector3Double UnitY => new(x: 0, y: 1, z: 0);
         public new static Vector3Double UnitZ => new(x: 0, y: 0, z: 1);
-        public Vector3Double()
-        {
-            X = 0;
-            Y = 0;
-            Z = 0;
-        }
 
-        public Vector3Double(double value)
-        {
-            X = value;
-            Y = value;
-            Z = value;
-        }
-
-        public Vector3Double(double x, double y, double z)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
+        public Vector3Double() : this(x: 0, y: 0, z: 0) { }
+        public Vector3Double(double value) : this(x: value, y: value, z: value) { }
+        public Vector3Double(Vector3Double xy, double z) : this(x: xy.X, y: xy.Y, z: z) { }
 
         public static Vector3Double operator +(Vector3Double left, Vector3Double right)
         {
@@ -256,7 +223,7 @@ namespace Core.Maths.Vectors
 
         public static bool operator ==(Vector3Double? left, Vector3Double? right)
         {
-            if (left is null || right is null ) { throw new InvalidOperationException(); }
+            if (left is null || right is null) { throw new InvalidOperationException(); }
 
             return left.X == right.X &&
                    left.Y == right.Y &&
@@ -327,7 +294,7 @@ namespace Core.Maths.Vectors
         }
     }
 
-    public class Vector3Int : Vector3<int>,
+    public class Vector3Int(int x, int y, int z) : Vector3<int>(x, y, z),
         IAdditionOperators<Vector3Int, Vector3Int, Vector3Int>,
         ISubtractionOperators<Vector3Int, Vector3Int, Vector3Int>,
         IMultiplyOperators<Vector3Int, int, Vector3Int>,
@@ -342,26 +309,9 @@ namespace Core.Maths.Vectors
         public new static Vector3Int UnitY => new(x: 0, y: 1, z: 0);
         public new static Vector3Int UnitZ => new(x: 0, y: 0, z: 1);
 
-        public Vector3Int()
-        {
-            X = 0;
-            Y = 0;
-            Z = 0;
-        }
-
-        public Vector3Int(int value)
-        {
-            X = value;
-            Y = value;
-            Z = value;
-        }
-
-        public Vector3Int(int x, int y, int z)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
+        public Vector3Int() : this(x: 0, y: 0, z: 0) { }
+        public Vector3Int(int value) : this(x: value, y: value, z: value) { }
+        public Vector3Int(Vector3Int xy, int z) : this(x: xy.X, y: xy.Y, z: z) { }
 
         public static Vector3Int operator +(Vector3Int left, Vector3Int right)
         {
@@ -419,7 +369,7 @@ namespace Core.Maths.Vectors
 
         public static bool operator ==(Vector3Int? left, Vector3Int? right)
         {
-            if (left is null || right is null ) { throw new InvalidOperationException(); }
+            if (left is null || right is null) { throw new InvalidOperationException(); }
 
             return left.X == right.X &&
                    left.Y == right.Y &&
@@ -469,7 +419,7 @@ namespace Core.Maths.Vectors
         }
     }
 
-    public class Vector3Byte : Vector3<byte>,
+    public class Vector3Byte(byte x, byte y, byte z) : Vector3<byte>(x, y, z),
         IAdditionOperators<Vector3Byte, Vector3Byte, Vector3Byte>,
         ISubtractionOperators<Vector3Byte, Vector3Byte, Vector3Byte>,
         IMultiplyOperators<Vector3Byte, byte, Vector3Byte>,
@@ -484,26 +434,9 @@ namespace Core.Maths.Vectors
         public new static Vector3Byte UnitY => new(x: 0, y: 1, z: 0);
         public new static Vector3Byte UnitZ => new(x: 0, y: 0, z: 1);
 
-        public Vector3Byte()
-        {
-            X = 0;
-            Y = 0;
-            Z = 0;
-        }
-
-        public Vector3Byte(byte value)
-        {
-            X = value;
-            Y = value;
-            Z = value;
-        }
-
-        public Vector3Byte(byte x, byte y, byte z)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
+        public Vector3Byte() : this(x: 0, y: 0, z: 0) { }
+        public Vector3Byte(byte value) : this(x: value, y: value, z: value) { }
+        public Vector3Byte(Vector3Byte xy, byte z) : this(x: xy.X, y: xy.Y, z: z) { }
 
         public static Vector3Byte operator +(Vector3Byte left, Vector3Byte right)
         {
@@ -559,7 +492,7 @@ namespace Core.Maths.Vectors
 
         public static bool operator ==(Vector3Byte? left, Vector3Byte? right)
         {
-            if (left is null || right is null ) { throw new InvalidOperationException(); }
+            if (left is null || right is null) { throw new InvalidOperationException(); }
 
             return left.X == right.X &&
                    left.Y == right.Y &&
@@ -568,7 +501,7 @@ namespace Core.Maths.Vectors
 
         public static bool operator !=(Vector3Byte? left, Vector3Byte? right)
         {
-            if (left is null || right is null ) { throw new InvalidOperationException(); }
+            if (left is null || right is null) { throw new InvalidOperationException(); }
 
             return left.X != right.X &&
                    left.Y != right.Y &&
@@ -609,7 +542,7 @@ namespace Core.Maths.Vectors
         }
     }
 
-    public class RootVector3<T>:
+    public class RootedVector3<T>(T x, T y, T z) :
         IAdditionOperators<RootVector3<T>, RootVector3<T>, RootVector3<T>>,
         ISubtractionOperators<RootVector3<T>, RootVector3<T>, RootVector3<T>>,
         IMultiplyOperators<RootVector3<T>, T, RootVector3<T>>,
@@ -625,33 +558,13 @@ namespace Core.Maths.Vectors
         public static RootVector3<T> UnitY => new(x: T.Zero, y: T.One, z: T.Zero);
         public static RootVector3<T> UnitZ => new(x: T.Zero, y: T.Zero, z: T.One);
 
+        public T X { get; set; } = x;
+        public T Y { get; set; } = y;
+        public T Z { get; set; } = z;
 
-        public T X { get; set; }
-
-        public T Y { get; set; }
-
-        public T Z { get; set; }
-
-        public RootVector3()
-        {
-            X = T.Zero;
-            Y = T.Zero;
-            Z = T.Zero;
-        }
-
-        public RootVector3(T value)
-        {
-            X = value;
-            Y = value;
-            Z = value;
-        }
-
-        public RootVector3(T x, T y, T z) : this()
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
+        public RootVector3() : this(x: T.Zero, y: T.Zero, z: T.Zero) { }
+        public RootVector3(T value) : this(x: value, y: value, z: value) { }
+        public RootVector3(RootedVector2<T> xy, T z) : this(x: xy.X, y: xy.Y, z: z) { }
 
         public static RootVector3<T> operator +(RootVector3<T> left, RootVector3<T> right)
         {
@@ -749,9 +662,9 @@ namespace Core.Maths.Vectors
             T magnitude = Magnitude();
             return new()
             {
-                X = X/magnitude,
-                Y = Y/magnitude, 
-                Z = Z/magnitude
+                X = X / magnitude,
+                Y = Y / magnitude,
+                Z = Z / magnitude
             };
         }
 
@@ -791,7 +704,7 @@ namespace Core.Maths.Vectors
         }
     }
 
-    public class Vector3<T>:
+    public class Vector3<T>(T x, T y, T z) :
         IAdditionOperators<Vector3<T>, Vector3<T>, Vector3<T>>,
         ISubtractionOperators<Vector3<T>, Vector3<T>, Vector3<T>>,
         IMultiplyOperators<Vector3<T>, T, Vector3<T>>,
@@ -807,39 +720,13 @@ namespace Core.Maths.Vectors
         public static Vector3<T> UnitY => new(x: T.Zero, y: T.One, z: T.Zero);
         public static Vector3<T> UnitZ => new(x: T.Zero, y: T.Zero, z: T.One);
 
+        public T X { get; set; } = x;
+        public T Y { get; set; } = y;
+        public T Z { get; set; } = z;
 
-        public T X { get; set; }
-
-        public T Y { get; set; }
-
-        public T Z { get; set; }
-
-        public Vector3()
-        {
-            X = T.Zero;
-            Y = T.Zero;
-            Z = T.Zero;
-        }
-
-        public Vector3(T value)
-        {
-            X = value;
-            Y = value;
-            Z = value;
-        }
-
-        public Vector3(T x, T y, T z)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
-        public Vector3(Vector2<T> xy, T z)
-        {
-            X = xy.X;
-            Y = xy.Y;
-            Z = z;
-        }
+        public Vector3() : this(T.Zero, T.Zero, T.Zero) { }
+        public Vector3(T value) : this(value, value, value) { }
+        public Vector3(Vector2<T> xy, T z) : this(xy.X, xy.Y, z) { }
 
         public static Vector3<T> operator +(Vector3<T> left, Vector3<T> right)
         {

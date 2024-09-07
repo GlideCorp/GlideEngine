@@ -7,7 +7,7 @@ void MyCachedList128()
     Work.ReferenceTypeMatcher matcher = new();
     Work.InsertFindRemove(
         1000,
-        createList: () => new CachedList2<int, Work.ReferenceType<int>>(cacheSize: 128, matcher),
+        createList: () => new List<int, Work.ReferenceType<int>>(matcher),
         addElement: (list, key) => { list.Insert(key); },
         removeElement: (list, key) => { list.Remove(key); },
         findElement: (list, key) => list.Find(key, out Work.ReferenceType<int>? value) ? value : default!,
