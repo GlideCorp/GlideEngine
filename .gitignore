@@ -9,8 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-Benchmarks/*
-Sandbox/*
+
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -34,6 +33,8 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
+Benchmarks/*
+Sandbox/*
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -363,5 +364,3 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/Sandbox/Sandbox.csproj
-/Benchmarks/Benchmarks.csproj
