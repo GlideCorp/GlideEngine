@@ -61,7 +61,7 @@ namespace Editor
                 Shininess = 2
             };
 
-            mTest = ModelLoader.Load("resources\\models\\shapes.glb");
+            mTest = ModelLoader.Load("resources\\models\\cube.glb");
 
             oldMousePos = Vector2D<float>.Zero;
 

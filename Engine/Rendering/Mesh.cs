@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using Engine.Collections;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using System.Runtime.InteropServices;
 
@@ -27,6 +28,8 @@ namespace Engine.Rendering
             new VertexElement(2, VertexAttribPointerType.Float, 2)
         );
 
+        public MeshDataBuffer Data { get; set; }
+        /*
         private List<Vertex>? _vertices;
         public List<Vertex> Vertices 
         {
@@ -47,9 +50,10 @@ namespace Engine.Rendering
                 }
             }
         }
-        public uint VerticesCount { get; private set; }
+        */
+        public uint VerticesCount { get => (uint)Data.VertexCount; }
 
-
+        /*
         private List<uint>? _indices;
         public List<uint> Indices
         {
@@ -69,17 +73,18 @@ namespace Engine.Rendering
                     _indices = new List<uint>(value);
                 }
             }
-        }
-        public uint IndicesCount { get; private set; }
+        }*/
+        public uint IndicesCount { get => (uint)Data.IndexCount; }
 
         public Mesh()
         {
+            Data = new MeshDataBuffer();
         }
 
         public void Build()
         {
             //If trying to build an empty mesh dont do it, usefull if trying to rebuilding an already created mesh without setting vertices first
-            if(Vertices.Count == 0)
+            if(VerticesCount == 0)
             {
                 return;
             }
@@ -92,9 +97,9 @@ namespace Engine.Rendering
                 uint VBO = Application.Context.GenBuffer();
                 Application.Context.BindBuffer(BufferTargetARB.ArrayBuffer, VBO);
 
-                fixed (Vertex* data = Vertices.ToArray())
+                fixed (void* data = Data.Vertices)
                 {
-                    Application.Context.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(Vertices.Count * VertexLayout.Stride), data, BufferUsageARB.StaticDraw);
+                    Application.Context.BufferData(BufferTargetARB.ArrayBuffer, (VerticesCount * VertexLayout.Stride), data, BufferUsageARB.StaticDraw);
                 }
 
                 /*			         Element 1						  Element 2					 */
@@ -111,31 +116,28 @@ namespace Engine.Rendering
                     offset += element.Count * VertexElement.GetSizeOf(element.Type);
                 }
 
-                if (Indices.Count > 0)
+                if (IndicesCount > 0)
                 {
                     uint IBO = Application.Context.GenBuffer();
                     Application.Context.BindBuffer(BufferTargetARB.ElementArrayBuffer, IBO);
 
-                    fixed (uint* buf = Indices.ToArray())
+                    fixed (void* buf = Data.Indices)
                     {
-                        Application.Context.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)Indices.Count * sizeof(int), buf, BufferUsageARB.StaticDraw);
+                        Application.Context.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)IndicesCount * sizeof(uint), buf, BufferUsageARB.StaticDraw);
                     }
                 }
 
                 Application.Context.BindVertexArray(0);
                 Application.Context.BindBuffer(BufferTargetARB.ArrayBuffer, 0);
 
-                if (Indices.Count > 0)
+                if (IndicesCount > 0)
                 {
                     Application.Context.BindBuffer(BufferTargetARB.ElementArrayBuffer, 0);
                 }
             }
 
-            VerticesCount = (uint)Vertices.Count;
-            IndicesCount = (uint)Indices.Count;
-
-            Vertices.Clear();
-            Indices.Clear();
+            //Vertices.Clear();
+            //Indices.Clear();
         }
 
     }

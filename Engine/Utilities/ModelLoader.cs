@@ -72,7 +72,9 @@ namespace Engine.Utilities
                 else
                     v.UV = Vector2D<float>.Zero;
 
-                vertices.Add(v);
+                //vertices.Add(v);
+                m.Data.InsertVertex(v);
+                //m.Data.InsertVertex(2.0f);
             }
 
             for (int i = 0; i < mesh->MNumFaces; i++)
@@ -81,12 +83,13 @@ namespace Engine.Utilities
 
                 for (uint j = 0; j < face.MNumIndices; j++)
                 {
-                    indices.Add(face.MIndices[j]);
+                    //indices.Add(face.MIndices[j]);
+                    m.Data.InsertIndex(face.MIndices[j]);
                 }
             }
 
-            m.Vertices = vertices;
-            m.Indices = indices;
+            //m.Vertices = vertices;
+            //m.Indices = indices;
             m.Build();
             return m;
         }
