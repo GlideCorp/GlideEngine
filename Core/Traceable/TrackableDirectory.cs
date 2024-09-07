@@ -6,8 +6,10 @@ using Core.Utilities;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace Core.Trackables
+namespace Core.Traceable
 {
+    
+
     public class TrackableDirectory : IComparable<TrackableDirectory>
     {
         public const char DefaultSeparator = ':';
@@ -15,7 +17,7 @@ namespace Core.Trackables
 
         public string[] Subdirectories { get; init; }
 
-        public string this[int index] { get { return Subdirectories[index]; } }
+        public string this[int index] => Subdirectories[index];
 
         public TrackableDirectory(string directory)
         {
@@ -88,10 +90,8 @@ namespace Core.Trackables
 
         public static implicit operator TrackableDirectory(string directory)
         {
-            if (string.IsNullOrEmpty(directory)) { return Empty; }
-            else { return new(directory); }
+            return string.IsNullOrEmpty(directory) ? Empty : new(directory);
         }
-
 
         public override string ToString()
         {
@@ -110,14 +110,14 @@ namespace Core.Trackables
         public int CompareTo(TrackableDirectory? other)
         {
             if (other is null) { return 1; }
-            else if (Subdirectories.Length == 0) { return 1; }
-            else if (other.Subdirectories.Length == 0) { return -1; }
+            if (Subdirectories.Length == 0) { return 1; }
+            if (other.Subdirectories.Length == 0) { return -1; }
 
             int length = Math.Min(Subdirectories.Length, other.Subdirectories.Length);
-            int comp = Subdirectories[0].CompareTo(other.Subdirectories[0]);
+            int comp = string.Compare(Subdirectories[0], other.Subdirectories[0], StringComparison.Ordinal);
             for (int i = 1; comp == 0 && i < length; i++)
             {
-                comp = Subdirectories[i].CompareTo(other.Subdirectories[i]);
+                comp = string.Compare(Subdirectories[i], other.Subdirectories[i], StringComparison.Ordinal);
             }
 
             return comp;

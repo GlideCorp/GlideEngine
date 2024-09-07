@@ -9,8 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-Benchmarks/
-Sandbox/
+
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -363,5 +362,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/Sandbox/Sandbox.csproj
-/Benchmarks/Benchmarks.csproj
+
+Benchmarks/
+Sandbox/
