@@ -4,12 +4,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections.Lists
 {
-    public class DoublyLinkedList<TKey, TValue>(IMatcher<TKey, TValue> defaultMatcher) : ICollection<TKey, TValue>
+    public class DoublyLinkedList<TKey, TValue>(IMatcher<TKey, TValue> defaultMatcher) : ILinkedList<TKey, TValue, DoublyLinkedNode<TValue>>
     {
         public IMatcher<TKey, TValue> DefaultMatcher { get; init; } = defaultMatcher;
 
-        protected DoublyLinkedNode<TValue>? First { get; set; } = null;
-        protected DoublyLinkedNode<TValue>? Last { get; set; } = null;
+        public DoublyLinkedNode<TValue>? FirstNode { get; protected set; } = null;
+        public DoublyLinkedNode<TValue>? LastNode { get; protected set; } = null;
 
         public int Count { get; private set; } = 0;
 
@@ -17,12 +17,11 @@ namespace Core.Collections.Lists
         {
             Count++;
 
-            if (First is null) { First = Last = new(value); }
+            if (FirstNode is null) { FirstNode = LastNode = new(value); }
             else
             {
-                DoublyLinkedNode<TValue> newNode = new(value, previous: null, next: First);
-                First.Previous = newNode;
-                First = newNode;
+                FirstNode.Previous = new(value, previous: null, next: FirstNode);
+                FirstNode = FirstNode.Previous;
             }
         }
 
@@ -30,56 +29,55 @@ namespace Core.Collections.Lists
         {
             Count++;
 
-            if (First is null) { First = Last = new(value); }
+            if (LastNode is null) { FirstNode = LastNode = new(value); }
             else
             {
-                DoublyLinkedNode<TValue> newNode = new(value, previous: Last, next: null);
-                Last!.Next = newNode;
-                Last = newNode;
+                LastNode.Next = new(value, previous: LastNode, next: null);
+                LastNode = LastNode.Next;
             }
         }
 
         public void Insert(TValue value) { InsertFirst(value); }
 
-        private void RemoveFirst()
+        private void RemoveFirstNoChecks()
         {
             Count--;
-            if (Count == 0) { First = Last = null; }
+            if (Count == 0) { FirstNode = LastNode = null; }
             else
             {
-                DoublyLinkedNode<TValue> toRemove = First!;
-                First = First!.Next;
-                First!.Previous = null;
-                toRemove.Next = null;
+                DoublyLinkedNode<TValue> toRemove = FirstNode!;
+                FirstNode = toRemove.Next;
+                FirstNode!.Previous = toRemove.Next = null;
             }
         }
 
-        private void RemoveCurrent(DoublyLinkedNode<TValue> current)
+        public void RemoveFirst() { if (Count > 0) { RemoveFirstNoChecks(); } }
+
+        private void RemoveCurrentNoChecks(DoublyLinkedNode<TValue> current)
         {
             Count--;
-            if (Count == 0) { First = Last = null; }
+            if (Count == 0) { FirstNode = LastNode = null; }
             else
             {
                 current.Previous!.Next = current.Next;
                 current.Next!.Previous = current.Previous;
-
-                current.Next = null;
-                current.Previous = null;
+                current.Previous = current.Next = null;
             }
         }
 
-        private void RemoveLast()
+        private void RemoveLastNoChecks()
         {
             Count--;
-            if (Count == 0) { First = Last = null; }
+            if (Count == 0) { FirstNode = LastNode = null; }
             else
             {
-                DoublyLinkedNode<TValue> toRemove = Last!;
-                Last = Last!.Previous;
-                Last!.Next = null;
-                toRemove.Previous = null;
+                DoublyLinkedNode<TValue> toRemove = LastNode!;
+                LastNode = toRemove.Previous;
+                toRemove.Previous = LastNode!.Next = null;
             }
         }
+
+        public void RemoveLast() { if (Count > 0) { RemoveLastNoChecks(); } }
 
         public void Remove(TKey key)
         {
@@ -89,19 +87,19 @@ namespace Core.Collections.Lists
 
         public void Remove(IMatcher<TKey, TValue> matcher)
         {
-            if (First is null) { return; }
+            if (FirstNode is null) { return; }
 
-            if (matcher.Match(First.Value)) { RemoveFirst(); return; }
-            if (First.Next is null) { return; }
+            if (matcher.Match(FirstNode.Value)) { RemoveFirstNoChecks(); return; }
+            if (FirstNode.Next is null) { return; }
 
-            DoublyLinkedNode<TValue> current = First.Next;
-            while (current != Last)
+            DoublyLinkedNode<TValue> current = FirstNode.Next;
+            while (current != LastNode)
             {
-                if (matcher.Match(current.Value)) { RemoveCurrent(current); return; }
+                if (matcher.Match(current.Value)) { RemoveCurrentNoChecks(current); return; }
                 current = current.Next!;
             }
 
-            if (matcher.Match(Last!.Value)) { RemoveLast(); }
+            if (matcher.Match(LastNode!.Value)) { RemoveLastNoChecks(); }
         }
 
         public bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
@@ -112,7 +110,7 @@ namespace Core.Collections.Lists
 
         public bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
         {
-            DoublyLinkedNode<TValue>? current = First;
+            DoublyLinkedNode<TValue>? current = FirstNode;
 
             while (current is not null)
             {
@@ -122,7 +120,7 @@ namespace Core.Collections.Lists
                     return true;
                 }
 
-                current = current.Next;
+                current = current.Next!;
             }
 
             value = default;

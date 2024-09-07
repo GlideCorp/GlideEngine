@@ -6,5 +6,6 @@ namespace Core.Collections
         public TKey Key { get; set; }
 
         public bool Match(TValue value);
+        public int Compare(TValue value);
     }
 }

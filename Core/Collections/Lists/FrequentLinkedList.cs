@@ -12,45 +12,51 @@ namespace Core.Collections.Lists
             return Find(DefaultMatcher, out value);
         }
 
+        private void NextToFront(SinglyLinkedNode<TValue> previous)
+        {
+            SinglyLinkedNode<TValue> toFront = previous.Next!;
+            previous.Next = toFront.Next;
+            toFront.Next = FirstNode;
+            FirstNode = toFront;
+        }
+
+        private void LastToFront(SinglyLinkedNode<TValue> previous)
+        {
+            LastNode!.Next = FirstNode;
+            FirstNode = LastNode;
+            LastNode = previous;
+            previous.Next = null;
+        }
+
         public new bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
         {
-            if (First is null) { goto ReturnDefault; }
+            if (FirstNode is null) { goto ReturnDefault; }
 
-            if (matcher.Match(First.Value))
+            if (matcher.Match(FirstNode.Value))
             {
-                value = First.Value!;
+                value = FirstNode.Value!;
                 return true;
             }
 
-            if (First.Next is null) { goto ReturnDefault; }
+            if (FirstNode.Next is null) { goto ReturnDefault; }
 
-            SinglyLinkedNode<TValue> previous = First;
-            while (previous.Next != Last)
+            SinglyLinkedNode<TValue> previous = FirstNode;
+            while (previous.Next != LastNode)
             {
                 if (matcher.Match(previous.Next!.Value))
                 {
                     value = previous.Next.Value!;
-
-                    SinglyLinkedNode<TValue> toFront = previous.Next;
-                    previous.Next = toFront.Next;
-                    toFront.Next = First;
-                    First = toFront;
-
+                    NextToFront(previous);
                     return true;
                 }
 
                 previous = previous.Next;
             }
 
-            if (matcher.Match(Last!.Value))
+            if (matcher.Match(LastNode!.Value))
             {
-                value = Last.Value!;
-
-                Last.Next = First;
-                First = Last;
-                Last = previous;
-                previous.Next = null;
-
+                value = LastNode.Value!;
+                LastToFront(previous);
                 return true;
             }
 
