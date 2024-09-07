@@ -4,16 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections.Lists
 {
-    public class CachedList2<TKey, TValue>(int cacheSize, IMatcher<TKey, TValue> defaultMatcher)
-        : ICollection<TKey, TValue>
+    public class CachedList2<TKey, TValue>(int cacheSize, IMatcher<TKey, TValue> defaultMatcher) : ICollection<TKey, TValue>
     {
-        /*
-        protected class CacheValue()
-        {
-            public DateTime LastHit { get; set; } = DateTime.MinValue;
-            public TValue? Value { get; set; } = default;
-        }
-        */
         public IMatcher<TKey, TValue> DefaultMatcher { get; init; } = defaultMatcher;
 
         protected TValue[] Array { get; set; } = [];
@@ -23,16 +15,19 @@ namespace Core.Collections.Lists
         protected int ArrayCount { get; set; } = 0;
         protected int CacheCount { get; set; } = 0;
 
-        protected int NextSize() { return Math.Max(Array.Length * 2, 2); }
-        protected int PreviousSize() { return Array.Length / 2; }
+        protected int GrowthFactor { get; set; } = 2;
+        protected int ShrinkFactor { get; set; } = 2;
+
+        protected int Growth() { return Math.Max(Array.Length * GrowthFactor, 2); }
+        protected int Shrink() { return Array.Length / ShrinkFactor; }
 
         private void ResizeArray(int newSize)
         {
             TValue[] newArray = new TValue[newSize];
 
-            Span<TValue> span1 = Array.AsSpan(0, ArrayCount);
-            Span<TValue> span2 = newArray.AsSpan(0, ArrayCount);
-            span1.CopyTo(span2);
+            Span<TValue> arraySpan = Array.AsSpan(0, ArrayCount);
+            Span<TValue> newArraySpan = newArray.AsSpan(0, ArrayCount);
+            arraySpan.CopyTo(newArraySpan);
 
             Array = newArray;
         }
@@ -41,42 +36,40 @@ namespace Core.Collections.Lists
         {
             TValue[] newArray = new TValue[newSize];
 
-            Span<TValue> span1 = Array.AsSpan(0, skipIndex);
-            Span<TValue> span2 = newArray.AsSpan(0, skipIndex);
-            span1.CopyTo(span2);
+            Span<TValue> arraySpan = Array.AsSpan(0, skipIndex);
+            Span<TValue> newArraySpan = newArray.AsSpan(0, skipIndex);
+            arraySpan.CopyTo(newArraySpan);
 
-            span1 = Array.AsSpan(skipIndex + 1, ArrayCount);
-            span2 = newArray.AsSpan(skipIndex + 1, ArrayCount);
-            span1.CopyTo(span2);
+            arraySpan = Array.AsSpan(skipIndex + 1, ArrayCount);
+            newArraySpan = newArray.AsSpan(skipIndex, ArrayCount - 1);
+            arraySpan.CopyTo(newArraySpan);
 
             Array = newArray;
         }
 
 
-        private static void PushBackAndAddLast(Span<TValue> source, Span<TValue> destination,
-            int from, int to, TValue value)
+        private static void PushBackAndAddLast(Span<TValue> source, Span<TValue> destination, int from, int to, TValue value)
         {
             Span<TValue> moveSource = source[from..to];
             Span<TValue> moveDestination = destination[(from - 1)..(to - 1)];
             moveSource.CopyTo(moveDestination);
 
-            destination[^1] = value;
+            destination[to - 1] = value;
         }
 
-        private static void PushForwardAndAddFirst(Span<TValue> source, Span<TValue> destination,
-            int from, int to, TValue value)
+        private static void PushForwardAndAddFirst(Span<TValue> source, Span<TValue> destination, int from, int to, TValue value)
         {
             Span<TValue> moveSource = source[from..to];
             Span<TValue> moveDestination = destination[(from + 1)..(to + 1)];
             moveSource.CopyTo(moveDestination);
 
-            destination[0] = value;
+            destination[from] = value;
         }
 
 
         public void Insert(TValue value)
         {
-            if (ArrayCount == Array.Length) { ResizeArray(newSize: NextSize()); }
+            if (ArrayCount == Array.Length) { ResizeArray(newSize: Growth()); }
             Array[ArrayCount++] = value;
         }
 
@@ -104,7 +97,7 @@ namespace Core.Collections.Lists
 
                 if (ArrayCount == 1) { Array = []; }
                 else if (ArrayCount - 1 <= Array.Length / 4)
-                    ResizeArrayWithoutElementAt(newSize: PreviousSize(), skipIndex: i);
+                    ResizeArrayWithoutElementAt(newSize: Shrink(), skipIndex: i);
                 else
                     PushBackAndAddLast(source: span, destination: span, from: i + 1, to: ArrayCount, value: default!);
 
@@ -143,7 +136,7 @@ ReturnDefault:
         private void RemoveLastFromArray()
         {
             if (ArrayCount - 1 <= Array.Length / 4)
-                ResizeArrayWithoutElementAt(newSize: PreviousSize(), skipIndex: ArrayCount - 1);
+                ResizeArrayWithoutElementAt(newSize: Shrink(), skipIndex: ArrayCount - 1);
             else { Array[ArrayCount - 1] = default!; }
         }
 

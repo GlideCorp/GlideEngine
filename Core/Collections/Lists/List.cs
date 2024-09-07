@@ -11,37 +11,98 @@ namespace Core.Collections.Lists
         protected TValue[] Array { get; set; } = [];
         public int Count { get; protected set; } = 0;
 
-        protected int IncreaseSize() { return Math.Max(Array.Length * 2, 2); }
-        protected int DecreaseSize() { return Array.Length / 2; }
+        protected int GrowthFactor { get; set; } = 2;
+        protected int ShrinkFactor { get; set; } = 2;
+
+        protected int Growth() { return Math.Max(Array.Length * GrowthFactor, 2); }
+        protected int Shrink() { return Array.Length / ShrinkFactor; }
+
+        private void ResizeArray(int newSize)
+        {
+            TValue[] newArray = new TValue[newSize];
+
+            Span<TValue> arraySpan = Array.AsSpan(0, Count);
+            Span<TValue> newArraySpan = newArray.AsSpan(0, Count);
+            arraySpan.CopyTo(newArraySpan);
+
+            Array = newArray;
+        }
+
+        private void ResizeArrayAndAddLast(int newSize, TValue value)
+        {
+            TValue[] newArray = new TValue[newSize];
+
+            Span<TValue> arraySpan = Array.AsSpan(0, Count);
+            Span<TValue> newArraySpan = newArray.AsSpan(0, Count);
+            arraySpan.CopyTo(newArraySpan);
+
+            newArray[Count] = value;
+            Array = newArray;
+        }
+
+        private void ResizeArrayAndAddFirst(int newSize, TValue value)
+        {
+            TValue[] newArray = new TValue[newSize];
+
+            Span<TValue> arraySpan = Array.AsSpan(0, Count);
+            Span<TValue> newArraySpan = newArray.AsSpan(1, Count);
+            arraySpan.CopyTo(newArraySpan);
+
+            newArraySpan[0] = value;
+            Array = newArray;
+        }
+
+        private static void PushBackAndAddLast(Span<TValue> source, Span<TValue> destination, int from, int to, TValue value)
+        {
+            Span<TValue> moveSource = source[from..to];
+            Span<TValue> moveDestination = destination[(from - 1)..(to - 1)];
+            moveSource.CopyTo(moveDestination);
+
+            destination[to - 1] = value;
+        }
+
+        private static void PushForwardAndAddFirst(Span<TValue> source, Span<TValue> destination, int from, int to, TValue value)
+        {
+            Span<TValue> moveSource = source[from..to];
+            Span<TValue> moveDestination = destination[(from + 1)..(to + 1)];
+            moveSource.CopyTo(moveDestination);
+
+            destination[from] = value;
+        }
+
+        private void ResizeArrayWithoutElementAt(int newSize, int skipIndex)
+        {
+            TValue[] newArray = new TValue[newSize];
+
+            Span<TValue> arraySpan = Array.AsSpan(0, skipIndex);
+            Span<TValue> newArraySpan = newArray.AsSpan(0, skipIndex);
+            arraySpan.CopyTo(newArraySpan);
+
+            arraySpan = Array.AsSpan(skipIndex + 1, Count);
+            newArraySpan = newArray.AsSpan(skipIndex, Count - 1);
+            arraySpan.CopyTo(newArraySpan);
+
+            Array = newArray;
+        }
 
         public void InsertFirst(TValue value)
         {
-            if (Count == Array.Length)
+            if (Count == Array.Length) { ResizeArrayAndAddFirst(newSize: Growth(), value); }
+            else
             {
-                int newSize = IncreaseSize();
-                TValue[] newArray = new TValue[newSize];
-
-                System.Array.Copy(Array, sourceIndex: 0, newArray, destinationIndex: 1, length: Count);
-                Array = newArray;
+                Span<TValue> span = Array;
+                PushForwardAndAddFirst(span, span, 0, Count, value);
             }
-            else { System.Array.Copy(Array, sourceIndex: 0, Array, destinationIndex: 1, length: Count); }
 
-            Array[0] = value;
             Count++;
         }
 
         public void InsertLast(TValue value)
         {
-            if (Count == Array.Length)
-            {
-                int newSize = IncreaseSize();
-                TValue[] newArray = new TValue[newSize];
+            if (Count == Array.Length) { ResizeArrayAndAddLast(newSize: Growth(), value); }
+            else { Array[Count] = value; }
 
-                System.Array.Copy(Array, newArray, Count);
-                Array = newArray;
-            }
-
-            Array[Count++] = value;
+            Count++;
         }
 
         public void Insert(TValue value) { InsertLast(value); }
@@ -54,31 +115,18 @@ namespace Core.Collections.Lists
 
         public void Remove(IMatcher<TKey, TValue> matcher)
         {
-            if (Count == 0) { return; }
-
             Span<TValue> span = Array.AsSpan(0, Count);
             for (int i = 0; i < span.Length; i++)
             {
-                if (!matcher.Match(span[i])) { continue; }
+                if (matcher.Match(span[i])) { continue; }
+
+                if (Count == 1) { Array = []; }
+                else if (Count - 1 <= Array.Length / 4)
+                    ResizeArrayWithoutElementAt(newSize: Shrink(), skipIndex: i);
+                else
+                    PushBackAndAddLast(source: span, destination: span, from: i + 1, to: Count, value: default!);
 
                 Count--;
-                if (Count == 0) { Array = []; return; }
-
-                if (Count <= Array.Length / 4)
-                {
-                    int newSize = DecreaseSize();
-
-                    TValue[] newArray = new TValue[newSize];
-                    System.Array.Copy(Array, sourceIndex: 0, newArray, destinationIndex: 0, length: i);
-                    System.Array.Copy(Array, sourceIndex: i + 1, newArray, destinationIndex: i, length: Count - i);
-                    Array = newArray;
-                }
-                else
-                {
-                    System.Array.Copy(Array, sourceIndex: i + 1, Array, destinationIndex: i, length: Count - i);
-                    span[Count] = default!;
-                }
-
                 return;
             }
         }

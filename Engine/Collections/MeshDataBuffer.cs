@@ -60,7 +60,12 @@ namespace Engine.Collections
             int typeSize = Marshal.SizeOf<T>();
             bool resized = EnsureVertexSpace(typeSize);
 
-            MemoryMarshal.Write(Vertices.AsSpan(VertexCursor, VertexCursor + typeSize), value);
+            Span<byte> span = Vertices.AsSpan(VertexCursor, typeSize);
+            MemoryMarshal.Write(span, value);
+
+            //BinaryPrimitives.WriteSingleBigEndian();
+            MemoryMarshal.Cast<byte, T>(Vertices.AsSpan(VertexCursor, VertexCursor + typeSize));
+            MemoryMarshal.Cast<byte, T>(Vertices.AsSpan(VertexCursor, VertexCursor + typeSize));
 
             VertexCursor += typeSize;
             VertexCount++;
@@ -80,12 +85,10 @@ namespace Engine.Collections
         }
 
         public bool InsertVertices<T>(Vector<T> vector)
-            where T : struct, System.Numerics.INumber<T>
-        { return InsertVertices(vector.Values); }
+            where T : struct, System.Numerics.INumber<T> { return InsertVertices(vector.Values); }
 
         public bool InsertIndices<T>(Vector<T> vector)
-            where T : struct, System.Numerics.INumber<T>
-        { return InsertIndices(vector.Values); }
+            where T : struct, System.Numerics.INumber<T> { return InsertIndices(vector.Values); }
 
         public bool InsertVertices<T>(T[] vertices) where T : struct
         {
