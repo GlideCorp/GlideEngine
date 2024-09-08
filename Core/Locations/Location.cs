@@ -1,99 +1,107 @@
 ﻿
 using System;
-using System.Collections;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Runtime.Intrinsics;
-using Microsoft.VisualBasic;
+using System.Text;
 
 namespace Core.Locations
 {
     /*
-    * CompressedChar
-    *      'a': 1,
-    *      ...,
-    *      'z': 26,
-    *      '': 27,
-    *      '': 28,
-    *      '/': 29,
-    *      '.': 30,
-    *      '_': 31,
-    *      ':': 32
-    *
-    * x = 1 byte
-    * |xxxx|xxxx|xxxx|xxxx| = 1 int = 4 compressed chars
-    * |xxxx|xxxx|xxxx|xxxx|xxxx|xxxx|xxxx|xxxx| = 1 long = 8 compressed chars
-    */
+     * CompressedChar
+     *      'a': 1,
+     *      ...,
+     *      'z': 26,
+     *      '': 27,
+     *      '': 28,
+     *      '/': 29,
+     *      '.': 30,
+     *      '_': 31,
+     *      ':': 32
+     *
+     *  x = 1 bit
+     * |xxxxx|xxxxx|xxxxx|x| = 1 short = 3 compressed chars with only 1 wasted bit
+     * |xxxxx|xxxxx|xxxxx|x| |xxxxx|xxxxx|xxxxx|x| = 1 int = 2 short = 6 compressed chars with 2 wasted bits
+     * |xxxxx|xxxxx|xxxxx|x| |xxxxx|xxxxx|xxxxx|x| |xxxxx|xxxxx|xxxxx|x| |xxxxx|xxxxx|xxxxx|x| = 1 long = 4 short = 12 compressed chars with 4 wasted bits
+     */
 
     public class Location(ReadOnlySpan<char> alphabeticalLocation) : IEquatable<Location>
     {
-        private ulong[] NumericalLocation { get; set; } = ConvertToNumerical(alphabeticalLocation);
+        private const int BitsForCompressedChars = 5;
+        private const int UnusedBits = 1;
+        private const int CharsPerNumber = sizeof(ushort) * 8 / BitsForCompressedChars;
+        private const int CharsPerNumberMinus1 = sizeof(ushort) * 8 / BitsForCompressedChars - 1;
 
-        private static ulong CompressChar(char decompressedChar)
+        private ushort[] NumericalLocation { get; init; } = ConvertToNumerical(alphabeticalLocation);
+
+        private static ushort CompressChar(char decompressedChar)
         {
             return decompressedChar switch
             {
-                >= 'a' and <= 'z' => (ulong)(decompressedChar - 'a'),
+                >= 'a' and <= 'z' => (ushort)(decompressedChar - 'a'),
                 ':' => 31,
                 '_' => 30,
                 '.' => 29,
                 '/' => 28,
-                _ => 0,
+                _ => 27,
             };
         }
 
-        private static char DecompressChar(ulong compressedChar)
+        private static char DecompressChar(ushort compressedChar)
         {
-            return ' ';
+            return compressedChar switch
+            {
+                <= 'z' - 'a' => (char)(compressedChar + 'a'),
+                31 => ':',
+                30 => '_',
+                29 => '.',
+                28 => '/',
+                _ => '\0',
+            };
         }
 
-        private static ulong[] ConvertToNumerical(ReadOnlySpan<char> alphabeticalLocation)
+        private static ushort[] ConvertToNumerical(ReadOnlySpan<char> alphabeticalLocation)
         {
-            int numericalParts = (alphabeticalLocation.Length + 7) / 8;
-            ulong[] numericalLocations = numericalParts == 0 ? [] : new ulong[numericalParts];
+            int numericalParts = (alphabeticalLocation.Length + CharsPerNumberMinus1) / CharsPerNumber;
+            ushort[] numericalLocations = numericalParts == 0 ? [] : new ushort[numericalParts];
 
             for (int i = 0; i < alphabeticalLocation.Length; i++)
             {
-                ulong compressedChar = CompressChar(alphabeticalLocation[i]);
-                numericalLocations[i / 8] |= compressedChar << ((8 - i % 8 - 1) * 8);
+                int numericalIndex = i / CharsPerNumber;
+                int shiftAmount = (CharsPerNumberMinus1 - i % CharsPerNumber) * BitsForCompressedChars + UnusedBits;
+
+                numericalLocations[numericalIndex] |= (ushort)(CompressChar(alphabeticalLocation[i]) << shiftAmount);
+            }
+
+            for (int i = alphabeticalLocation.Length % CharsPerNumber; i < 3; i++)
+            {
+                int shiftAmount = (CharsPerNumberMinus1 - i % CharsPerNumber) * BitsForCompressedChars + UnusedBits;
+
+                numericalLocations[^1] |= (ushort)(CompressChar('\0') << shiftAmount);
             }
 
             return numericalLocations;
         }
 
-        private static string ConvertToAlphabetical(ulong[] numericalLocation)
+        private static ushort GetCompressedChar(ushort number, int position)
         {
-            return "";
+            int shiftAmount = BitsForCompressedChars * position + UnusedBits;
+            return (ushort)((number >> shiftAmount) & 0b11111);
         }
-        /*
-        public bool Equals(Location? other)
+
+        private static string ConvertToAlphabetical(ushort[] numericalLocation)
         {
-            if (other is null || NumericalLocation.Length != other.NumericalLocation.Length) { return false; }
-           
-           int length = NumericalLocation.Length;
-           int remaining = length % Vector<ulong>.Count;
-           ReadOnlySpan<ulong> leftSpan = NumericalLocation.AsSpan();
-           ReadOnlySpan<ulong> rightSpan = other.NumericalLocation.AsSpan();
-           Vector<ulong> allBitsSet = Vector<ulong>.AllBitsSet;
-           ref ulong leftReference = ref MemoryMarshal.GetReference(leftSpan);
-           ref ulong rightReference = ref MemoryMarshal.GetReference(rightSpan);
-           
-           for (int i = 0; i < length - remaining; i += Vector<ulong>.Count)
-           {
-               Vector<ulong> v = Vector.Equals(
-                   Unsafe.As<ulong, Vector<ulong>>(ref Unsafe.Add(ref leftReference, i)),
-                   Unsafe.As<ulong, Vector<ulong>>(ref Unsafe.Add(ref rightReference, i)));
-           
-               if (v != allBitsSet) { return false; }
-           }
-           
-           for (int i = length - remaining; i < length; i++) { if (leftSpan[i] != rightSpan[i]) { return false; } }
-           
-           return true;
+            int characterLength = numericalLocation.Length * 8;
+            StringBuilder builder = new(characterLength);
+
+            for (int i = 0; i < numericalLocation.Length; i++)
+            {
+                builder.Append(DecompressChar(GetCompressedChar(numericalLocation[i], position: 2)));
+                builder.Append(DecompressChar(GetCompressedChar(numericalLocation[i], position: 1)));
+                builder.Append(DecompressChar(GetCompressedChar(numericalLocation[i], position: 0)));
+            }
+
+            return builder.ToString();
         }
-        */
 
         public bool Equals(Location? other)
         {
@@ -101,12 +109,12 @@ namespace Core.Locations
 
             int arrayLength = NumericalLocation.Length;
             int remaining = arrayLength - arrayLength % Vector<ulong>.Count;
-            ReadOnlySpan<ulong> leftSpan = NumericalLocation.AsSpan();
-            ReadOnlySpan<ulong> rightSpan = other.NumericalLocation.AsSpan();
+            ReadOnlySpan<ushort> leftSpan = NumericalLocation.AsSpan();
+            ReadOnlySpan<ushort> rightSpan = other.NumericalLocation.AsSpan();
 
-            ReadOnlySpan<Vector<ulong>> left = MemoryMarshal.Cast<ulong, Vector<ulong>>(leftSpan);
-            ReadOnlySpan<Vector<ulong>> right = MemoryMarshal.Cast<ulong, Vector<ulong>>(rightSpan);
-            Vector<ulong> allBits = Vector<ulong>.AllBitsSet;
+            ReadOnlySpan<Vector<ushort>> left = MemoryMarshal.Cast<ushort, Vector<ushort>>(leftSpan);
+            ReadOnlySpan<Vector<ushort>> right = MemoryMarshal.Cast<ushort, Vector<ushort>>(rightSpan);
+            Vector<ushort> allBits = Vector<ushort>.AllBitsSet;
             int vectorSpanLength = left.Length;
 
             for (int i = 0; i < vectorSpanLength; i++)
@@ -134,5 +142,10 @@ namespace Core.Locations
 
         public static bool operator ==(Location left, Location right) { return left.Equals(right); }
         public static bool operator !=(Location left, Location right) { return !left.Equals(right); }
+
+        public override string ToString()
+        {
+            return $"<{ConvertToAlphabetical(NumericalLocation)}>";
+        }
     }
 }
