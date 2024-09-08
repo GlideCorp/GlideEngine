@@ -6,7 +6,7 @@ namespace Engine.Rendering
 {
     internal class UniformBuffer
     {
-        public uint BufferID { get; private set; }
+        internal uint BufferID { get; private set; }
 
         internal unsafe UniformBuffer(int size, uint bindingPoint)
         {
@@ -31,6 +31,7 @@ namespace Engine.Rendering
         {
             Application.Context.NamedBufferSubData(BufferID, offset, 16*4, ref matrix);
         }
+
         internal void SetVec4(int offset, Vector4Float vector)
         {
             Application.Context.NamedBufferSubData(BufferID, offset, 16 , ref vector);

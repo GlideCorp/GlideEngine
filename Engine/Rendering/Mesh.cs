@@ -20,16 +20,14 @@ namespace Engine.Rendering
     //  This should make mesh much more flexile and more importantly reusable if needed
     public class Mesh
     {
-        public uint VAO {  get; private set; }
+        internal uint VAO {  get; private set; }
 
         public static VertexLayout VertexLayout => new(
             new VertexElement(0, VertexAttribPointerType.Float, 3),
             new VertexElement(1, VertexAttribPointerType.Float, 3),
             new VertexElement(2, VertexAttribPointerType.Float, 2)
         );
-
-        //public MeshDataBuffer Data { get; set; }
-        
+                
         private List<Vertex>? _vertices;
         public List<Vertex> Vertices 
         {
@@ -50,7 +48,6 @@ namespace Engine.Rendering
                 }
             }
         }
-        
         public uint VerticesCount { get => (uint)Vertices.Count; }
 
         
@@ -78,7 +75,6 @@ namespace Engine.Rendering
 
         public Mesh()
         {
-            //Data = new MeshDataBuffer();
         }
 
         public void Build()
@@ -99,8 +95,8 @@ namespace Engine.Rendering
 
                 Span<Vertex> vertexSpan = CollectionsMarshal.AsSpan(Vertices);
                 ReadOnlySpan<Vertex> readOnlyVertexSpan = (ReadOnlySpan<Vertex>)vertexSpan;
-                //ref Vertex data = ref MemoryMarshal.AsRef<Vertex>(readOnlyVertexSpan);
                 Application.Context.BufferData(BufferTargetARB.ArrayBuffer, readOnlyVertexSpan, BufferUsageARB.StaticDraw);
+
                 /*
                 fixed (Vertex* data = Vertices.ToArray())
                 {
@@ -127,10 +123,9 @@ namespace Engine.Rendering
                     uint IBO = Application.Context.GenBuffer();
                     Application.Context.BindBuffer(BufferTargetARB.ElementArrayBuffer, IBO);
 
-                    fixed (void* buf = Indices.ToArray())
-                    {
-                        Application.Context.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)IndicesCount * sizeof(uint), buf, BufferUsageARB.StaticDraw);
-                    }
+                    Span<uint> indexSpan = CollectionsMarshal.AsSpan(Indices);
+                    ReadOnlySpan<uint> readOnlyIndexSpan = (ReadOnlySpan<uint>)indexSpan;
+                    Application.Context.BufferData(BufferTargetARB.ElementArrayBuffer, readOnlyIndexSpan, BufferUsageARB.StaticDraw);
                 }
 
                 Application.Context.BindVertexArray(0);
@@ -141,9 +136,6 @@ namespace Engine.Rendering
                     Application.Context.BindBuffer(BufferTargetARB.ElementArrayBuffer, 0);
                 }
             }
-
-            //Vertices.Clear();
-            //Indices.Clear();
         }
 
     }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Core.Maths.Vectors
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector4Float(float x, float y, float z, float w) :
         IAdditionOperators<Vector4Float, Vector4Float, Vector4Float>,
         ISubtractionOperators<Vector4Float, Vector4Float, Vector4Float>,
@@ -166,8 +168,14 @@ namespace Core.Maths.Vectors
         {
             return HashCode.Combine(X, Y, Z, W);
         }
+
+        public override string ToString()
+        {
+            return $"<{X}, {Y}, {Z}, {W}>";
+        }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector4Double(double x, double y, double z, double w) :
         IAdditionOperators<Vector4Double, Vector4Double, Vector4Double>,
         ISubtractionOperators<Vector4Double, Vector4Double, Vector4Double>,
@@ -331,8 +339,13 @@ namespace Core.Maths.Vectors
         {
             return HashCode.Combine(X, Y, Z, W);
         }
+        public override string ToString()
+        {
+            return $"<{X}, {Y}, {Z}, {W}>";
+        }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector4Int(int x, int y, int z, int w) :
         IAdditionOperators<Vector4Int, Vector4Int, Vector4Int>,
         ISubtractionOperators<Vector4Int, Vector4Int, Vector4Int>,
@@ -484,8 +497,13 @@ namespace Core.Maths.Vectors
         {
             return HashCode.Combine(X, Y, Z, W);
         }
+        public override string ToString()
+        {
+            return $"<{X}, {Y}, {Z}, {W}>";
+        }
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector4Byte(byte x, byte y, byte z, byte w) :
         IAdditionOperators<Vector4Byte, Vector4Byte, Vector4Byte>,
         ISubtractionOperators<Vector4Byte, Vector4Byte, Vector4Byte>,
@@ -637,6 +655,10 @@ namespace Core.Maths.Vectors
         public override int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z, W);
+        }
+        public override string ToString()
+        {
+            return $"<{X}, {Y}, {Z}, {W}>";
         }
     }
 

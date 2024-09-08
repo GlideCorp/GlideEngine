@@ -98,7 +98,7 @@ namespace Core.Maths.Matrices
 
             result.M00 = 1.0f - (yy + zz);
             result.M10 = (xy + wz);
-            result.M20 = (xz + wy);
+            result.M20 = (xz - wy);
             result.M30 = 0.0f;
 
             result.M01 = (xy - wz);

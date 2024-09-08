@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using Core.Logs;
 using Core.Maths.Vectors;
 
 namespace Core.Maths
@@ -110,49 +111,118 @@ namespace Core.Maths
 
             Vector3Float result = axis * sina;
 
-            return new Quaternion(result, cosa);
+            return new Quaternion(result, cosa).Normalize();
         }
 
-        public static Quaternion FromEuler(Vector3 eulerAngles)
+        /*             ↑ Y        Z ←--------○ Y
+         *             |                     |
+         *             |                     |
+         *             |                     |
+         *  Z ←--------○ X                   ↓ X
+         */
+        //Pitch = Rotation Around X Axis = Attitude
+        //Yaw = Rotation Around Y Axis = Heading
+        //Roll = Rotation Around Z Axis = Bank
+
+        //EulerAngles <Yaw, Pitch, Roll>
+        //Vector3F    <X,     Y,    Z>
+        //In pratica le componenti del vettore non combaciano effettivamente con gli assi intorno a cui ruotano
+
+        public static Quaternion FromEuler(Vector3Float eulerAngles)
         {
-            float cy = MathF.Cos(eulerAngles.Z * 0.5f);
-            float sy = MathF.Sin(eulerAngles.Z * 0.5f);
+            float c1 = MathF.Cos(eulerAngles.Y * 0.5f);
+            float c2 = MathF.Cos(eulerAngles.Z * 0.5f);
+            float c3 = MathF.Cos(eulerAngles.X * 0.5f);
+
+            float s1 = MathF.Sin(eulerAngles.Y * 0.5f);
+            float s2 = MathF.Sin(eulerAngles.Z * 0.5f);
+            float s3 = MathF.Sin(eulerAngles.X * 0.5f);
+            
+            return new Quaternion
+            (
+                w: (c1*c2*c3 - s1*s2*s3),
+                x: (s1*s2*c3 + c1*c2*s3),
+                y: (s1*c2*c3 + c1*s2*s3),
+                z: (c1*s2*c3 - s1*c2*s3)
+            );
+
+            /*
+            float cy = MathF.Cos(eulerAngles.X * 0.5f);
+            float sy = MathF.Sin(eulerAngles.X * 0.5f);
+
             float cp = MathF.Cos(eulerAngles.Y * 0.5f);
             float sp = MathF.Sin(eulerAngles.Y * 0.5f);
-            float cr = MathF.Cos(eulerAngles.X * 0.5f);
-            float sr = MathF.Sin(eulerAngles.X * 0.5f);
+
+            float cr = MathF.Cos(eulerAngles.Z * 0.5f);
+            float sr = MathF.Sin(eulerAngles.Z * 0.5f);
 
             return new Quaternion
             (
+                w: (cr * cp * cy + sr * sp * sy),
                 x: (sr * cp * cy - cr * sp * sy),
                 y: (cr * sp * cy + sr * cp * sy),
-                z: (cr * cp * sy - sr * sp * cy),
-                w: (cr * cp * cy + sr * sp * sy)
+                z: (cr * cp * sy - sr * sp * cy)
             );
+            */
         }
         
         public Vector3Float ToEuler()
         {
-            Vector3Float angles = new();
+            Vector3Float result = new();
 
-            // roll / X
-            double sinr_cosp = 2 * (W * X + Y * Z);
-            double cosr_cosp = 1 - 2 * (X * X + Y * Y);
-            angles.X = (float)Math.Atan2(sinr_cosp, cosr_cosp);
+            float sqx = X * X;
+            float sqy = Y * Y;
+            float sqz = Z * Z;
+            float sqw = W * W;
 
-            // pitch / y
-            double sinp = 2 * (W * Y - Z * X);
-            sinp = (sinp > 1.0) ? 1.0 : sinp;
-            sinp = (sinp < -1.0) ? -1.0 : sinp;
-            angles.Y = (float)Math.Asin(sinp);
+            float unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
+            float test = X * Y + Z * W;
+            
+            if(test > 0.49999*unit)
+            {
+                result.Z = (MathF.PI / 2) - 0.001f;
+                result.Y = 0;
+                result.X = 2 * MathF.Atan2(Y, W);
 
-            // yaw / Z
-            double siny_cosp = 2 * (W * Z + X * Y);
-            double cosy_cosp = 1 - 2 * (Y * Y + Z * Z);
-            angles.Z = (float)Math.Atan2(siny_cosp, cosy_cosp);
+                Logger.Warning("asdads");
+                return result;
+            }
 
-            return angles;
+            if(test < -0.49999 * unit)
+            {
+                result.Z = -MathF.PI / 2 ;
+                result.Y = 0;
+                result.X = -2 * MathF.Atan2(Y, W);
+
+                Logger.Warning("asdads2");
+                return result;
+            }
+
+            result.Y = MathF.Atan2(2*Y*W - 2 *X*Z, sqx - sqy - sqz + sqw);
+            result.Z = MathF.Asin(2*test/unit);
+            result.X = MathF.Atan2(2*X*W-2*Y*Z, -sqx + sqy - sqz + sqw);
+            
+            return result;
         }
+
+        public float Magnitude()
+        {
+            float magnitudeSquared = (W*W + X*X + Y*Y + Z*Z);
+            return MathF.Sqrt(magnitudeSquared);
+        }
+
+        public Quaternion Normalize()
+        {
+            float magnitude = Magnitude();
+            return new()
+            {
+                X = X / magnitude,
+                Y = Y / magnitude,
+                Z = Z / magnitude,
+                W = W / magnitude
+            };
+        }
+
         #endregion
 
         private bool Equals(Quaternion other)
@@ -170,6 +240,11 @@ namespace Core.Maths
         public override int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z, W);
+        }
+
+        public override string ToString()
+        {
+            return $"<w: {W}, x: {X}, y: {Y}, z: {Z}>";
         }
     }
 }

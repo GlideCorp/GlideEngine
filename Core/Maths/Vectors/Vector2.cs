@@ -140,6 +140,11 @@ namespace Core.Maths.Vectors
         {
             return HashCode.Combine(X, Y);
         }
+
+        public override string ToString()
+        {
+            return $"<{X}, {Y}>";
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -277,6 +282,10 @@ namespace Core.Maths.Vectors
         {
             return HashCode.Combine(X, Y);
         }
+        public override string ToString()
+        {
+            return $"<{X}, {Y}>";
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -404,6 +413,10 @@ namespace Core.Maths.Vectors
         {
             return HashCode.Combine(X, Y);
         }
+        public override string ToString()
+        {
+            return $"<{X}, {Y}>";
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -530,6 +543,10 @@ namespace Core.Maths.Vectors
         public override int GetHashCode()
         {
             return HashCode.Combine(X, Y);
+        }
+        public override string ToString()
+        {
+            return $"<{X}, {Y}>";
         }
     }
     

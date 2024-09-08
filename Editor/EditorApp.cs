@@ -9,10 +9,12 @@ using Engine.Entities.Components;
 using Engine.Utilities;
 using System.Drawing;
 using Core.Extensions;
+using Core.Maths;
 using System.Numerics;
 using Editor.resources.materials;
 using Core.Maths.Vectors;
 using Silk.NET.Maths;
+using Quaternion = Core.Maths.Quaternion;
 
 namespace Editor
 {
@@ -60,7 +62,7 @@ namespace Editor
                 Shininess = 2
             };
 
-            mTest = ModelLoader.Load("resources\\models\\cube.glb");
+            mTest = ModelLoader.Load("resources\\models\\shapes.glb");
 
             oldMousePos = Vector2Float.Zero;
 
@@ -106,6 +108,8 @@ namespace Editor
                 camera.Position = camera.Position + (camera.Direction * scrollDelta);
             }
             oldMousePos = Input.MousePosition();
+
+            transform.Rotate(Quaternion.AxisAngle(Vector3Float.UnitZ, 20 * Time.DeltaTime * MathHelper.Deg2Rad));
         }
 
         protected override void OnRender(double deltaTime)

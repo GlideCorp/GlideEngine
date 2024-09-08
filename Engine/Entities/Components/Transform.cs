@@ -53,11 +53,11 @@ namespace Engine.Entities.Components
                 }
 
                 Matrix4x4 translation = Matrix4x4.Translate(m_Position);
-                Matrix4x4 rotoationMat = Matrix4x4.Rotate(m_Rotation);
+                Matrix4x4 rotationMat = Matrix4x4.Rotate(m_Rotation);
                 Matrix4x4 scaleMat = Matrix4x4.Scale(m_Size);
                 IsDirty = false;
 
-                return m_ModelMatrix = scaleMat * rotoationMat * translation;
+                return m_ModelMatrix = rotationMat * scaleMat * translation;
             }
         }
 
