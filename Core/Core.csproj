@@ -18,4 +18,8 @@
     <Compile Remove="Maths\Matrices\Matrix.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.8" />
+  </ItemGroup>
+
 </Project>

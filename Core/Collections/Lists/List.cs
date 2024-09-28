@@ -1,130 +1,114 @@
 ﻿
+using Core.Helpers;
 using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections.Lists
 {
-    public class List<TKey, TValue>(IMatcher<TKey, TValue> defaultMatcher) : ICollection<TKey, TValue>
+    public class List<TValue> : List<TValue, TValue>
+        where TValue : IComparable<TValue>, IEquatable<TValue>
     {
-        public IMatcher<TKey, TValue> DefaultMatcher { get; init; } = defaultMatcher;
+        public List() : base(new DefaultFilter<TValue>()) { }
+        public List(int initialSize) : base(initialSize, new DefaultFilter<TValue>()) { }
+    }
 
-        protected TValue[] Array { get; set; } = [];
-        public int Count { get; protected set; } = 0;
+    public class List<TKey, TValue> //: IList<TKey, TValue>
+    {
+        public IFilter<TKey, TValue> DefaultFilter { get; init; }
 
-        protected int GrowthFactor { get; set; } = 2;
-        protected int ShrinkFactor { get; set; } = 2;
+        protected TValue[] Array { get; set; }
+        public int Count { get; protected set; }
 
-        protected int Growth() { return Math.Max(Array.Length * GrowthFactor, 2); }
-        protected int Shrink() { return Array.Length / ShrinkFactor; }
+        protected float GrowthFactor { get; set; } = 2;
+        protected float ShrinkFactor { get; set; } = 0.5f;
 
-        private void ResizeArray(int newSize)
+        public List(IFilter<TKey, TValue> defaultFilter)
         {
-            TValue[] newArray = new TValue[newSize];
+            DefaultFilter = defaultFilter;
 
-            Span<TValue> arraySpan = Array.AsSpan(0, Count);
-            Span<TValue> newArraySpan = newArray.AsSpan(0, Count);
-            arraySpan.CopyTo(newArraySpan);
-
-            Array = newArray;
+            Array = [];
+            Count = 0;
         }
 
-        private void ResizeArrayAndAddLast(int newSize, TValue value)
+        public List(int initialSize, IFilter<TKey, TValue> defaultFilter)
         {
-            TValue[] newArray = new TValue[newSize];
+            DefaultFilter = defaultFilter;
 
-            Span<TValue> arraySpan = Array.AsSpan(0, Count);
-            Span<TValue> newArraySpan = newArray.AsSpan(0, Count);
-            arraySpan.CopyTo(newArraySpan);
-
-            newArray[Count] = value;
-            Array = newArray;
+            Array = initialSize == 0 ? [] : new TValue[initialSize];
+            Count = 0;
         }
 
-        private void ResizeArrayAndAddFirst(int newSize, TValue value)
-        {
-            TValue[] newArray = new TValue[newSize];
-
-            Span<TValue> arraySpan = Array.AsSpan(0, Count);
-            Span<TValue> newArraySpan = newArray.AsSpan(1, Count);
-            arraySpan.CopyTo(newArraySpan);
-
-            newArraySpan[0] = value;
-            Array = newArray;
-        }
-
-        private static void PushBackAndAddLast(Span<TValue> source, Span<TValue> destination, int from, int to, TValue value)
-        {
-            Span<TValue> moveSource = source[from..to];
-            Span<TValue> moveDestination = destination[(from - 1)..(to - 1)];
-            moveSource.CopyTo(moveDestination);
-
-            destination[to - 1] = value;
-        }
-
-        private static void PushForwardAndAddFirst(Span<TValue> source, Span<TValue> destination, int from, int to, TValue value)
-        {
-            Span<TValue> moveSource = source[from..to];
-            Span<TValue> moveDestination = destination[(from + 1)..(to + 1)];
-            moveSource.CopyTo(moveDestination);
-
-            destination[from] = value;
-        }
-
-        private void ResizeArrayWithoutElementAt(int newSize, int skipIndex)
-        {
-            TValue[] newArray = new TValue[newSize];
-
-            Span<TValue> arraySpan = Array.AsSpan(0, skipIndex);
-            Span<TValue> newArraySpan = newArray.AsSpan(0, skipIndex);
-            arraySpan.CopyTo(newArraySpan);
-
-            arraySpan = Array.AsSpan(skipIndex + 1, Count);
-            newArraySpan = newArray.AsSpan(skipIndex, Count - 1);
-            arraySpan.CopyTo(newArraySpan);
-
-            Array = newArray;
-        }
+        private int Growth() { return Math.Max((int)(Array.Length * GrowthFactor), 2); }
+        private int Shrink() { return (int)(Array.Length * ShrinkFactor); }
 
         public void InsertFirst(TValue value)
         {
-            if (Count == Array.Length) { ResizeArrayAndAddFirst(newSize: Growth(), value); }
+            if (Count == Array.Length)
+            {
+                int newLength = Growth();
+                TValue[] newArray = new TValue[newLength];
+                ArrayHelper.CopyOffset(source: Array, destination: newArray, sourceOffset: 0, destinationOffset: 1, Count);
+            }
             else
             {
-                Span<TValue> span = Array;
-                PushForwardAndAddFirst(span, span, 0, Count, value);
+                ArrayHelper.CopyOffset(source: Array, destination: Array, sourceOffset: 0, destinationOffset: 1, Count);
             }
 
+            Array[0] = value;
             Count++;
         }
 
         public void InsertLast(TValue value)
         {
-            if (Count == Array.Length) { ResizeArrayAndAddLast(newSize: Growth(), value); }
-            else { Array[Count] = value; }
+            if (Count == Array.Length)
+            {
+                int newLength = Growth();
+                TValue[] newArray = new TValue[newLength];
+                ArrayHelper.CopyUntil(source: Array, destination: newArray, untilExclusive: Count);
 
-            Count++;
+                Array = newArray;
+            }
+
+            Array[Count++] = value;
         }
 
         public void Insert(TValue value) { InsertLast(value); }
 
         public void Remove(TKey key)
         {
-            DefaultMatcher.Key = key;
-            Remove(DefaultMatcher);
+            DefaultFilter.Key = key;
+            Remove(DefaultFilter);
         }
 
-        public void Remove(IMatcher<TKey, TValue> matcher)
+        public void Remove(IFilter<TKey, TValue> filter)
         {
             Span<TValue> span = Array.AsSpan(0, Count);
             for (int i = 0; i < span.Length; i++)
             {
-                if (matcher.Match(span[i])) { continue; }
+                if (filter.Match(span[i])) { continue; }
 
                 if (Count == 1) { Array = []; }
                 else if (Count - 1 <= Array.Length / 4)
-                    ResizeArrayWithoutElementAt(newSize: Shrink(), skipIndex: i);
+                {
+                    int newLength = Shrink();
+                    TValue[] newArray = new TValue[newLength];
+                    ArrayHelper.CopyUntil(source: Array, destination: newArray, untilExclusive: i);
+                    ArrayHelper.CopyOffset(
+                        source: Array, destination: newArray, 
+                        sourceOffset: i + 1, destinationOffset: i,
+                        length: Count - i - 1);
+
+                    Array = newArray;
+                }
                 else
-                    PushBackAndAddLast(source: span, destination: span, from: i + 1, to: Count, value: default!);
+                {
+                    ArrayHelper.CopyOffset(
+                        source: Array, destination: Array,
+                        sourceOffset: i + 1, destinationOffset: i,
+                        length: Count - i - 1);
+
+                    Array[Count] = default!;
+                }
 
                 Count--;
                 return;
@@ -133,18 +117,18 @@ namespace Core.Collections.Lists
 
         public bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
         {
-            DefaultMatcher.Key = key;
-            return Find(DefaultMatcher, out value);
+            DefaultFilter.Key = key;
+            return Find(DefaultFilter, out value);
         }
 
-        public bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
+        public bool Find(IFilter<TKey, TValue> filter, [NotNullWhen(true)] out TValue? value)
         {
             if (Count == 0) { goto ReturnDefault; }
 
             Span<TValue> span = Array.AsSpan(0, Count);
             foreach (TValue val in span)
             {
-                if (!matcher.Match(val)) { continue; }
+                if (!filter.Match(val)) { continue; }
 
                 value = val!;
                 return true;
@@ -153,6 +137,22 @@ namespace Core.Collections.Lists
 ReturnDefault:
             value = default;
             return false;
+        }
+
+        public void Pack()
+        {
+            if (Array.Length == Count) { return; }
+
+            TValue[] newArray = new TValue[Count];
+            ArrayHelper.Copy(source: Array, destination: newArray);
+            Array = newArray;
+        }
+
+        public TValue[] ToArray()
+        {
+            TValue[] newArray = new TValue[Count];
+            ArrayHelper.Copy(source: Array, destination: newArray);
+            return newArray;
         }
     }
 }

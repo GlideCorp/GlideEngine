@@ -4,62 +4,125 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections.Lists
 {
-    public class CachedList<TKey, TValue>(int cacheSize, IMatcher<TKey, TValue> defaultMatcher) : List<TKey, TValue>(defaultMatcher)
+    public class CachedList<TKey, TValue>(int cacheSize, IFilter<TKey, TValue> defaultFilter) //: ICollection<TKey, TValue>
     {
-        protected TValue[] Cache { get; set; } = new TValue[cacheSize];
-        protected int NextCacheIndex { get; set; } = 0;
-        protected int InverseCacheIndex { get; set; } = cacheSize - 1;
-        protected bool Looped { get; set; } = false;
+        public IFilter<TKey, TValue> DefaultFilter { get; init; } = defaultFilter;
 
-        public new bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
+        protected TValue[] Array { get; set; } = [];
+        protected TValue[] Cache { get; set; } = new TValue[cacheSize];
+
+        public int Count => ArrayCount + CacheCount;
+        protected int ArrayCount { get; set; } = 0;
+        protected int CacheCount { get; set; } = 0;
+
+        protected int GrowthFactor { get; set; } = 2;
+        protected int ShrinkFactor { get; set; } = 2;
+
+        protected int Growth() { return Math.Max(Array.Length * GrowthFactor, 2); }
+        protected int Shrink() { return Array.Length / ShrinkFactor; }
+
+        private void ResizeArray(int newSize)
         {
-            DefaultMatcher.Key = key;
-            return Find(DefaultMatcher, out value);
+            TValue[] newArray = new TValue[newSize];
+
+            Span<TValue> arraySpan = Array.AsSpan(0, ArrayCount);
+            Span<TValue> newArraySpan = newArray.AsSpan(0, ArrayCount);
+            arraySpan.CopyTo(newArraySpan);
+
+            Array = newArray;
         }
 
-        private bool FindInCache(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
+        private void ResizeArrayWithoutElementAt(int newSize, int skipIndex)
         {
-            if (Count == 0) { goto ReturnDefault; }
+            TValue[] newArray = new TValue[newSize];
 
-            Span<TValue> span = Cache.AsSpan(0, !Looped ? NextCacheIndex : Cache.Length);
+            Span<TValue> arraySpan = Array.AsSpan(0, skipIndex);
+            Span<TValue> newArraySpan = newArray.AsSpan(0, skipIndex);
+            arraySpan.CopyTo(newArraySpan);
+
+            arraySpan = Array.AsSpan(skipIndex + 1, ArrayCount);
+            newArraySpan = newArray.AsSpan(skipIndex, ArrayCount - 1);
+            arraySpan.CopyTo(newArraySpan);
+
+            Array = newArray;
+        }
+
+        private static void PushBackAndAddLast(Span<TValue> source, Span<TValue> destination, int from, int to, TValue value)
+        {
+            Span<TValue> moveSource = source[from..to];
+            Span<TValue> moveDestination = destination[(from - 1)..(to - 1)];
+            moveSource.CopyTo(moveDestination);
+
+            destination[to - 1] = value;
+        }
+
+        private static void PushForwardAndAddFirst(Span<TValue> source, Span<TValue> destination, int from, int to, TValue value)
+        {
+            Span<TValue> moveSource = source[from..to];
+            Span<TValue> moveDestination = destination[(from + 1)..(to + 1)];
+            moveSource.CopyTo(moveDestination);
+
+            destination[from] = value;
+        }
+
+        public void Insert(TValue value)
+        {
+            if (ArrayCount == Array.Length) { ResizeArray(newSize: Growth()); }
+            Array[ArrayCount++] = value;
+        }
+
+        private bool RemoveFromCache(IFilter<TKey, TValue> filter)
+        {
+            Span<TValue> span = Cache.AsSpan(0, CacheCount);
             for (int i = 0; i < span.Length; i++)
             {
-                if (!matcher.Match(span[i])) { continue; }
+                if (filter.Match(span[i])) { continue; }
 
-                value = span[i]!;
-
-                if (InverseCacheIndex == (NextCacheIndex - 1) % Cache.Length ||
-                    ((NextCacheIndex > i || i >= InverseCacheIndex) &&
-                     (InverseCacheIndex >= NextCacheIndex || NextCacheIndex > i) &&
-                     (i >= InverseCacheIndex || i >= NextCacheIndex))) { return true; }
-
-                span[i] = span[InverseCacheIndex];
-                span[InverseCacheIndex] = value;
-                InverseCacheIndex = Maths.Utilities.Module(InverseCacheIndex - 1, Cache.Length);
-
+                PushBackAndAddLast(source: span, destination: span, from: i + 1, to: CacheCount, value: default!);
+                CacheCount--;
                 return true;
             }
 
-ReturnDefault:
-            value = default;
             return false;
         }
 
-        private bool FindInList(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
+        private void RemoveFromArray(IFilter<TKey, TValue> filter)
+        {
+            Span<TValue> span = Array.AsSpan(0, ArrayCount);
+            for (int i = 0; i < span.Length; i++)
+            {
+                if (filter.Match(span[i])) { continue; }
+
+                if (ArrayCount == 1) { Array = []; }
+                else if (ArrayCount - 1 <= Array.Length / 4)
+                    ResizeArrayWithoutElementAt(newSize: Shrink(), skipIndex: i);
+                else
+                    PushBackAndAddLast(source: span, destination: span, from: i + 1, to: ArrayCount, value: default!);
+
+                ArrayCount--;
+                return;
+            }
+        }
+
+        public void Remove(TKey key)
+        {
+            DefaultFilter.Key = key;
+            Remove(DefaultFilter);
+        }
+
+        public void Remove(IFilter<TKey, TValue> filter) { if (!RemoveFromCache(filter)) { RemoveFromArray(filter); } }
+
+        private bool FindInCache(IFilter<TKey, TValue> filter, [NotNullWhen(true)] out TValue? value)
         {
             if (Count == 0) { goto ReturnDefault; }
 
-            Span<TValue> span = Array.AsSpan(0, Count);
-            foreach (TValue val in span)
+            Span<TValue> span = Cache.AsSpan(0, CacheCount);
+            for (int i = 0; i < span.Length; i++)
             {
-                if (!matcher.Match(val)) { continue; }
+                if (!filter.Match(span[i])) { continue; }
 
-                Cache[NextCacheIndex] = val;
-                InverseCacheIndex = Maths.Utilities.Module(NextCacheIndex - 1, Cache.Length);
-                NextCacheIndex = Maths.Utilities.Module(NextCacheIndex + 1, Cache.Length);
-                Looped |= NextCacheIndex == 0;
-
-                value = val!;
+                value = span[i]!;
+                PushForwardAndAddFirst(source: span, destination: span, from: 0, to: i - 1, value: value);
                 return true;
             }
 
@@ -68,10 +131,58 @@ ReturnDefault:
             return false;
         }
 
-        public new bool Find(IMatcher<TKey, TValue> matcher, [NotNullWhen(true)] out TValue? value)
+        private void RemoveLastFromArray()
         {
-            return FindInCache(matcher, out value) || FindInList(matcher, out value);
+            if (ArrayCount - 1 <= Array.Length / 4)
+                ResizeArrayWithoutElementAt(newSize: Shrink(), skipIndex: ArrayCount - 1);
+            else { Array[ArrayCount - 1] = default!; }
         }
 
+        private bool FindInList(IFilter<TKey, TValue> filter, [NotNullWhen(true)] out TValue? value)
+        {
+            if (Count == 0) { goto ReturnDefault; }
+
+            Span<TValue> arraySpan = Array.AsSpan(0, ArrayCount);
+            for (int i = 0; i < arraySpan.Length; i++)
+            {
+                if (!filter.Match(arraySpan[i])) { continue; }
+
+                value = arraySpan[i]!;
+                Span<TValue> cacheSpan = Cache.AsSpan(0, CacheCount);
+
+                if (ArrayCount == 1) { Array = []; }
+                else if (CacheCount < Cache.Length)
+                {
+                    arraySpan[i] = arraySpan[ArrayCount - 1];
+                    RemoveLastFromArray();
+                    cacheSpan[CacheCount++] = value;
+                }
+                else if (CacheCount == Cache.Length)
+                {
+                    arraySpan[i] = cacheSpan[CacheCount - 1];
+                    PushForwardAndAddFirst(source: cacheSpan, destination: cacheSpan, from: 0, to: Cache.Length - 1, value: value);
+                }
+
+                Cache[0] = value;
+                ArrayCount--;
+                return true;
+            }
+
+ReturnDefault:
+            value = default;
+            return false;
+        }
+
+        public bool Find(TKey key, [NotNullWhen(true)] out TValue? value)
+        {
+            value = default;
+            return false;
+        }
+
+        public bool Find(IFilter<TKey, TValue> filter, [NotNullWhen(true)] out TValue? value)
+        {
+            value = default;
+            return false;
+        }
     }
 }

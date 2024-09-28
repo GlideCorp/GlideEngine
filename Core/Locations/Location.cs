@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.ComponentModel.Design;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -7,16 +9,18 @@ using System.Text;
 namespace Core.Locations
 {
     /*
-     * CompressedChar
-     *      'a': 1,
-     *      ...,
-     *      'z': 26,
-     *      '': 27,
-     *      '': 28,
-     *      '/': 29,
-     *      '.': 30,
-     *      '_': 31,
-     *      ':': 32
+     * ZippedChar:
+     *     'a': 0,
+     *      .
+     *      .
+     *      .
+     *     'z': 25,
+     *     '/': 26
+     *     '_': 27,
+     *     '<': 28,
+     *     '>': 29,
+     *     '.': 30,
+     *     '\0': 31, // no char
      *
      *  x = 1 bit
      * |xxxxx|xxxxx|xxxxx|x| = 1 short = 3 compressed chars with only 1 wasted bit
@@ -24,108 +28,212 @@ namespace Core.Locations
      * |xxxxx|xxxxx|xxxxx|x| |xxxxx|xxxxx|xxxxx|x| |xxxxx|xxxxx|xxxxx|x| |xxxxx|xxxxx|xxxxx|x| = 1 long = 4 short = 12 compressed chars with 4 wasted bits
      */
 
-    public class Location(ReadOnlySpan<char> alphabeticalLocation) : IEquatable<Location>
+    public class Location : IEquatable<Location>
     {
-        private const int BitsForCompressedChars = 5;
+        private const char Separator = ':';
+        private const int ZippedCharsSize = 5;
         private const int UnusedBits = 1;
-        private const int CharsPerNumber = sizeof(ushort) * 8 / BitsForCompressedChars;
-        private const int CharsPerNumberMinus1 = sizeof(ushort) * 8 / BitsForCompressedChars - 1;
+        private const int CharsPerValue = sizeof(ushort) * 8 / ZippedCharsSize;
 
-        private ushort[] NumericalLocation { get; init; } = ConvertToNumerical(alphabeticalLocation);
+        private ushort[] NumericalLocation { get; init; }
+        private int[] SeparationIndices { get; init; }
 
-        private static ushort CompressChar(char decompressedChar)
+        public Location(ReadOnlySpan<char> alphabeticalLocation)
         {
-            return decompressedChar switch
+            ConvertToNumerical(alphabeticalLocation, out ushort[] numericalLocation, out int[] separationIndices);
+            NumericalLocation = numericalLocation;
+            SeparationIndices = separationIndices;
+        }
+
+        private static void ToBinary(ushort number)
+        {
+            StringBuilder builder = new();
+            int counter = 0;
+
+            for (int i = sizeof(ushort) * 8 - 1; i >= 0; i--)
             {
-                >= 'a' and <= 'z' => (ushort)(decompressedChar - 'a'),
-                ':' => 31,
-                '_' => 30,
-                '.' => 29,
-                '/' => 28,
-                _ => 27,
+                counter++;
+                builder.Append((number & (0b1 << i)) > 0 ? '1' : '0');
+                if ((sizeof(ushort) * 8 - i) % 16 == 0)
+                {
+                    builder.Append('|');
+                    counter = 0;
+                }
+                else if (counter % 5 == 0) { builder.Append('|'); }
+            }
+
+            Console.WriteLine(builder.ToString());
+        }
+
+        private static ushort Zip(char c)
+        {
+            return c switch
+            {
+                >= 'a' and <= 'z' => (ushort)(c - 'a'),
+                '/' => 26,
+                '_' => 27,
+                '<' => 28,
+                '>' => 29,
+                '.' => 30,
+                _ => 31
             };
         }
 
-        private static char DecompressChar(ushort compressedChar)
+        private static void CountPartsAndSeparations(ReadOnlySpan<char> alphabeticalLocation, out int parts, out int separations)
         {
-            return compressedChar switch
-            {
-                <= 'z' - 'a' => (char)(compressedChar + 'a'),
-                31 => ':',
-                30 => '_',
-                29 => '.',
-                28 => '/',
-                _ => '\0',
-            };
-        }
-
-        private static ushort[] ConvertToNumerical(ReadOnlySpan<char> alphabeticalLocation)
-        {
-            int numericalParts = (alphabeticalLocation.Length + CharsPerNumberMinus1) / CharsPerNumber;
-            ushort[] numericalLocations = numericalParts == 0 ? [] : new ushort[numericalParts];
+            parts = separations = 0;
+            int counter = 0;
 
             for (int i = 0; i < alphabeticalLocation.Length; i++)
             {
-                int numericalIndex = i / CharsPerNumber;
-                int shiftAmount = (CharsPerNumberMinus1 - i % CharsPerNumber) * BitsForCompressedChars + UnusedBits;
-
-                numericalLocations[numericalIndex] |= (ushort)(CompressChar(alphabeticalLocation[i]) << shiftAmount);
+                if (alphabeticalLocation[i] == Separator)
+                {
+                    parts++;
+                    separations++;
+                    counter = 0;
+                }
+                else if (counter + 1 == CharsPerValue)
+                {
+                    parts++;
+                    counter = 0;
+                }
+                else { counter++; }
             }
 
-            for (int i = alphabeticalLocation.Length % CharsPerNumber; i < 3; i++)
-            {
-                int shiftAmount = (CharsPerNumberMinus1 - i % CharsPerNumber) * BitsForCompressedChars + UnusedBits;
-
-                numericalLocations[^1] |= (ushort)(CompressChar('\0') << shiftAmount);
-            }
-
-            return numericalLocations;
+            if (counter > 0) { parts++; }
         }
 
-        private static ushort GetCompressedChar(ushort number, int position)
+        private static void ConvertToNumerical(ReadOnlySpan<char> alphabeticalLocation, out ushort[] numericalLocation, out int[] separationIndices)
         {
-            int shiftAmount = BitsForCompressedChars * position + UnusedBits;
-            return (ushort)((number >> shiftAmount) & 0b11111);
+            CountPartsAndSeparations(alphabeticalLocation, out int parts, out int separations);
+            numericalLocation = new ushort[parts];
+            separationIndices = new int[separations];
+
+            int numericalLocationIndex = 0;
+            int numericalLocationCounter = 0;
+            int separationIndex = 0;
+            int shift;
+
+            for (int i = 0; i < alphabeticalLocation.Length; i++)
+            {
+                if (alphabeticalLocation[i] == Separator)
+                {
+                    while (numericalLocationCounter < CharsPerValue)
+                    {
+                        shift = (CharsPerValue - numericalLocationCounter++ - 1) * ZippedCharsSize + UnusedBits;
+                        numericalLocation[numericalLocationIndex] |= (ushort)(Zip(Separator) << shift);
+                        //ToBinary(numericalLocation[numericalLocationIndex]);
+                    }
+
+                    separationIndices[separationIndex++] = ++numericalLocationIndex;
+                    numericalLocationCounter = 0;
+                    continue;
+                }
+
+                shift = (CharsPerValue - numericalLocationCounter++ - 1) * ZippedCharsSize + UnusedBits;
+                numericalLocation[numericalLocationIndex] |= (ushort)(Zip(alphabeticalLocation[i]) << shift);
+                //ToBinary(numericalLocation[numericalLocationIndex]);
+
+                if (numericalLocationCounter != CharsPerValue) { continue; }
+                numericalLocationIndex++;
+                numericalLocationCounter = 0;
+            }
+
+            while (numericalLocationCounter is > 0 and < CharsPerValue)
+            {
+                shift = (CharsPerValue - numericalLocationCounter++ - 1) * ZippedCharsSize + UnusedBits;
+                numericalLocation[numericalLocationIndex] |= (ushort)(Zip(Separator) << shift);
+            }
+        }
+
+        private static void Unzip(ushort number, out char c1, out char c2, out char c3)
+        {
+            byte a = (byte)(number >> 11 & 0b11111);
+            byte b = (byte)(number >> 6 & 0b11111);
+            byte c = (byte)(number >> 1 & 0b11111);
+
+            c1 = a switch
+            {
+                <= 'z' - 'a' => (char)(a + 'a'),
+                26 => '/',
+                27 => '_',
+                28 => '<',
+                29 => '>',
+                30 => '.',
+                _ => Separator
+            };
+
+            c2 = b switch
+            {
+                <= 'z' - 'a' => (char)(b + 'a'),
+                26 => '/',
+                27 => '_',
+                28 => '<',
+                29 => '>',
+                30 => '.',
+                _ => Separator
+            };
+
+            c3 = c switch
+            {
+                <= 'z' - 'a' => (char)(c + 'a'),
+                26 => '/',
+                27 => '_',
+                28 => '<',
+                29 => '>',
+                30 => '.',
+                _ => Separator
+            };
         }
 
         private static string ConvertToAlphabetical(ushort[] numericalLocation)
         {
-            int characterLength = numericalLocation.Length * 8;
+            int characterLength = numericalLocation.Length * CharsPerValue;
             StringBuilder builder = new(characterLength);
 
             for (int i = 0; i < numericalLocation.Length; i++)
             {
-                builder.Append(DecompressChar(GetCompressedChar(numericalLocation[i], position: 2)));
-                builder.Append(DecompressChar(GetCompressedChar(numericalLocation[i], position: 1)));
-                builder.Append(DecompressChar(GetCompressedChar(numericalLocation[i], position: 0)));
+                Unzip(numericalLocation[i], out char c1, out char c2, out char c3);
+
+                if (c1 == Separator) { builder.Append($"{c1}"); continue; }
+                if (c2 == Separator) { builder.Append($"{c1}{c2}"); continue; }
+                builder.Append($"{c1}{c2}{c3}");
             }
 
             return builder.ToString();
         }
 
-        public bool Equals(Location? other)
+
+        private static bool ArrayEqual<T>(ReadOnlySpan<T> a, ReadOnlySpan<T> b)
+            where T : struct, IEqualityOperators<T, T, bool>
         {
-            if (other is null || NumericalLocation.Length != other.NumericalLocation.Length) { return false; }
+            // most common case: first element is different.
 
-            int arrayLength = NumericalLocation.Length;
-            int remaining = arrayLength - arrayLength % Vector<ulong>.Count;
-            ReadOnlySpan<ushort> leftSpan = NumericalLocation.AsSpan();
-            ReadOnlySpan<ushort> rightSpan = other.NumericalLocation.AsSpan();
+            if (a[0] != b[0]) { return false; }
 
-            ReadOnlySpan<Vector<ushort>> left = MemoryMarshal.Cast<ushort, Vector<ushort>>(leftSpan);
-            ReadOnlySpan<Vector<ushort>> right = MemoryMarshal.Cast<ushort, Vector<ushort>>(rightSpan);
-            Vector<ushort> allBits = Vector<ushort>.AllBitsSet;
-            int vectorSpanLength = left.Length;
+            int length = a.Length;
+            int remaining = length % Vector<T>.Count;
 
-            for (int i = 0; i < vectorSpanLength; i++)
+            for (int i = 1; i < length - remaining; i += Vector<T>.Count)
             {
-                var result = Vector.Equals(left[i], right[i]);
-                if (result != allBits) { return false; }
+                var v1 = new Vector<T>(a[i..]);
+                var v2 = new Vector<T>(b[i..]);
+                if (v1 != v2) { return false; }
             }
 
-            for (int i = remaining; i < arrayLength; i++) { if (leftSpan[i] != rightSpan[i]) { return false; } }
+            for (int i = a.Length - remaining; i < length; i++) { if (a[i] != b[i]) { return false; } }
 
             return true;
+        }
+
+        public bool Equals(Location? other)
+        {
+            if (other is null ||
+                SeparationIndices.Length != other.SeparationIndices.Length ||
+                NumericalLocation.Length != other.NumericalLocation.Length) { return false; }
+
+            return ArrayEqual<int>(SeparationIndices.AsSpan(), other.SeparationIndices.AsSpan()) &&
+                   ArrayEqual<ushort>(NumericalLocation.AsSpan(), other.NumericalLocation.AsSpan());
         }
 
         public override bool Equals(object? obj)

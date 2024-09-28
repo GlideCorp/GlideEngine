@@ -3,9 +3,9 @@ using System;
 
 namespace Core.Collections.Lists
 {
-    public class BinaryCachedList<TKey, TValue>(IMatcher<TKey, TValue> defaultMatcher)
+    public class BinaryCachedList<TKey, TValue>(IFilter<TKey, TValue> defaultFilter)
     {
-        public IMatcher<TKey, TValue> DefaultMatcher { get; init; } = defaultMatcher;
+        public IFilter<TKey, TValue> DefaultFilter { get; init; } = defaultFilter;
 
         protected TValue[] Array { get; set; } = [];
         public int Count { get; protected set; } = 0;
@@ -17,7 +17,7 @@ namespace Core.Collections.Lists
         {
             if (Count == 0) { return -1; }
 
-            DefaultMatcher.Key = key;
+            DefaultFilter.Key = key;
             Span<TValue> span = Array.AsSpan(0, Count);
             int left = 0;
             int right = span.Length - 1;
@@ -26,7 +26,7 @@ namespace Core.Collections.Lists
             while (left <= right)
             {
                 middle = (left + right) / 2;
-                int comparison = DefaultMatcher.Compare(span[middle]);
+                int comparison = 0;// DefaultFilter.Compare(span[middle]);
                 switch (comparison)
                 {
                     case 0: return middle;

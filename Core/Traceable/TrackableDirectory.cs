@@ -8,8 +8,6 @@ using System.Text;
 
 namespace Core.Traceable
 {
-    
-
     public class TrackableDirectory : IComparable<TrackableDirectory>
     {
         public const char DefaultSeparator = ':';
