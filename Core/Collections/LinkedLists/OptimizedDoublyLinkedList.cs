@@ -37,7 +37,7 @@ namespace Core.Collections.LinkedLists
         {
             get
             {
-                Debug.Assert(index < Count);
+                Debug.Assert(index >= 0 && index < Count);
                 if (index == 0) { return FirstNode!.Value; }
 
                 if (index == Count - 1) { return LastNode!.Value; }
@@ -98,7 +98,7 @@ namespace Core.Collections.LinkedLists
 
         public void InsertAt(TValue value, int index)
         {
-            Debug.Assert(index <= Count);
+            Debug.Assert(index >= 0 && index <= Count);
             if (IsPacked) { throw new InvalidOperationException(); }
 
             if (index == 0)
@@ -213,7 +213,7 @@ namespace Core.Collections.LinkedLists
 
         public void RemoveAt(int index)
         {
-            Debug.Assert(index < Count);
+            Debug.Assert(index >= 0 && index < Count);
             if (IsPacked) { throw new InvalidOperationException(); }
 
             if (Count == 0) { return; }

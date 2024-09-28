@@ -28,7 +28,7 @@ namespace Core.Collections.LinkedLists
         {
             get
             {
-                Debug.Assert(index < Count);
+                Debug.Assert(index >= 0 && index < Count);
                 if (index < ChunkSize) { return FirstNode!.Values[index]; }
 
                 if (index >= Count - LastNode!.NextValueIndex) { return LastNode!.Values[Count - 1 - index]; }
@@ -122,7 +122,7 @@ namespace Core.Collections.LinkedLists
 
         public void InsertAt(TValue value, int index)
         {
-            Debug.Assert(index <= Count);
+            Debug.Assert(index >= 0 && index <= Count);
             if (IsPacked) { throw new InvalidOperationException(); }
 
             if (index < ChunkSize)
@@ -264,7 +264,7 @@ namespace Core.Collections.LinkedLists
 
         public void RemoveAt(int index)
         {
-            Debug.Assert(index < Count);
+            Debug.Assert(index >= 0 && index < Count);
             if (IsPacked) { throw new InvalidOperationException(); }
 
             if (Count == 0) { return; }
