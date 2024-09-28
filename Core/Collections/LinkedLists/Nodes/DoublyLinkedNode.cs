@@ -1,5 +1,4 @@
-﻿
-namespace Core.Collections.Nodes
+﻿namespace Core.Collections.LinkedLists.Nodes
 {
     public class DoublyLinkedNode<TValue>(TValue value, DoublyLinkedNode<TValue>? previous, DoublyLinkedNode<TValue>? next)
     {

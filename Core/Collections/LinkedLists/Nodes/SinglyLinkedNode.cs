@@ -1,5 +1,4 @@
-﻿
-namespace Core.Collections.Nodes
+﻿namespace Core.Collections.LinkedLists.Nodes
 {
     public class SinglyLinkedNode<TValue>(TValue value, SinglyLinkedNode<TValue>? next)
     {

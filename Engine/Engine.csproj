@@ -19,7 +19,8 @@
     <PackageReference Include="Silk.NET.Maths" Version="2.21.0" />
     <PackageReference Include="Silk.NET.OpenGL" Version="2.21.0" />
     <PackageReference Include="Silk.NET.Windowing" Version="2.21.0" />
-    <PackageReference Include="StbImageSharp" Version="2.27.14" />
+    <PackageReference Include="StbImageSharp" Version="2.30.15" />
+    <PackageReference Include="System.Text.Json" Version="8.0.4" />
   </ItemGroup>
 
   <ItemGroup>
