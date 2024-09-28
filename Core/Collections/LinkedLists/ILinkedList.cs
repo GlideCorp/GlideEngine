@@ -23,27 +23,5 @@ namespace Core.Collections.LinkedLists
         /// The last node of the linked list
         /// </summary>
         public TNode? LastNode { get; set; }
-
-        /// <summary>
-        /// Insert a value at the start of the linked list
-        /// </summary>
-        /// <param name="value"></param>
-        public void InsertFirst(TValue value);
-
-        /// <summary>
-        /// Insert a value at the end of the linked list
-        /// </summary>
-        /// <param name="value"></param>
-        public void InsertLast(TValue value);
-
-        /// <summary>
-        /// Remove a value at the start of the linked list
-        /// </summary>
-        public void RemoveFirst();
-
-        /// <summary>
-        /// Remove a value at the end of the linked list
-        /// </summary>
-        public void RemoveLast();
     }
 }

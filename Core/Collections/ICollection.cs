@@ -64,6 +64,18 @@ namespace Core.Collections
         public TValue this[int index] { get; }
 
         /// <summary>
+        /// Insert a value at the start of the list
+        /// </summary>
+        /// <param name="value"></param>
+        public void InsertFirst(TValue value);
+
+        /// <summary>
+        /// Insert a value at the end of the list
+        /// </summary>
+        /// <param name="value"></param>
+        public void InsertLast(TValue value);
+
+        /// <summary>
         /// Insert the value at the default collection location
         /// </summary>
         /// <param name="value"></param>
@@ -75,6 +87,16 @@ namespace Core.Collections
         /// <param name="value"></param>
         /// <param name="index"></param>
         public void InsertAt(TValue value, int index);
+
+        /// <summary>
+        /// Remove a value at the start of the list
+        /// </summary>
+        public void RemoveFirst();
+
+        /// <summary>
+        /// Remove a value at the end of the list
+        /// </summary>
+        public void RemoveLast();
 
         /// <summary>
         /// Remove the first value that matches the key requirements with <see cref="DefaultFilter"/>
