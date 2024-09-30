@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Core.Collections.LinkedLists
 {
@@ -17,8 +19,8 @@ namespace Core.Collections.LinkedLists
         public SinglyLinkedNode<TValue>? FirstNode { get; set; } = null;
         public SinglyLinkedNode<TValue>? LastNode { get; set; } = null;
 
-        public int Count { get; private set; } = 0;
-        public bool IsPacked { get; set; } = false;
+        public int Count { get; protected set; } = 0;
+        public bool IsPacked { get; protected set; } = false;
 
         public TValue this[int index]
         {
@@ -28,17 +30,55 @@ namespace Core.Collections.LinkedLists
                 if (index == 0) { return FirstNode!.Value; }
 
                 if (index == Count - 1) { return LastNode!.Value; }
-               
-                SinglyLinkedNode<TValue> current = FirstNode!.Next!;
-                for (int i = 1; i < index; i++) { current = current.Next!; }
-                return current.Value;
+
+                SinglyLinkedNode<TValue> previous = ReachPreviousNode(index);
+                return previous.Next!.Value;
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private SinglyLinkedNode<TValue> ReachPreviousNode(int index)
+        {
+            SinglyLinkedNode<TValue> previous = FirstNode!;
+            index--;
+
+            while (index > 0)
+            {
+                previous = previous.Next!;
+                index--;
+            }
+
+            return previous;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void InsertZero(TValue value)
         {
             FirstNode = LastNode = new(value);
             Count = 1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void InsertFirstNoCheck(TValue value)
+        {
+            FirstNode = new(value, next: FirstNode);
+            Count++;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void InsertNextNoCheck(SinglyLinkedNode<TValue> previous, TValue value)
+        {
+            previous.Next = new(value, next: previous.Next);
+            Count++;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void InsertLastNoCheck(TValue value)
+        {
+            SinglyLinkedNode<TValue> newNode = new(value);
+            LastNode!.Next = newNode;
+            LastNode = newNode;
+            Count++;
         }
 
         public void InsertFirst(TValue value)
@@ -47,8 +87,7 @@ namespace Core.Collections.LinkedLists
 
             if (Count == 0) { InsertZero(value); return; }
 
-            FirstNode = new(value, next: FirstNode);
-            Count++;
+            InsertFirstNoCheck(value);
         }
 
         public void InsertLast(TValue value)
@@ -57,10 +96,7 @@ namespace Core.Collections.LinkedLists
 
             if (Count == 0) { InsertZero(value); return; }
 
-            SinglyLinkedNode<TValue> newNode = new(value);
-            LastNode!.Next = newNode;
-            LastNode = newNode;
-            Count++;
+            InsertLastNoCheck(value);
         }
 
         public void Insert(TValue value) { InsertFirst(value); }
@@ -73,39 +109,42 @@ namespace Core.Collections.LinkedLists
             if (index == 0)
             {
                 if (Count == 0) { InsertZero(value); }
-                else { InsertFirst(value); }
+                else { InsertFirstNoCheck(value); }
                 return;
             }
 
-            if (index == Count) { InsertLast(value); return; }
+            if (index == Count) { InsertLastNoCheck(value); return; }
 
-            SinglyLinkedNode<TValue> previousNode = FirstNode!;
-            for (int i = 1; i < index; i++) { previousNode = previousNode.Next!; }
-            previousNode.Next = new(value, next: previousNode.Next);
+            SinglyLinkedNode<TValue> previous = ReachPreviousNode(index);
+            InsertNextNoCheck(previous, value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RemoveZero()
         {
             FirstNode = LastNode = null;
             Count = 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RemoveFirstNoChecks()
         {
             FirstNode = FirstNode!.Next;
             Count--;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void RemoveNextNoChecks(SinglyLinkedNode<TValue> previous)
+        {
+            previous.Next = previous.Next!.Next;
+            Count--;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RemoveLastNoChecks(SinglyLinkedNode<TValue> previous)
         {
             LastNode = previous;
             previous.Next = null;
-            Count--;
-        }
-
-        private void RemoveNextNoChecks(SinglyLinkedNode<TValue> previous)
-        {
-            previous.Next = previous.Next!.Next;
             Count--;
         }
 
@@ -128,8 +167,7 @@ namespace Core.Collections.LinkedLists
 
             if (Count == 1) { RemoveZero(); return; }
 
-            SinglyLinkedNode<TValue> previous = FirstNode!;
-            while (previous.Next is not null) { previous = previous.Next; }
+            SinglyLinkedNode<TValue> previous = ReachPreviousNode(index: Count - 1);
             RemoveLastNoChecks(previous);
         }
 
@@ -144,22 +182,30 @@ namespace Core.Collections.LinkedLists
             if (IsPacked) { throw new InvalidOperationException(); }
 
             if (Count == 0) { return; }
+            
+            Predicate<TValue> match = filter.Match;
 
-            if (filter.Match(FirstNode!.Value))
+            if (match(FirstNode!.Value))
             {
                 if (Count == 1) { RemoveZero(); }
                 else { RemoveFirstNoChecks(); }
                 return;
             }
 
-            SinglyLinkedNode<TValue> previous = FirstNode;
-            while (previous.Next != LastNode)
+            if (Count == 1) { return; }
+
+            SinglyLinkedNode<TValue> previous = FirstNode!;
+            SinglyLinkedNode<TValue> next = FirstNode!.Next!;
+
+            while (next != LastNode)
             {
-                if (filter.Match(previous.Next!.Value)) { RemoveNextNoChecks(previous); return; }
-                previous = previous.Next;
+                TValue value = next.Value;
+                if (match(value)) { RemoveNextNoChecks(previous); }
+                previous = next;
+                next = next.Next!;
             }
 
-            if (filter.Match(LastNode!.Value)) { RemoveLastNoChecks(previous); }
+            if (match(LastNode!.Value)) { RemoveLastNoChecks(previous); }
         }
 
         public void RemoveAt(int index)
@@ -172,21 +218,13 @@ namespace Core.Collections.LinkedLists
             if (index == 0)
             {
                 if (Count == 1) { RemoveZero(); }
-                else { RemoveFirst(); }
+                else { RemoveFirstNoChecks(); }
                 return;
             }
 
-            SinglyLinkedNode<TValue> previous = FirstNode!;
-            if (index == Count - 1)
-            {
-                while (previous.Next is not null) { previous = previous.Next; }
-                RemoveLastNoChecks(previous);
-            }
-            else
-            {
-                for (int i = 1; i < index; i++) { previous = previous.Next!; }
-                RemoveNextNoChecks(previous);
-            }
+            SinglyLinkedNode<TValue> previous = ReachPreviousNode(index);
+            if (previous.Next == LastNode) { RemoveLastNoChecks(previous); }
+            else { RemoveNextNoChecks(previous); }
         }
 
         public bool Search(TKey key, [NotNullWhen(true)] out TValue? value)
@@ -197,17 +235,32 @@ namespace Core.Collections.LinkedLists
 
         public bool Search(IFilter<TKey, TValue> filter, [NotNullWhen(true)] out TValue? value)
         {
-            SinglyLinkedNode<TValue>? current = FirstNode;
-
-            while (current is not null)
+            if (Count != 0)
             {
-                if (filter.Match(current.Value))
+                Predicate<TValue> match = filter.Match;
+
+                if (match(FirstNode!.Value))
                 {
-                    value = current.Value!;
+                    value = FirstNode!.Value!;
                     return true;
                 }
 
-                current = current.Next;
+                if (Count > 1)
+                {
+                    SinglyLinkedNode<TValue> current = FirstNode!.Next!;
+                    while (current != LastNode)
+                    {
+                        value = current.Value!;
+                        if (match(value)) { return true; }
+                        current = current.Next!;
+                    }
+
+                    if (match(LastNode!.Value))
+                    {
+                        value = LastNode!.Value!;
+                        return true;
+                    }
+                }
             }
 
             value = default;
@@ -231,10 +284,12 @@ namespace Core.Collections.LinkedLists
         public IEnumerable<TValue> Filter(IFilter<TKey, TValue> filter)
         {
             SinglyLinkedNode<TValue>? current = FirstNode;
+            Func<TValue, bool> match = filter.Match;
 
             while (current is not null)
             {
-                if (filter.Match(current.Value)) { yield return current.Value; }
+                TValue value = current.Value!;
+                if (match(value)) { yield return value; }
                 current = current.Next;
             }
         }
