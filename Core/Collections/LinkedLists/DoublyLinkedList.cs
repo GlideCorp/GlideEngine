@@ -117,6 +117,7 @@ namespace Core.Collections.LinkedLists
             InsertLastNoCheck(value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Insert(TValue value) { InsertFirst(value); }
 
         public void InsertAt(TValue value, int index)
@@ -191,6 +192,7 @@ namespace Core.Collections.LinkedLists
             RemoveLastNoChecks();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Remove(TKey key)
         {
             DefaultFilter.Key = key;
@@ -248,6 +250,7 @@ namespace Core.Collections.LinkedLists
             RemoveCurrentNoChecks(current);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Search(TKey key, [NotNullWhen(true)] out TValue? value)
         {
             DefaultFilter.Key = key;
