@@ -1,12 +1,14 @@
 ﻿
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Core.Helpers
 {
     #region Fill
     public static partial class ArrayHelper
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void FillPrivate<T>(T[] array, T value, int offset, int length)
         {
             Span<T> arraySpan = array.AsSpan(offset, length);
@@ -75,6 +77,7 @@ namespace Core.Helpers
     #region Copy
     public static partial class ArrayHelper
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void CopyPrivate<T>(T[] source, T[] destination, int sourceOffset, int destinationOffset, int length)
         {
             Span<T> sourceSpan = source.AsSpan(sourceOffset, length);

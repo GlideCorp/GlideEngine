@@ -32,9 +32,14 @@ namespace Core.Collections
     /// <typeparam name="TValue"></typeparam>
     public class DefaultFilter<TValue> : IFilter<TValue, TValue> where TValue : IComparable<TValue>, IEquatable<TValue>
     {
-        public TValue Key { get; set; } = default!;
+        private TValue _key = default!;
+        public TValue Key
+        {
+            get => _key;
+            set => _key = value;
+        }
 
-        public bool Match(TValue value) { return Key.Equals(value); }
+        public bool Match(TValue value) { return _key.Equals(value); }
     }
 
     /// <summary>
