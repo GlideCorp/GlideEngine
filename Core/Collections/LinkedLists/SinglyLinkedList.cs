@@ -202,7 +202,7 @@ namespace Core.Collections.LinkedLists
             while (next != LastNode)
             {
                 TValue value = next.Value;
-                if (match(value)) { RemoveNextNoChecks(previous); }
+                if (match(value)) { RemoveNextNoChecks(previous); return; }
                 previous = next;
                 next = next.Next!;
             }
