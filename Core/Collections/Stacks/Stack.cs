@@ -1,6 +1,7 @@
 ﻿
 using Core.Collections.Interfaces;
 using Core.Collections.LinkedLists;
+using System.Runtime.CompilerServices;
 
 namespace Core.Collections.Stacks
 {
@@ -9,6 +10,7 @@ namespace Core.Collections.Stacks
         public int Count => BackingCollection.Count;
         private SinglyLinkedList<TValue> BackingCollection { get; set; } = new();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Insert(TValue value) { Push(value); }
 
         public void Push(TValue value) { BackingCollection.InsertFirst(value); }
