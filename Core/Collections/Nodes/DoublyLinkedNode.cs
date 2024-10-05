@@ -1,6 +1,9 @@
-﻿namespace Core.Collections.LinkedLists.Nodes
+﻿
+using Core.Collections.Interfaces;
+
+namespace Core.Collections.Nodes
 {
-    public class DoublyLinkedNode<TValue>(TValue value, DoublyLinkedNode<TValue>? previous, DoublyLinkedNode<TValue>? next)
+    public class DoublyLinkedNode<TValue>(TValue value, DoublyLinkedNode<TValue>? previous, DoublyLinkedNode<TValue>? next) : INode<TValue>
     {
         public TValue Value { get; set; } = value;
         public DoublyLinkedNode<TValue>? Previous { get; set; } = previous;
