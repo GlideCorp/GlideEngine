@@ -2,22 +2,10 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Core.Collections
+namespace Core.Collections.Interfaces
 {
-    /// <summary>
-    /// The interface of a generic collection
-    /// </summary>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
-    public interface ICollection<TValue>
+    public interface IList<TValue> : ICollection<TValue>, IPackable
     {
-        /// <summary>
-        /// The number of elements in the list.
-        /// </summary>
-        public int Count { get; }
-
-        public bool IsPacked { get; }
-
         /// <summary>
         /// Insert a value at the start of the list.
         /// </summary>
@@ -29,12 +17,6 @@ namespace Core.Collections
         /// </summary>
         /// <param name="value"></param>
         public void InsertLast(TValue value);
-
-        /// <summary>
-        /// Insert the value at the default collection location.
-        /// </summary>
-        /// <param name="value"></param>
-        public void Insert(TValue value);
 
         /// <summary>
         /// Insert the value at the specified index.
@@ -82,9 +64,10 @@ namespace Core.Collections
         /// <summary>
         /// Return all the matched values.
         /// </summary>
+        /// <param name="collection"></param>
         /// <param name="match"></param>
         /// <returns></returns>
-        public ICollection<TValue> Filter(Predicate<TValue> match);
+        public void Filter<TCollection>(TCollection collection, Predicate<TValue> match) where TCollection : ICollection<TValue>;
 
         /// <summary>
         /// Returns the value at the specified index.
@@ -94,13 +77,17 @@ namespace Core.Collections
         public TValue ValueAt(int index);
 
         /// <summary>
-        /// Removes every value from the list
+        /// 
         /// </summary>
-        public void Clear();
+        /// <returns></returns>
+        public Span<TValue> AsSpan();
 
         /// <summary>
-        /// Prevents values from being added or removed.
+        /// 
         /// </summary>
-        public void Pack();
+        /// <param name="start"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public Span<TValue> AsSpan(int start, int length);
     }
 }
