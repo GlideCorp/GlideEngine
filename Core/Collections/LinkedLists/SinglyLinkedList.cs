@@ -237,14 +237,16 @@ namespace Core.Collections.LinkedLists
                     return true;
                 }
 
-                switch (Count)
+                if (Count > 1 && match(LastNode!.Value))
                 {
-                    case > 1 when match(LastNode!.Value):
-                        value = LastNode.Value!;
-                        return true;
-                    case > 2 when ReachPreviousNode(match, out SinglyLinkedNode<TValue> previous):
-                        value = previous.Next!.Value!;
-                        return true;
+                    value = LastNode.Value!;
+                    return true;
+                }
+
+                if (Count > 2 && ReachPreviousNode(match, out SinglyLinkedNode<TValue> previous))
+                {
+                    value = previous.Next!.Value!;
+                    return true;
                 }
             }
 
