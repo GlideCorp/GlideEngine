@@ -200,7 +200,7 @@ namespace Core.Collections.LinkedLists
                 else { previous = next; next = next.Next!; }
             }
 
-            if (Count > 1 && match(LastNode!.Value)) { RemoveLastNoChecks(previous); }
+            if (Count > 0 && match(LastNode!.Value)) { RemoveLastNoChecks(previous); }
         }
 
         public void RemoveAt(int index)
