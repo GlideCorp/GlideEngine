@@ -1,141 +1,97 @@
 ﻿
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Collections
 {
     /// <summary>
-    /// This class allows you to implement a method to filter elements in a <see cref="ICollection{TKey,TValue}"/>>
-    /// based on a key type, without the need to create a new object to use the compare method
-    /// </summary>
-    /// <typeparam name="TKey">The key type with which to search for the match</typeparam>
-    /// <typeparam name="TValue">The value type passed by <see cref="ICollection{TKey,TValue}.Search(TKey,out TValue?)"/>></typeparam>
-    public interface IFilter<TKey, in TValue>
-    {
-        /// <summary>
-        /// The key with which to search for the match
-        /// </summary>
-        public TKey Key { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="value">The value passed by collection.filter()</param>
-        /// <returns>true if value matches the key</returns>
-        public bool Match(TValue value);
-    }
-
-    /// <summary>
-    /// The basic implementation of <see cref="IFilter{TKey,TValue}"/> if the key type and value type are the same
-    /// </summary>
-    /// <typeparam name="TValue"></typeparam>
-    public class DefaultFilter<TValue> : IFilter<TValue, TValue> where TValue : IComparable<TValue>, IEquatable<TValue>
-    {
-        private TValue _key = default!;
-        public TValue Key
-        {
-            get => _key;
-            set => _key = value;
-        }
-
-        public bool Match(TValue value) { return _key.Equals(value); }
-    }
-
-    /// <summary>
-    /// The interface of a generic collection that searches for values ​​with <see cref="IFilter{TKey,TValue}"/>>
+    /// The interface of a generic collection
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    public interface ICollection<TKey, TValue>
+    public interface ICollection<TValue>
     {
         /// <summary>
-        /// The default filter to search with if not specified
-        /// </summary>
-        public IFilter<TKey, TValue> DefaultFilter { get; }
-
-        /// <summary>
-        /// The number of elements in the list
+        /// The number of elements in the list.
         /// </summary>
         public int Count { get; }
 
         public bool IsPacked { get; }
 
         /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns>The value at the index</returns>
-        public TValue this[int index] { get; }
-
-        /// <summary>
-        /// Insert a value at the start of the list
+        /// Insert a value at the start of the list.
         /// </summary>
         /// <param name="value"></param>
         public void InsertFirst(TValue value);
 
         /// <summary>
-        /// Insert a value at the end of the list
+        /// Insert a value at the end of the list.
         /// </summary>
         /// <param name="value"></param>
         public void InsertLast(TValue value);
 
         /// <summary>
-        /// Insert the value at the default collection location
+        /// Insert the value at the default collection location.
         /// </summary>
         /// <param name="value"></param>
         public void Insert(TValue value);
 
         /// <summary>
-        /// Insert the value at the specified index
+        /// Insert the value at the specified index.
         /// </summary>
         /// <param name="value"></param>
         /// <param name="index"></param>
         public void InsertAt(TValue value, int index);
 
         /// <summary>
-        /// Remove a value at the start of the list
+        /// Remove a value at the start of the list.
         /// </summary>
         public void RemoveFirst();
 
         /// <summary>
-        /// Remove a value at the end of the list
+        /// Remove a value at the end of the list.
         /// </summary>
         public void RemoveLast();
 
         /// <summary>
-        /// Remove the first value that matches the key requirements with <see cref="DefaultFilter"/>
+        /// Remove the first value that matches the predicate.
         /// </summary>
-        /// <param name="key"></param>
-        public void Remove(TKey key);
+        /// <param name="match"></param>
+        public void Remove(Predicate<TValue> match);
 
         /// <summary>
-        /// Remove the first value that matches the key requirements with the custom filter
+        /// Remove all the values that match the predicate.
         /// </summary>
-        /// <param name="filter"></param>
-        public void Remove(IFilter<TKey, TValue> filter);
+        /// <param name="match"></param>
+        public void RemoveAll(Predicate<TValue> match);
 
         /// <summary>
-        /// Remove the value at the specified index
+        /// Remove the value at the specified index.
         /// </summary>
         /// <param name="index"></param>
         public void RemoveAt(int index);
 
         /// <summary>
-        /// Search the first value that matches the key requirements with <see cref="DefaultFilter"/>
+        /// Search the first value that matches the predicate.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="match"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public bool Search(TKey key, [NotNullWhen(true)] out TValue? value);
+        public bool Search(Predicate<TValue> match, [NotNullWhen(true)] out TValue? value);
 
         /// <summary>
-        /// Search the first value that matches the key requirements with the custom filter
+        /// Return all the matched values.
         /// </summary>
-        /// <param name="filter"></param>
-        /// <param name="value"></param>
+        /// <param name="match"></param>
         /// <returns></returns>
-        public bool Search(IFilter<TKey, TValue> filter, [NotNullWhen(true)] out TValue? value);
+        public ICollection<TValue> Filter(Predicate<TValue> match);
+
+        /// <summary>
+        /// Returns the value at the specified index.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public TValue ValueAt(int index);
 
         /// <summary>
         /// Removes every value from the list
@@ -143,22 +99,8 @@ namespace Core.Collections
         public void Clear();
 
         /// <summary>
-        /// Prevents values to be added or removed.
+        /// Prevents values from being added or removed.
         /// </summary>
         public void Pack();
-
-        /// <summary>
-        /// Returns all the values that matches the key with <see cref="DefaultFilter"/> one at a time
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public IEnumerable<TValue> Filter(TKey key);
-
-        /// <summary>
-        /// Returns all the values that matches the key with the custom filter one at a time
-        /// </summary>
-        /// <param name="filter"></param>
-        /// <returns></returns>
-        public IEnumerable<TValue> Filter(IFilter<TKey, TValue> filter);
     }
 }

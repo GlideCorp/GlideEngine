@@ -1,11 +1,11 @@
 ﻿
 namespace Core.Collections.Lists
 {
-    public interface IList<TKey, TValue> : ICollection<TKey, TValue>
+    public interface IList<TValue> : ICollection<TValue>
     {
         /// <summary>
-        /// The array used in the background
+        /// The array used behind the scenes
         /// </summary>
-        public TValue[] BackedArray { get; }
+        public TValue[] BackingArray { get; }
     }
 }

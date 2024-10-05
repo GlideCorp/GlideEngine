@@ -12,7 +12,7 @@ namespace Core.Collections.LinkedLists
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
     /// <typeparam name="TNode"></typeparam>
-    public interface ILinkedList<TKey, TValue, TNode> : ICollection<TKey, TValue>
+    public interface ILinkedList<TValue, TNode> : ICollection<TValue>
     {
         /// <summary>
         /// The first node of the linked list
